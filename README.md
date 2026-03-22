@@ -1,74 +1,72 @@
 # GestureOS (Gestra2)
 
-Desktop **Electron** app that maps **webcam hand gestures** (MediaPipe) to **system actions** (scroll, click, media keys, screenshot hotkey) and includes an optional **Gemini** or **xAI** assistant with voice wake (“Hey Gesture”).
+Webcam **hand tracking** (MediaPipe) mapped to **OS control** (cursor, click, scroll). The **recommended MVP** is the **Python** pipeline below: **MediaPipe + OpenCV + PyAutoGUI**. It avoids native Node bindings (`robotjs`), **nut-js**, and fragile Electron-side automation.
 
-## Requirements
+The **Electron / Vite** UI remains optional for preview and assistant features; **renderer OS actions are stubbed** — they log to the console and may `POST` to an optional local Python listener. **The Electron-based OS control path is deprecated** due to install and OS-level limitations; use **python-core** for real desktop automation.
 
-- **Windows** (primary target; `electron-builder` is configured for NSIS).
+## Python gesture engine (working MVP)
+
+1. **Install**
+
+   ```bash
+   cd python-core
+   pip install -r requirements.txt
+   python main.py
+   ```
+
+   On first run, a **hand landmarker** `.task` model is downloaded into `python-core/models/` (official MediaPipe storage URL).
+
+2. **Use**
+
+   - Allow the camera when prompted (OpenCV).
+   - **Index fingertip** moves the cursor (smoothed).
+   - **Pinch** (thumb + index close) triggers a **left click** (1 second cooldown).
+   - Optional: quick **up/down** motion of the index finger accumulates into **scroll** (disable with `python main.py --no-scroll`).
+   - Press **ESC** in the preview window to exit.
+
+3. **Optional bridge from the web UI**
+
+   ```bash
+   python main.py --api
+   ```
+
+   Listens on `http://127.0.0.1:8765` — `POST /gesture` with JSON body (logged; extend to drive actions).
+
+### Python layout
+
+- `python-core/main.py` — camera loop, pipeline wiring, optional HTTP API.
+- `python-core/gesture.py` — MediaPipe Hands, fingertip positions, pinch state.
+- `python-core/actions.py` — PyAutoGUI: smoothed `moveTo`, click cooldown, scroll.
+
+Console logs include **Hand detected**, **Cursor moving** (throttled), and **Click triggered**.
+
+## Legacy Electron app (optional)
+
 - **Node.js** 18+ recommended.
-- **Webcam** and microphone (for assistant voice) permissions when prompted.
-- **Internet** on first run for MediaPipe WASM/model CDN assets.
+- **Internet** on first run for MediaPipe WASM (browser tasks) CDN assets.
 
-## Quick start
+```bash
+npm install
+npm run dev
+```
 
-1. **Install dependencies**
+Gesture labels in the UI still appear, but **system actions from the renderer are stubs**; run **python-core** for actual OS control.
 
-   ```bash
-   npm install
-   ```
-
-2. **Environment (optional — for the AI assistant)**
-
-   Copy `.env.example` to `.env` and set at least one API key:
-
-   - `VITE_GEMINI_API_KEY` — default provider.
-   - Or `VITE_XAI_API_KEY` — if set, xAI is used instead of Gemini.
-
-3. **Run the full app (Vite + Electron)**
-
-   ```bash
-   npm run dev
-   ```
-
-   This is the same as `npm run electron:dev` (both run Vite with `vite-plugin-electron`, which launches the Electron window).
-
-4. **Use the app**
-
-   - Click **Initialize System**, allow camera access.
-   - Use **Overlay click-through** so the window does not block clicks on other apps (optional).
-   - Open **Assistant Engine** for chat; say **“Hey Gesture”** then your command if voice is supported in your environment.
-
-## Scripts
+### Scripts
 
 | Command | Purpose |
 |--------|---------|
-| `npm run dev` | Development: Vite + Electron with hot reload. |
-| `npm run electron:dev` | Same as `dev`. |
-| `npm run build` | Production Vite build for renderer; copies `electron/*.cjs` into `dist-electron/`. |
-| `npm run preview` | Static preview server only (no Electron bridge — gestures fall back to browser behavior). |
-| `npm run dist` | Build then package Windows installer via `electron-builder`. |
+| `npm run dev` | Vite + Electron (legacy). |
+| `npm run build` | Production Vite build. |
+| `npm run preview` | Static preview only. |
 
-## Gesture → action map
+### Project layout
 
-| Gesture | Action (Electron) |
-|--------|-------------------|
-| Open palm | Scroll up (repeat while held) |
-| Closed fist | Scroll down (repeat while held) |
-| Peace sign | Print Screen key (OS-defined screenshot behavior) |
-| Thumbs up | Media play/pause |
-| Index point | Left click |
-
-In **browser-only** mode (no `electronAPI`), “screenshot” saves a canvas capture of the app UI via `html2canvas`; other actions show a toast.
-
-## Project layout
-
-- `electron/main.cjs` — window, tray, IPC, `nut-js` automation, assistant API proxy.
-- `electron/preload.cjs` — exposes `electronAPI` to the renderer.
-- `src/main.js` — gesture pipeline startup, webcam, overlay toggle.
-- `src/gesture-mediapipe.js` — MediaPipe hand landmarker + gesture classification.
-- `src/actions.js` — gesture → action execution and cooldowns.
-- `src/assistant.js` / `src/ai.js` — assistant UI and provider routing.
-- `src/voice.js` — Web Speech API wake word + commands.
+- `python-core/` — **supported** gesture → OS pipeline.
+- `electron/main.cjs` — legacy window / tray (automation not required for MVP).
+- `src/main.js` — UI + browser MediaPipe gesture preview.
+- `src/gesture-mediapipe.js` — `@mediapipe/tasks-vision` hand gestures (browser).
+- `src/actions.js` — stubbed OS calls + optional `POST /gesture` to Python.
 
 ## License
 

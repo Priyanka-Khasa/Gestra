@@ -73,17 +73,29 @@ async function captureCanvasScreenshot() {
 }
 
 async function invokePerformAction(action, options = null) {
-  console.log('[GestureOS/Renderer] performAction', action, options ?? '');
+  console.log(
+    '[GestureOS/Renderer] OS automation stubbed — use `python-core` (MediaPipe + PyAutoGUI) for real control.',
+    action,
+    options ?? ''
+  );
 
-  if (window.electronAPI?.performAction) {
-    await window.electronAPI.performAction(action, options);
+  try {
+    await fetch('http://127.0.0.1:8765/gesture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, options: options ?? null, source: 'gestureos-renderer' }),
+      mode: 'cors',
+    });
+  } catch {
+    // Optional: start Python with `python main.py --api` to receive events; otherwise ignore.
+  }
+
+  if (action === 'screenshot') {
+    await captureCanvasScreenshot();
     return;
   }
 
-  showToast(`Desktop only: ${action} needs the GestureOS Electron app.`);
-  if (action === 'screenshot') {
-    await captureCanvasScreenshot();
-  }
+  showToast(`OS action "${action}" is handled by the Python engine (see README).`);
 }
 
 function stopRepeatingAction() {

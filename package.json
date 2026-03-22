@@ -46,5 +46,20 @@
     "win": {
       "target": "nsis"
     }
-  }
+  },
+  "description": "Desktop **Electron** app that maps **webcam hand gestures** (MediaPipe) to **system actions** (scroll, click, media keys, screenshot hotkey) and includes an optional **Gemini** or **xAI** assistant with voice wake (“Hey Gesture”).",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mr-animesh/gestra-repo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mr-animesh/gestra-repo/issues"
+  },
+  "homepage": "https://github.com/Mr-animesh/gestra-repo#readme"
 }
