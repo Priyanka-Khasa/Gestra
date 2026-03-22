@@ -2,11 +2,10 @@ import html2canvas from 'html2canvas';
 import { speakFeedback } from './tts.js';
 import { logAction, showToast } from './ui.js';
 
-let lastGesture = 'none';
-let lastActionTime = 0;
 let repeatingGesture = null;
 let repeatTimer = null;
 
+/** MediaPipe gesture id → human label (UI / TTS) */
 const gestureLabels = {
   palm: 'Scroll up',
   fist: 'Scroll down',
@@ -15,22 +14,49 @@ const gestureLabels = {
   index: 'Left click',
 };
 
-const actionMap = {
-  palm: 'scroll_up',
-  fist: 'scroll_down',
+/**
+ * MediaPipe → OS action (kebab-case, matches main process).
+ * Conceptual names: open_palm → scroll-up, fist → scroll-down, peace → screenshot,
+ * thumbs_up → play-pause, point → left-click
+ */
+const gestureToAction = {
+  palm: 'scroll-up',
+  fist: 'scroll-down',
   peace: 'screenshot',
-  thumb: 'media_toggle',
-  index: 'left_click',
+  thumb: 'play-pause',
+  index: 'left-click',
 };
+
+/** Min ms between non-repeating fires of the same action */
+const actionCooldownMs = {
+  'scroll-up': 700,
+  'scroll-down': 700,
+  'left-click': 900,
+  'right-click': 900,
+  'play-pause': 1000,
+  screenshot: 1400,
+  'alt-tab': 1200,
+  'volume-up': 400,
+  'volume-down': 400,
+  'move-mouse': 32,
+};
+
+const lastActionFireAt = new Map();
 
 const repeatableGestures = new Set(['palm', 'fist']);
 const repeatDelayByGesture = {
-  palm: 220,
-  fist: 220,
-  thumb: 1200,
-  peace: 1400,
-  index: 900,
+  palm: 400,
+  fist: 400,
 };
+
+function canFireAction(action, { bypassCooldown }) {
+  if (bypassCooldown) return true;
+  const gap = actionCooldownMs[action] ?? 750;
+  const last = lastActionFireAt.get(action) ?? 0;
+  if (Date.now() - last < gap) return false;
+  lastActionFireAt.set(action, Date.now());
+  return true;
+}
 
 async function captureCanvasScreenshot() {
   const target = document.getElementById('app-container') || document.body;
@@ -46,18 +72,18 @@ async function captureCanvasScreenshot() {
   link.click();
 }
 
-async function executeAction(action) {
-  if (window.electronAPI?.executeAction) {
-    await window.electronAPI.executeAction(action);
+async function invokePerformAction(action, options = null) {
+  console.log('[GestureOS/Renderer] performAction', action, options ?? '');
+
+  if (window.electronAPI?.performAction) {
+    await window.electronAPI.performAction(action, options);
     return;
   }
 
+  showToast(`Desktop only: ${action} needs the GestureOS Electron app.`);
   if (action === 'screenshot') {
     await captureCanvasScreenshot();
-    return;
   }
-
-  showToast(`Browser mode: ${action.replace('_', ' ')}`);
 }
 
 function stopRepeatingAction() {
@@ -68,22 +94,25 @@ function stopRepeatingAction() {
   repeatingGesture = null;
 }
 
-async function triggerGesture(gesture, { silent = false } = {}) {
+async function triggerGesture(gesture, { silent = false, bypassCooldown = false } = {}) {
   const label = gestureLabels[gesture];
-  if (!label) {
+  const action = gestureToAction[gesture];
+  if (!label || !action) {
     return false;
   }
 
-  const now = Date.now();
-  const cooldown = repeatDelayByGesture[gesture] || 900;
-  if (gesture === lastGesture && now - lastActionTime < cooldown) {
+  if (!canFireAction(action, { bypassCooldown })) {
     return false;
   }
 
-  lastGesture = gesture;
-  lastActionTime = now;
+  try {
+    await invokePerformAction(action);
+  } catch (err) {
+    console.error('[GestureOS/Renderer] performAction failed:', err);
+    showToast(`Action failed: ${label}`);
+    return false;
+  }
 
-  await executeAction(actionMap[gesture]);
   if (!silent) {
     logAction(gesture, label);
     speakFeedback(label);
@@ -106,8 +135,8 @@ export function updateGestureActivity(state) {
   stopRepeatingAction();
   repeatingGesture = gesture;
   repeatTimer = setInterval(() => {
-    triggerGesture(gesture, { silent: true }).catch((error) => {
-      console.error('Failed repeating gesture action:', error);
+    triggerGesture(gesture, { silent: true, bypassCooldown: true }).catch((error) => {
+      console.error('[GestureOS/Renderer] repeat gesture failed:', error);
       stopRepeatingAction();
     });
   }, repeatDelayByGesture[gesture]);
@@ -121,12 +150,6 @@ export async function fireAction(gestureStateOrName) {
     return false;
   }
 
-  try {
-    await triggerGesture(gesture, { silent: false });
-    return true;
-  } catch (error) {
-    console.error('Failed to execute gesture action:', error);
-    showToast(`Action failed: ${gestureLabels[gesture]}`);
-    return false;
-  }
+  console.log('[GestureOS/Renderer] stable gesture detected →', gesture, '→', gestureToAction[gesture]);
+  return triggerGesture(gesture, { silent: false, bypassCooldown: false });
 }

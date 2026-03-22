@@ -136,7 +136,7 @@
     </aside>
 
     <!-- Main View -->
-    <main class="flex-1 flex flex-col p-8 relative overflow-hidden">
+    <main class="flex-1 flex min-h-0 flex-col p-8 relative overflow-hidden">
       <!-- Top HUD -->
       <div class="flex justify-between items-center mb-8 z-10">
         <div>
@@ -157,7 +157,7 @@
 
       <!-- Camera Feed Wrapper -->
       <div id="camera-container" 
-        class="relative flex-1 rounded-[40px] overflow-hidden border border-white/5 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.6)] group">
+        class="relative flex min-h-0 flex-1 rounded-[40px] overflow-hidden border border-white/5 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.6)] group">
         
         <video id="webcam-feed" class="w-full h-full object-cover transform scale-x-[-1]" autoplay playsinline muted></video>
 

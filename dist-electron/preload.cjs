@@ -10,7 +10,10 @@ function requirePreload() {
   hasRequiredPreload = 1;
   const { contextBridge, ipcRenderer } = require$$0;
   contextBridge.exposeInMainWorld("electronAPI", {
-    executeAction: (gesture) => ipcRenderer.invoke("execute-action", gesture),
+    performAction: (action, options) => {
+      console.log("[GestureOS/Preload] performAction → IPC", action, options ?? "");
+      return ipcRenderer.invoke("perform-action", { action, options: options ?? null });
+    },
     toggleOverlayMode: (enabled) => ipcRenderer.invoke("set-overlay-mode", enabled),
     hideWindow: () => ipcRenderer.invoke("hide-window"),
     showWindow: () => ipcRenderer.invoke("show-window"),

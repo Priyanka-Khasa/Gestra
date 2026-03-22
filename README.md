@@ -1,130 +1,75 @@
-# RunAnywhere Web Starter App
+# GestureOS (Gestra2)
 
-A minimal React + TypeScript starter app demonstrating **on-device AI in the browser** using the [`@runanywhere/web`](https://www.npmjs.com/package/@runanywhere/web) SDK. All inference runs locally via WebAssembly — no server, no API key, 100% private.
+Desktop **Electron** app that maps **webcam hand gestures** (MediaPipe) to **system actions** (scroll, click, media keys, screenshot hotkey) and includes an optional **Gemini** or **xAI** assistant with voice wake (“Hey Gesture”).
 
-## Features
+## Requirements
 
-| Tab | What it does |
-|-----|-------------|
-| **Chat** | Stream text from an on-device LLM (LFM2 350M) |
-| **Vision** | Point your camera and describe what the VLM sees (LFM2-VL 450M) |
-| **Voice** | Speak naturally — VAD detects speech, STT transcribes, LLM responds, TTS speaks back |
+- **Windows** (primary target; `electron-builder` is configured for NSIS).
+- **Node.js** 18+ recommended.
+- **Webcam** and microphone (for assistant voice) permissions when prompted.
+- **Internet** on first run for MediaPipe WASM/model CDN assets.
 
-## Quick Start
+## Quick start
 
-```bash
-npm install
-npm run dev
-```
+1. **Install dependencies**
 
-Open [http://localhost:5173](http://localhost:5173). Models are downloaded on first use and cached in the browser's Origin Private File System (OPFS).
+   ```bash
+   npm install
+   ```
 
-## How It Works
+2. **Environment (optional — for the AI assistant)**
 
-```
-@runanywhere/web (npm package)
-  ├── WASM engine (llama.cpp, whisper.cpp, sherpa-onnx)
-  ├── Model management (download, OPFS cache, load/unload)
-  └── TypeScript API (TextGeneration, STT, TTS, VAD, VLM, VoicePipeline)
-```
+   Copy `.env.example` to `.env` and set at least one API key:
 
-The app imports everything from `@runanywhere/web`:
+   - `VITE_GEMINI_API_KEY` — default provider.
+   - Or `VITE_XAI_API_KEY` — if set, xAI is used instead of Gemini.
 
-```typescript
-import { RunAnywhere, SDKEnvironment } from '@runanywhere/web';
-import { TextGeneration, VLMWorkerBridge } from '@runanywhere/web-llamacpp';
+3. **Run the full app (Vite + Electron)**
 
-await RunAnywhere.initialize({ environment: SDKEnvironment.Development });
+   ```bash
+   npm run dev
+   ```
 
-// Stream LLM text
-const { stream } = await TextGeneration.generateStream('Hello!', { maxTokens: 200 });
-for await (const token of stream) { console.log(token); }
+   This is the same as `npm run electron:dev` (both run Vite with `vite-plugin-electron`, which launches the Electron window).
 
-// VLM: describe an image
-const result = await VLMWorkerBridge.shared.process(rgbPixels, width, height, 'Describe this.');
-```
+4. **Use the app**
 
-## Project Structure
+   - Click **Initialize System**, allow camera access.
+   - Use **Overlay click-through** so the window does not block clicks on other apps (optional).
+   - Open **Assistant Engine** for chat; say **“Hey Gesture”** then your command if voice is supported in your environment.
 
-```
-src/
-├── main.tsx              # React root
-├── App.tsx               # Tab navigation (Chat | Vision | Voice)
-├── runanywhere.ts        # SDK init + model catalog + VLM worker
-├── workers/
-│   └── vlm-worker.ts     # VLM Web Worker entry (2 lines)
-├── hooks/
-│   └── useModelLoader.ts # Shared model download/load hook
-├── components/
-│   ├── ChatTab.tsx        # LLM streaming chat
-│   ├── VisionTab.tsx      # Camera + VLM inference
-│   ├── VoiceTab.tsx       # Full voice pipeline
-│   └── ModelBanner.tsx    # Download progress UI
-└── styles/
-    └── index.css          # Dark theme CSS
-```
+## Scripts
 
-## Adding Your Own Models
+| Command | Purpose |
+|--------|---------|
+| `npm run dev` | Development: Vite + Electron with hot reload. |
+| `npm run electron:dev` | Same as `dev`. |
+| `npm run build` | Production Vite build for renderer; copies `electron/*.cjs` into `dist-electron/`. |
+| `npm run preview` | Static preview server only (no Electron bridge — gestures fall back to browser behavior). |
+| `npm run dist` | Build then package Windows installer via `electron-builder`. |
 
-Edit the `MODELS` array in `src/runanywhere.ts`:
+## Gesture → action map
 
-```typescript
-{
-  id: 'my-custom-model',
-  name: 'My Model',
-  repo: 'username/repo-name',           // HuggingFace repo
-  files: ['model.Q4_K_M.gguf'],         // Files to download
-  framework: LLMFramework.LlamaCpp,
-  modality: ModelCategory.Language,      // or Multimodal, SpeechRecognition, etc.
-  memoryRequirement: 500_000_000,        // Bytes
-}
-```
+| Gesture | Action (Electron) |
+|--------|-------------------|
+| Open palm | Scroll up (repeat while held) |
+| Closed fist | Scroll down (repeat while held) |
+| Peace sign | Print Screen key (OS-defined screenshot behavior) |
+| Thumbs up | Media play/pause |
+| Index point | Left click |
 
-Any GGUF model compatible with llama.cpp works for LLM/VLM. STT/TTS/VAD use sherpa-onnx models.
+In **browser-only** mode (no `electronAPI`), “screenshot” saves a canvas capture of the app UI via `html2canvas`; other actions show a toast.
 
-## Deployment
+## Project layout
 
-### Vercel
-
-```bash
-npm run build
-npx vercel --prod
-```
-
-The included `vercel.json` sets the required Cross-Origin-Isolation headers.
-
-### Netlify
-
-Add a `_headers` file:
-
-```
-/*
-  Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: credentialless
-```
-
-### Any static host
-
-Serve the `dist/` folder with these HTTP headers on all responses:
-
-```
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: credentialless
-```
-
-## Browser Requirements
-
-- Chrome 96+ or Edge 96+ (recommended: 120+)
-- WebAssembly (required)
-- SharedArrayBuffer (requires Cross-Origin Isolation headers)
-- OPFS (for persistent model cache)
-
-## Documentation
-
-- [SDK API Reference](https://docs.runanywhere.ai)
-- [npm package](https://www.npmjs.com/package/@runanywhere/web)
-- [GitHub](https://github.com/RunanywhereAI/runanywhere-sdks)
+- `electron/main.cjs` — window, tray, IPC, `nut-js` automation, assistant API proxy.
+- `electron/preload.cjs` — exposes `electronAPI` to the renderer.
+- `src/main.js` — gesture pipeline startup, webcam, overlay toggle.
+- `src/gesture-mediapipe.js` — MediaPipe hand landmarker + gesture classification.
+- `src/actions.js` — gesture → action execution and cooldowns.
+- `src/assistant.js` / `src/ai.js` — assistant UI and provider routing.
+- `src/voice.js` — Web Speech API wake word + commands.
 
 ## License
 
-MIT
+See repository license if present; dependencies have their own licenses.

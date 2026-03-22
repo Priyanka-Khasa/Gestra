@@ -13,14 +13,12 @@ export function updateOverlay(state) {
   const labelEl = document.getElementById('detected-gesture-label');
   const barEl = document.getElementById('confidence-bar');
   const camContainer = document.getElementById('camera-container');
-  const thresholdInput = document.getElementById('confidence-slider');
 
   if (fpsCounter) fpsCounter.innerText = Math.round(state.fps || 0);
   if (stabilityCounter) stabilityCounter.innerText = `${Math.round((state.stability || 0) * 100)}%`;
 
-  const threshold = parseFloat(thresholdInput?.value || '0.7');
   const visible = state.handDetected && state.gesture !== 'none';
-  const stable = visible && state.confidence >= threshold && state.stable;
+  const stable = visible && state.stable;
 
   if (labelEl && barEl) {
     if (visible) {
@@ -105,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!testBtn) return;
 
   testBtn.onclick = async () => {
-    if (window.electronAPI?.executeAction) {
-      await window.electronAPI.executeAction('scroll_up');
+    if (window.electronAPI?.performAction) {
+      await window.electronAPI.performAction('scroll-up');
     } else {
       showToast('Electron bridge is unavailable in browser mode.');
     }

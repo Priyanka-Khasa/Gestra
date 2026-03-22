@@ -1,8 +1,36 @@
 import './style.css';
-import { initGestureEngine, startGestureEngine } from './gesture-mediapipe.js';
+import { initGestureEngine, setGestureMinConfidence, startGestureEngine } from './gesture-mediapipe.js';
 import { fireAction, updateGestureActivity } from './actions.js';
 import { initTTS } from './tts.js';
-import { updateOverlay, updateSystemStatus } from './ui.js';
+import { showToast, updateOverlay, updateSystemStatus } from './ui.js';
+
+function waitForVideoReady(video, timeoutMs = 15000) {
+  return new Promise((resolve, reject) => {
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0) {
+      resolve();
+      return;
+    }
+    const onDone = () => {
+      clearTimeout(timer);
+      video.removeEventListener('loadeddata', onDone);
+      video.removeEventListener('error', onErr);
+      resolve();
+    };
+    const onErr = () => {
+      clearTimeout(timer);
+      video.removeEventListener('loadeddata', onDone);
+      video.removeEventListener('error', onErr);
+      reject(new Error(video.error?.message || 'Video element error'));
+    };
+    const timer = setTimeout(() => {
+      video.removeEventListener('loadeddata', onDone);
+      video.removeEventListener('error', onErr);
+      reject(new Error('Camera stream timed out (no video frames).'));
+    }, timeoutMs);
+    video.addEventListener('loadeddata', onDone, { once: true });
+    video.addEventListener('error', onErr, { once: true });
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
@@ -25,33 +53,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
   startBtn.addEventListener('click', async () => {
     try {
+      // Chromium often never paints camera frames if the <video> lives under display:none
+      // (app was shown only after a delay + long MediaPipe init). Show layout now; landing
+      // stays on top via z-index until the fade finishes.
+      appContainer.classList.remove('hidden');
+
       updateSystemStatus('Neural Link Initializing...', 'bg-accent');
       landingPage.style.opacity = '0';
       setTimeout(() => {
         landingPage.classList.add('hidden');
-        appContainer.classList.remove('hidden');
       }, 700);
 
       if (loadingText) loadingText.innerText = 'Synchronizing Hand Tracking...';
       if (loadingBar) loadingBar.style.width = '30%';
 
-      await initGestureEngine();
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Camera API unavailable. Use the Electron app or a secure context (HTTPS / localhost).');
+      }
+
+      const videoConstraints = {
+        facingMode: 'user',
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 60, max: 60 },
+      };
+
+      async function openCameraStream() {
+        try {
+          return await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: videoConstraints,
+          });
+        } catch (firstError) {
+          const retriable =
+            firstError?.name === 'OverconstrainedError' || firstError?.name === 'ConstraintNotSatisfiedError';
+          if (retriable) {
+            return navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+          }
+          throw firstError;
+        }
+      }
+
+      const [gestureOutcome, streamOutcome] = await Promise.allSettled([
+        initGestureEngine(),
+        openCameraStream(),
+      ]);
+
+      if (gestureOutcome.status === 'rejected') {
+        if (streamOutcome.status === 'fulfilled') {
+          streamOutcome.value.getTracks().forEach((t) => t.stop());
+        }
+        throw gestureOutcome.reason;
+      }
+      if (streamOutcome.status === 'rejected') {
+        throw streamOutcome.reason;
+      }
+
+      const stream = streamOutcome.value;
 
       if (loadingText) loadingText.innerText = 'Calibrating Vision Stream...';
       if (loadingBar) loadingBar.style.width = '65%';
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 60, max: 60 },
-        },
-      });
-
+      videoElement.muted = true;
+      videoElement.setAttribute('playsinline', '');
+      videoElement.playsInline = true;
       videoElement.srcObject = stream;
-      await videoElement.play();
+
+      await waitForVideoReady(videoElement);
+      try {
+        await videoElement.play();
+      } catch (playError) {
+        console.warn('video.play():', playError);
+        showToast('Could not start camera preview. Try clicking the window or toggling the camera.');
+      }
+
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+
+      if (videoElement.videoWidth === 0) {
+        throw new Error('Camera opened but video has no resolution (0×0). Try another webcam or update GPU drivers.');
+      }
 
       initTTS().catch((error) => console.warn('TTS init failed:', error));
 
@@ -74,8 +155,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (error) {
       console.error('App startup failed:', error);
+      const v = document.getElementById('webcam-feed');
+      const existing = v?.srcObject;
+      if (existing?.getTracks) {
+        existing.getTracks().forEach((t) => t.stop());
+      }
+      if (v) v.srcObject = null;
+
       updateSystemStatus('Fatal Error', 'bg-red-500');
-      if (loadingText) loadingText.innerText = error?.message || 'Initialization failed.';
+      const name = error?.name || '';
+      const msg = error?.message || 'Initialization failed.';
+      if (loadingText) loadingText.innerText = msg;
+
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        showToast(
+          'Camera access denied. Enable camera for this app in Windows Settings → Privacy & security → Camera.'
+        );
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        showToast('No camera found. Plug in a webcam or enable it in Device Manager.');
+      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+        showToast('Camera is in use by another app. Close other apps using the camera and try again.');
+      } else if (msg.includes('API unavailable')) {
+        showToast(msg);
+      } else if (msg.includes('timed out') || msg.includes('0×0') || msg.includes('no resolution')) {
+        showToast(msg);
+      }
     }
   });
 
@@ -87,8 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (slider && valLabel) {
+    const syncThreshold = (raw) => {
+      const v = parseFloat(raw);
+      valLabel.innerText = Number.isFinite(v) ? v.toFixed(2) : '0.70';
+      if (Number.isFinite(v)) setGestureMinConfidence(v);
+    };
+    syncThreshold(slider.value);
     slider.addEventListener('input', (event) => {
-      valLabel.innerText = parseFloat(event.target.value).toFixed(2);
+      syncThreshold(event.target.value);
     });
   }
 

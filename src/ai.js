@@ -17,7 +17,6 @@ function buildGeminiUrl(baseUrl, model, apiKey) {
   const normalizedModel = String(model || GEMINI_DEFAULT_MODEL)
     .trim()
     .replace(/^models\//, '');
-
   return `${normalizedBaseUrl}/models/${normalizedModel}:generateContent?key=${apiKey}`;
 }
 
@@ -35,7 +34,6 @@ function resolveProviderConfig(options = {}) {
       baseUrl: options.xaiBaseUrl ?? import.meta.env.VITE_XAI_BASE_URL ?? XAI_DEFAULT_BASE_URL,
     };
   }
-
   const geminiApiKey = options.geminiApiKey ?? options.apiKey ?? import.meta.env.VITE_GEMINI_API_KEY;
   return {
     provider: 'gemini',
@@ -48,7 +46,6 @@ function resolveProviderConfig(options = {}) {
 export function createAIClient(options = {}) {
   const config = resolveProviderConfig(options);
   const hasApiKey = Boolean(config.apiKey);
-
   async function sendRequest(prompt, history = [], systemPrompt = 'You are GestureOS Assistant. Keep answers concise.') {
     if (window.electronAPI?.assistantRequest) {
       return window.electronAPI.assistantRequest({
@@ -113,7 +110,6 @@ export function createAIClient(options = {}) {
       }
       throw new Error(`Gemini request failed (${response.status}): ${errorBody}`);
     }
-
     const data = await response.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini.';
   }

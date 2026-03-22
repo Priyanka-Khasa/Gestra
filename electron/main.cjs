@@ -1,6 +1,6 @@
-const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, session } = require('electron');
 const path = require('path');
-const { keyboard, Key, mouse } = require('@nut-tree-fork/nut-js');
+const { keyboard, Key, mouse, screen } = require('@nut-tree-fork/nut-js');
 
 mouse.config.mouseSpeed = 2000;
 
@@ -119,26 +119,101 @@ async function proxyAssistantRequest(payload) {
   }
 }
 
-async function executeGesture(action) {
+function normalizeActionName(raw) {
+  return String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, '-');
+}
+
+async function runOsAction(actionRaw, options) {
+  const action = normalizeActionName(actionRaw);
+  console.log('[GestureOS/Main] runOsAction:', action, options ? JSON.stringify(options) : '');
+
   switch (action) {
-    case 'scroll_up':
+    case 'scroll-up':
+    case 'scrollup':
       await mouse.scrollUp(1200);
       break;
-    case 'scroll_down':
+    case 'scroll-down':
+    case 'scrolldown':
       await mouse.scrollDown(1200);
+      break;
+    case 'left-click':
+    case 'leftclick':
+      await mouse.leftClick();
+      break;
+    case 'right-click':
+    case 'rightclick':
+      await mouse.rightClick();
+      break;
+    case 'play-pause':
+    case 'playpause':
+    case 'media-toggle':
+      await keyboard.type(Key.AudioPlay);
       break;
     case 'screenshot':
       await keyboard.type(Key.Print);
       break;
-    case 'media_toggle':
-      await keyboard.type(Key.AudioPlay);
+    case 'alt-tab':
+    case 'alttab':
+      await keyboard.pressKey(Key.LeftAlt, Key.Tab);
+      await keyboard.releaseKey(Key.LeftAlt, Key.Tab);
       break;
-    case 'left_click':
-      await mouse.leftClick();
+    case 'volume-up':
+    case 'volumeup':
+      await keyboard.type(Key.AudioVolUp);
       break;
+    case 'volume-down':
+    case 'volumedown':
+      await keyboard.type(Key.AudioVolDown);
+      break;
+    case 'move-mouse':
+    case 'movemouse': {
+      const nx = Number(options?.nx);
+      const ny = Number(options?.ny);
+      if (!Number.isFinite(nx) || !Number.isFinite(ny)) {
+        console.warn('[GestureOS/Main] move-mouse skipped: expected options { nx, ny } in 0–1 range');
+        break;
+      }
+      const w = await screen.width();
+      const h = await screen.height();
+      const x = Math.round(Math.min(1, Math.max(0, nx)) * Math.max(0, w - 1));
+      const y = Math.round(Math.min(1, Math.max(0, ny)) * Math.max(0, h - 1));
+      await mouse.setPosition({ x, y });
+      break;
+    }
     default:
-      console.log('[BACKEND] Unknown action:', action);
+      console.warn('[GestureOS/Main] Unknown action:', actionRaw);
   }
+
+  console.log('[GestureOS/Main] runOsAction done:', action);
+}
+
+function setupMediaPermissions() {
+  const allowMediaPermission = (permission) =>
+    permission === 'media' ||
+    permission === 'camera' ||
+    permission === 'microphone' ||
+    permission === 'speaker-selection';
+
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
+    if (allowMediaPermission(permission)) {
+      if (!app.isPackaged) {
+        console.log('[GestureOS] Allowing permission:', permission, details?.mediaTypes);
+      }
+      callback(true);
+      return;
+    }
+    callback(false);
+  });
+
+  session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
+    if (allowMediaPermission(permission)) {
+      return true;
+    }
+    return null;
+  });
 }
 
 function createWindow() {
@@ -200,11 +275,23 @@ app.whenReady().then(() => {
     return;
   }
 
+  setupMediaPermissions();
+
   if (app.isPackaged) {
     app.setLoginItemSettings({ openAtLogin: true });
   }
 
-  ipcMain.handle('execute-action', async (_event, gesture) => executeGesture(gesture));
+  ipcMain.handle('perform-action', async (_event, payload) => {
+    const action = typeof payload === 'string' ? payload : payload?.action;
+    const options = typeof payload === 'object' && payload ? payload.options : null;
+    try {
+      await runOsAction(action, options);
+      return { ok: true };
+    } catch (err) {
+      console.error('[GestureOS/Main] perform-action failed:', err);
+      throw err;
+    }
+  });
   ipcMain.handle('assistant-request', async (_event, payload) => proxyAssistantRequest(payload));
   ipcMain.handle('set-overlay-mode', async (_event, enabled) => {
     mainWindow?.setIgnoreMouseEvents(Boolean(enabled), { forward: true });

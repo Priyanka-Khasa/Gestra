@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "electron:dev": "vite",
+    "start": "vite",
     "build": "vite build",
     "postbuild": "copy /Y electron\\main.cjs dist-electron\\main.cjs && copy /Y electron\\preload.cjs dist-electron\\preload.cjs",
     "preview": "vite preview",

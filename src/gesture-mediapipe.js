@@ -1,8 +1,14 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 
-const MIN_CONFIDENCE = 0.72;
+let minConfidence = 0.7;
 const REQUIRED_STABLE_FRAMES = 6;
 const MAX_HISTORY = 12;
+
+export function setGestureMinConfidence(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return;
+  minConfidence = Math.min(0.98, Math.max(0.5, n));
+}
 
 let handLandmarker;
 let animationFrameId = 0;
@@ -88,7 +94,7 @@ function buildState(classification, handDetected, landmarks) {
   const stable =
     handDetected &&
     classification.gesture !== 'none' &&
-    classification.confidence >= MIN_CONFIDENCE &&
+    classification.confidence >= minConfidence &&
     stableCount >= REQUIRED_STABLE_FRAMES;
 
   return {
