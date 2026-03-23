@@ -1,1 +1,24 @@
-"use strict";const d=require("electron");function s(r){return r&&r.__esModule&&Object.prototype.hasOwnProperty.call(r,"default")?r.default:r}var n={},i;function a(){if(i)return n;i=1;const{contextBridge:r,ipcRenderer:o}=d;return r.exposeInMainWorld("electronAPI",{setPinAbove:e=>o.invoke("set-pin-above",e),getWindowMode:()=>o.invoke("get-window-mode"),pythonBridge:e=>o.invoke("python-bridge",e),performAction:(e,t)=>(console.log("[GestureOS/Preload] performAction → IPC",e,t??""),o.invoke("perform-action",{action:e,options:t??null})),toggleOverlayMode:e=>o.invoke("set-overlay-mode",e),hideWindow:()=>o.invoke("hide-window"),showWindow:()=>o.invoke("show-window"),assistantRequest:e=>o.invoke("assistant-request",e)}),n}var l=a();const u=s(l);module.exports=u;
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  setPinAbove: (enabled) => ipcRenderer.invoke('set-pin-above', enabled),
+
+  getWindowMode: () => ipcRenderer.invoke('get-window-mode'),
+
+  pythonBridge: (payload) => ipcRenderer.invoke('python-bridge', payload),
+
+  performAction: (action, options) => {
+    console.log('[GestureOS/Preload] performAction → IPC', action, options ?? '');
+    return ipcRenderer.invoke('perform-action', { action, options: options ?? null });
+  },
+
+  toggleOverlayMode: (enabled) => ipcRenderer.invoke('set-overlay-mode', enabled),
+
+  hideWindow: () => ipcRenderer.invoke('hide-window'),
+
+  showWindow: () => ipcRenderer.invoke('show-window'),
+
+  quitApp: () => ipcRenderer.invoke('quit-app'),
+
+  assistantRequest: (payload) => ipcRenderer.invoke('assistant-request', payload),
+});

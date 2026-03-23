@@ -5,7 +5,6 @@ import { logAction, showToast } from './ui.js';
 let repeatingGesture = null;
 let repeatTimer = null;
 
-/** MediaPipe gesture id → human label (UI / TTS) */
 export const gestureLabels = {
   palm: 'Scroll up',
   fist: 'Scroll down',
@@ -15,11 +14,6 @@ export const gestureLabels = {
   pinch: 'Left click',
 };
 
-/**
- * MediaPipe → OS action (kebab-case, matches main process).
- * Conceptual names: open_palm → scroll-up, fist → scroll-down, peace → screenshot,
- * thumbs_up → play-pause, point → left-click
- */
 const gestureToAction = {
   palm: 'scroll-up',
   fist: 'scroll-down',
@@ -29,7 +23,6 @@ const gestureToAction = {
   pinch: 'left-click',
 };
 
-/** Min ms between non-repeating fires of the same action */
 const actionCooldownMs = {
   'scroll-up': 700,
   'scroll-down': 700,
@@ -44,13 +37,17 @@ const actionCooldownMs = {
 };
 
 const lastActionFireAt = new Map();
-
-const repeatableGestures = new Set(['palm', 'fist', 'index']);
+const repeatableGestures = new Set(['palm', 'fist']);
 const repeatDelayByGesture = {
   palm: 400,
   fist: 400,
-  index: 32,
 };
+
+export const DEFAULT_PYTHON_BRIDGE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PYTHON_BRIDGE_URL) ||
+  'http://127.0.0.1:8765';
+
+let pythonVisionCollective = false;
 
 function canFireAction(action, { bypassCooldown }) {
   if (bypassCooldown) return true;
@@ -75,13 +72,6 @@ async function captureCanvasScreenshot() {
   link.click();
 }
 
-export const DEFAULT_PYTHON_BRIDGE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PYTHON_BRIDGE_URL) ||
-  'http://127.0.0.1:8765';
-
-let pythonVisionCollective = false;
-
-/** Python owns camera + MediaPipe; Electron only shows MJPEG + polls HUD (no duplicate OS / gestures). */
 export function setPythonVisionCollective(on) {
   pythonVisionCollective = Boolean(on);
 }
@@ -90,7 +80,6 @@ export function isPythonVisionCollective() {
   return pythonVisionCollective;
 }
 
-/** Latest HUD JSON from python-core (Electron: main-process fetch). */
 export async function fetchPythonHudState(baseUrl) {
   const base = String(baseUrl || DEFAULT_PYTHON_BRIDGE_URL).replace(/\/+$/, '');
   if (window.electronAPI?.pythonBridge) {
@@ -105,7 +94,6 @@ export async function fetchPythonHudState(baseUrl) {
   }
 }
 
-/** Shape expected by ui.js `updateOverlay`. */
 export function mapPythonStateToOverlay(j) {
   if (!j) {
     return {
@@ -127,7 +115,6 @@ export function mapPythonStateToOverlay(j) {
   };
 }
 
-/** Probe Python bridge; Electron uses main-process fetch (see electron/main.cjs). */
 export async function probePythonBridge() {
   if (window.electronAPI?.pythonBridge) {
     const r = await window.electronAPI.pythonBridge({ op: 'bridge' });
@@ -138,6 +125,7 @@ export async function probePythonBridge() {
       baseUrl: r?.baseUrl || DEFAULT_PYTHON_BRIDGE_URL,
     };
   }
+
   const base = DEFAULT_PYTHON_BRIDGE_URL;
   try {
     const res = await fetch(`${base}/api/v1/bridge`, { method: 'GET', mode: 'cors' });
@@ -154,34 +142,12 @@ export async function probePythonBridge() {
 
 async function invokePerformAction(action, options = null, { silent = false } = {}) {
   if (pythonVisionCollective) {
-    // In collective mode Python owns the actions already.
-    return true;
+    return { ok: true, via: 'python-collective' };
   }
 
-  console.log('[GestureOS/Renderer] Performing OS action:', action, options ?? '');
-
-  // ── 1. Electron native path (nut-js via main process) ──
-  if (window.electronAPI?.performAction) {
-    try {
-      await window.electronAPI.performAction(action, options ?? null);
-      return true;
-    } catch (err) {
-      console.warn('[GestureOS/Renderer] Electron performAction failed:', err);
-      // Fall through to Python bridge as fallback
-    }
-  }
-
-  // ── 2. Screenshots work without any bridge (canvas capture) ──
-  if (action === 'screenshot') {
-    await captureCanvasScreenshot();
-    return true;
-  }
-
-  // ── 3. Python bridge fallback (browser mode) ──
   const bridgeBase = DEFAULT_PYTHON_BRIDGE_URL.replace(/\/+$/, '');
-  let bridgeOk = false;
+  let executedVia = null;
 
-  // Try IPC proxy first (Electron → Python)
   if (window.electronAPI?.pythonBridge) {
     try {
       const r = await window.electronAPI.pythonBridge({
@@ -189,14 +155,15 @@ async function invokePerformAction(action, options = null, { silent = false } = 
         action,
         options: options ?? null,
       });
-      bridgeOk = Boolean(r?.ok);
-    } catch (e) {
-      console.warn('[GestureOS/Renderer] python-bridge IPC failed:', e);
+      if (r?.ok) {
+        executedVia = 'python';
+      }
+    } catch (error) {
+      console.warn('[GestureOS/Renderer] python-bridge IPC failed:', error);
     }
   }
 
-  // Direct HTTP fetch (browser → Python)
-  if (!bridgeOk) {
+  if (!executedVia) {
     try {
       const res = await fetch(`${bridgeBase}/gesture`, {
         method: 'POST',
@@ -204,17 +171,53 @@ async function invokePerformAction(action, options = null, { silent = false } = 
         body: JSON.stringify({ action, options: options ?? null, source: 'gestureos-renderer' }),
         mode: 'cors',
       });
-      bridgeOk = res.ok;
+      if (res.ok) {
+        executedVia = 'python';
+      }
     } catch {
-      // Python bridge not running
+      // Fall through to Electron/native fallback.
     }
   }
 
-  if (!bridgeOk && !silent) {
-    showToast(`No action backend available. Run the Electron app or Python bridge (python main.py --api).`);
+  if (!executedVia && window.electronAPI?.performAction) {
+    await window.electronAPI.performAction(action, options ?? null);
+    executedVia = 'electron';
   }
 
-  return bridgeOk;
+  if (!executedVia && action === 'screenshot') {
+    await captureCanvasScreenshot();
+    executedVia = 'renderer';
+  }
+
+  if (!executedVia) {
+    throw new Error(`No action backend available for "${action}".`);
+  }
+
+  if (!silent && executedVia !== 'python-collective') {
+    const routeLabel =
+      executedVia === 'python'
+        ? 'Python bridge'
+        : executedVia === 'electron'
+          ? 'Electron native bridge'
+          : 'renderer fallback';
+    showToast(`Action "${action}" executed via ${routeLabel}.`);
+  }
+
+  return { ok: true, via: executedVia };
+}
+
+function buildIndexPointerOptions(state) {
+  const tip = state?.landmarks?.[8];
+  if (!tip) return null;
+
+  const nx = 1 - Number(tip.x);
+  const ny = Number(tip.y);
+  if (!Number.isFinite(nx) || !Number.isFinite(ny)) return null;
+
+  return {
+    nx: Math.min(1, Math.max(0, nx)),
+    ny: Math.min(1, Math.max(0, ny)),
+  };
 }
 
 function stopRepeatingAction() {
@@ -223,6 +226,16 @@ function stopRepeatingAction() {
     repeatTimer = null;
   }
   repeatingGesture = null;
+}
+
+async function sendPointerMove(nx, ny) {
+  if (!canFireAction('move-mouse', { bypassCooldown: false })) return false;
+  try {
+    await invokePerformAction('move-mouse', { nx, ny }, { silent: true });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function triggerGesture(gesture, { silent = false, bypassCooldown = false } = {}) {
@@ -237,8 +250,7 @@ async function triggerGesture(gesture, { silent = false, bypassCooldown = false 
   }
 
   try {
-    const ok = await invokePerformAction(action, null, { silent });
-    if (!ok) return false;
+    await invokePerformAction(action, null, { silent });
   } catch (err) {
     console.error('[GestureOS/Renderer] performAction failed:', err);
     showToast(`Action failed: ${label}`);
@@ -254,6 +266,15 @@ async function triggerGesture(gesture, { silent = false, bypassCooldown = false 
 
 export function updateGestureActivity(state) {
   const gesture = state?.stable ? state.gesture : 'none';
+
+  if (!pythonVisionCollective && state?.handDetected && state?.gesture === 'index') {
+    const options = buildIndexPointerOptions(state);
+    if (options) {
+      sendPointerMove(options.nx, options.ny).catch((error) => {
+        console.error('[GestureOS/Renderer] move-mouse failed:', error);
+      });
+    }
+  }
 
   if (!repeatableGestures.has(gesture)) {
     stopRepeatingAction();
@@ -282,28 +303,11 @@ export async function fireAction(gestureStateOrName) {
     return false;
   }
 
-  // For index (pointer move), pass landmark coordinates
   if (gesture === 'index' && typeof gestureStateOrName === 'object' && gestureStateOrName?.landmarks) {
-    const indexTip = gestureStateOrName.landmarks[8];
-    if (indexTip) {
-      const nx = 1.0 - indexTip.x; // Mirror X for natural movement
-      const ny = indexTip.y;
-      return sendPointerMove(nx, ny);
-    }
+    const options = buildIndexPointerOptions(gestureStateOrName);
+    return options ? sendPointerMove(options.nx, options.ny) : false;
   }
 
-  console.log('[GestureOS/Renderer] stable gesture detected →', gesture, '→', gestureToAction[gesture]);
+  console.log('[GestureOS/Renderer] stable gesture detected ->', gesture, '->', gestureToAction[gesture]);
   return triggerGesture(gesture, { silent: false, bypassCooldown: false });
-}
-
-/** Send pointer movement continuously (index gesture = cursor control). */
-async function sendPointerMove(nx, ny) {
-  const action = 'move-mouse';
-  if (!canFireAction(action, { bypassCooldown: false })) return false;
-  try {
-    await invokePerformAction(action, { nx, ny }, { silent: true });
-    return true;
-  } catch {
-    return false;
-  }
 }

@@ -33,7 +33,7 @@
   },
   "build": {
     "appId": "com.gestureos.desktop",
-    "productName": "GestureOS",
+    "productName": "RunAnywhere AI",
     "files": [
       "dist/**",
       "dist-electron/**",
@@ -47,7 +47,7 @@
       "target": "nsis"
     }
   },
-  "description": "Desktop **Electron** app that maps **webcam hand gestures** (MediaPipe) to **system actions** (scroll, click, media keys, screenshot hotkey) and includes an optional **Gemini** or **xAI** assistant with voice wake (“Hey Gesture”).",
+  "description": "Desktop Electron app for real-time vision control, system actions, and a RunAnywhere AI assistant with voice activation.",
   "directories": {
     "test": "tests"
   },

@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadingBar = document.getElementById('loading-bar');
   const loadingOverlay = document.getElementById('loading-overlay');
   const overlayModeToggle = document.getElementById('overlay-mode-toggle');
+  const overlayModeHint = document.getElementById('overlay-mode-hint');
+  const pinWindowBtn = document.getElementById('pin-window-btn');
+  const hideWindowBtn = document.getElementById('hide-window-btn');
+  const quitAppBtn = document.getElementById('quit-app-btn');
 
   let pythonVisionPollTimer = null;
 
@@ -61,6 +65,28 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Missing required DOM elements');
     return;
   }
+
+  const syncShellControls = async () => {
+    if (!window.electronAPI?.getWindowMode) {
+      pinWindowBtn?.classList.remove('active');
+      overlayModeToggle && (overlayModeToggle.checked = false);
+      return;
+    }
+
+    try {
+      const mode = await window.electronAPI.getWindowMode();
+      pinWindowBtn?.classList.toggle('active', Boolean(mode?.pinWindowAbove));
+      if (overlayModeToggle) {
+        overlayModeToggle.checked = Boolean(mode?.overlayModeEnabled);
+        overlayModeToggle.disabled = true;
+      }
+      if (overlayModeHint) {
+        overlayModeHint.textContent = 'Disabled for stability';
+      }
+    } catch (error) {
+      console.warn('getWindowMode failed:', error);
+    }
+  };
 
   startBtn.addEventListener('click', async () => {
     try {
@@ -85,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (collective && pythonVisionImg) {
         setPythonVisionCollective(true);
-        if (loadingText) loadingText.innerText = 'Linking to Python camera (MediaPipe)...';
+        if (loadingText) loadingText.innerText = 'Linking to live camera stream...';
         if (loadingBar) loadingBar.style.width = '45%';
 
         videoElement.classList.add('hidden');
@@ -127,11 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingBar) loadingBar.style.width = '100%';
         setTimeout(() => loadingOverlay?.classList.add('hidden'), 500);
         updateSystemStatus('Neural Interface: Active (Python)', 'bg-accent');
-
-        if (overlayModeToggle) {
-          overlayModeToggle.checked = true;
-          window.electronAPI?.toggleOverlayMode(true);
-        }
+        await syncShellControls();
         return;
       }
 
@@ -238,11 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loadingBar) loadingBar.style.width = '100%';
       setTimeout(() => loadingOverlay?.classList.add('hidden'), 500);
       updateSystemStatus('Neural Interface: Active', 'bg-accent');
-
-      if (overlayModeToggle) {
-        overlayModeToggle.checked = true;
-        window.electronAPI?.toggleOverlayMode(true);
-      }
+      await syncShellControls();
     } catch (error) {
       console.error('App startup failed:', error);
       setPythonVisionCollective(false);
@@ -304,9 +322,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (overlayModeToggle) {
     overlayModeToggle.checked = false;
-    window.electronAPI?.toggleOverlayMode(false);
-    overlayModeToggle.addEventListener('change', (event) => {
-      window.electronAPI?.toggleOverlayMode(Boolean(event.target.checked));
-    });
+    overlayModeToggle.disabled = true;
   }
+
+  pinWindowBtn?.addEventListener('click', async () => {
+    if (!window.electronAPI?.setPinAbove) {
+      showToast('Pinning is available only in the Electron desktop app.');
+      return;
+    }
+    const mode = await window.electronAPI.getWindowMode();
+    const next = !Boolean(mode?.pinWindowAbove);
+    await window.electronAPI.setPinAbove(next);
+    await syncShellControls();
+    showToast(next ? 'Window pinned above other apps.' : 'Window pin disabled.');
+  });
+
+  hideWindowBtn?.addEventListener('click', async () => {
+    await window.electronAPI?.hideWindow?.();
+  });
+
+  quitAppBtn?.addEventListener('click', async () => {
+    await window.electronAPI?.quitApp?.();
+  });
+
+  syncShellControls();
 });

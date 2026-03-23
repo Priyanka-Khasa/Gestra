@@ -10,8 +10,8 @@ function normalize(text) {
 }
 
 export function initVoiceActivation({
-  wakeWord = 'hey gesture',
-  commandWindowMs = 7000,
+  wakeWord = 'hey runanywhere',
+  commandWindowMs = 5000,
   onWakeWord = () => {},
   onCommand = () => {},
   onStateChange = () => {}
@@ -27,14 +27,17 @@ export function initVoiceActivation({
   }
 
   const recognition = new SpeechRecognitionCtor();
-  recognition.continuous = true;
-  recognition.interimResults = true;
+
+  // 🔥 FIX 1: NO continuous loop
+  recognition.continuous = false;
+  recognition.interimResults = false;
   recognition.lang = 'en-US';
 
   let shouldRun = false;
   let mode = 'wake';
   let commandTimer = null;
   let lastWakeAt = 0;
+
   const wakeWordNormalized = normalize(wakeWord);
 
   const emitState = () => {
@@ -52,79 +55,70 @@ export function initVoiceActivation({
 
   const enterCommandMode = () => {
     mode = 'command';
-    if (commandTimer) {
-      clearTimeout(commandTimer);
-    }
+    if (commandTimer) clearTimeout(commandTimer);
+
     commandTimer = setTimeout(() => {
       resetToWakeMode();
     }, commandWindowMs);
+
     emitState();
   };
 
-  const processTranscript = (text, isFinal) => {
+  const processTranscript = (text) => {
     const cleaned = normalize(text);
-    if (!cleaned) {
-      return;
-    }
+    if (!cleaned) return;
 
     if (mode === 'wake') {
-      const wakeIndex = cleaned.indexOf(wakeWordNormalized);
-      if (wakeIndex >= 0) {
+      if (cleaned.includes(wakeWordNormalized)) {
         const now = Date.now();
-        if (now - lastWakeAt < 1200) {
-          return;
-        }
+        if (now - lastWakeAt < 1000) return;
+
         lastWakeAt = now;
         onWakeWord(text);
         enterCommandMode();
-
-        const afterWake = cleaned
-          .slice(wakeIndex + wakeWordNormalized.length)
-          .trim();
-        if (afterWake && isFinal) {
-          onCommand(afterWake);
-          resetToWakeMode();
-        }
       }
       return;
     }
 
-    if (mode === 'command' && isFinal) {
+    if (mode === 'command') {
       onCommand(cleaned);
       resetToWakeMode();
     }
   };
 
   recognition.onresult = (event) => {
-    for (let i = event.resultIndex; i < event.results.length; i += 1) {
-      const result = event.results[i];
-      const transcript = result[0]?.transcript || '';
-      processTranscript(transcript, Boolean(result.isFinal));
-    }
+    const result = event.results[0];
+    const transcript = result[0]?.transcript || '';
+    processTranscript(transcript);
   };
 
+  // 🔥 FIX 2: SAFE restart (no infinite loop)
   recognition.onend = () => {
-    if (shouldRun) {
-      setTimeout(() => {
-        try {
-          recognition.start();
-        } catch (_) {}
-      }, 250);
-    } else {
+    if (!shouldRun) {
       resetToWakeMode();
+      return;
     }
+
+    // controlled restart
+    setTimeout(() => {
+      try {
+        recognition.start();
+      } catch (_) {}
+    }, 800);
   };
 
-  recognition.onerror = () => {
-    onStateChange({ supported: true, running: shouldRun, mode, error: true });
+  recognition.onerror = (e) => {
+    console.warn('Voice error:', e.error);
+    onStateChange({ supported: true, running: false, mode, error: e.error });
+    shouldRun = false;
   };
 
   const start = () => {
-    if (shouldRun) {
-      return true;
-    }
+    if (shouldRun) return true;
+
     shouldRun = true;
     emitState();
+
     try {
       recognition.start();
       return true;
@@ -136,26 +130,25 @@ export function initVoiceActivation({
   };
 
   const stop = () => {
-    if (!shouldRun) {
-      return true;
-    }
     shouldRun = false;
+
     try {
       recognition.stop();
     } catch (_) {}
+
     resetToWakeMode();
     return true;
   };
 
   const destroy = () => {
     shouldRun = false;
-    if (commandTimer) {
-      clearTimeout(commandTimer);
-      commandTimer = null;
-    }
+
+    if (commandTimer) clearTimeout(commandTimer);
+
     try {
       recognition.abort();
     } catch (_) {}
+
     resetToWakeMode();
   };
 
@@ -168,4 +161,3 @@ export function initVoiceActivation({
     destroy
   };
 }
-

@@ -22,17 +22,16 @@ export function updateOverlay(state) {
   const stable = visible && state.stable;
 
   if (labelEl && barEl) {
-    if (visible) {
-      labelEl.classList.add('stable');
-      labelEl.innerText = `${labelMap[state.gesture] || state.gesture} Detected`;
-      barEl.style.width = `${Math.min((state.confidence || 0) * 100, 100)}%`;
-    } else {
-      labelEl.classList.remove('stable');
-      labelEl.innerText = 'Show Gesture';
-      barEl.style.width = '0%';
-    }
+  if (visible) {
+    labelEl.classList.toggle('stable', stable);
+    labelEl.innerText = `${labelMap[state?.gesture] || state?.gesture} Detected`;
+    barEl.style.width = `${Math.max(0, Math.min((state.confidence || 0) * 100, 100))}%`;
+  } else {
+    labelEl.classList.remove('stable');
+    labelEl.innerText = 'Waiting for hand...';
+    barEl.style.width = '0%';
   }
-
+}
   camContainer?.classList.toggle('glow-border', stable);
   updateSystemStatus(
     stable

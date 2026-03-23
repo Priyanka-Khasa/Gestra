@@ -2,152 +2,212 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================= DESIGN SYSTEM ================= */
 :root {
   --accent: #00F2FF;
-  --accent-glow: rgba(0, 242, 255, 0.4);
-  --bg-deep: #050A14;
-  --card-glass: rgba(255, 255, 255, 0.03);
-  --border-glass: rgba(255, 255, 255, 0.08);
+  --accent-glow: rgba(0, 242, 255, 0.25);
+
+  --bg-main: #050A14;
+  --bg-soft: #0B1220;
+
+  --card: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.08);
+
+  --text-main: #E6EDF7;
+  --text-soft: #9CA3AF;
+
+  --radius: 16px;
+  --radius-lg: 28px;
+
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ================= BASE ================= */
 @layer base {
   body {
     @apply bg-[#050A14] text-slate-200 antialiased h-screen overflow-hidden;
+    font-family: 'Inter', sans-serif;
   }
 }
 
-/* --- ANIMATIONS --- */
-@keyframes slideInUp {
-  from { opacity: 0; transform: translateY(20px); }
+/* ================= ANIMATIONS ================= */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes glowPulse {
-  0% { box-shadow: 0 0 5px var(--accent-glow); }
-  50% { box-shadow: 0 0 20px var(--accent-glow); }
-  100% { box-shadow: 0 0 5px var(--accent-glow); }
+  0%,100% { box-shadow: 0 0 8px var(--accent-glow); }
+  50% { box-shadow: 0 0 18px var(--accent-glow); }
 }
 
 @keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
 }
 
-/* --- COMPONENTS --- */
-
+/* ================= CARDS ================= */
 .gesture-card {
-  @apply flex items-center gap-4 p-4 rounded-2xl border border-white/5 bg-white/[0.02] 
-         transition-all duration-300 cursor-default hover:bg-white/[0.05] hover:border-white/10;
+  @apply flex items-center gap-4 p-4 rounded-2xl border bg-white/[0.03]
+         transition-all duration-300;
+  border-color: var(--border);
+}
+
+.gesture-card:hover {
+  @apply bg-white/[0.06];
+  transform: translateY(-2px);
 }
 
 .gesture-card.pulse-active {
-  @apply border-accent/50 bg-accent/[0.05] shadow-[0_0_30px_rgba(0,242,255,0.15)];
-  animation: glowPulse 2s infinite ease-in-out;
+  border-color: rgba(0,242,255,0.4);
+  background: rgba(0,242,255,0.05);
+  animation: glowPulse 1.8s infinite ease-in-out;
 }
 
+/* ================= ICON ================= */
 .gesture-icon-box {
-  @apply w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 
-         transition-all group-hover:text-accent group-hover:scale-110;
+  @apply w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 transition-all;
+  background: rgba(255,255,255,0.06);
 }
 
-.pulse-active .gesture-icon-box {
-  @apply text-accent bg-accent/10;
+.gesture-card:hover .gesture-icon-box {
+  @apply text-accent;
+  transform: scale(1.08);
 }
 
+/* ================= STATUS ================= */
 .status-indicator {
-  @apply w-1.5 h-1.5 rounded-full bg-slate-800 transition-all duration-300;
+  @apply w-1.5 h-1.5 rounded-full bg-slate-700;
 }
 
 .pulse-active .status-indicator {
-  @apply bg-accent shadow-[0_0_10px_#00F2FF];
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
 }
 
+/* ================= HUD ================= */
 .hud-stat {
-  @apply px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex flex-col items-center min-w-[80px] backdrop-blur-md;
+  @apply px-4 py-2 rounded-xl flex flex-col items-center min-w-[80px];
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
 }
 
 .hud-stat-label {
-  @apply text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5;
+  @apply text-[10px] font-bold text-slate-500 uppercase tracking-widest;
 }
 
 .hud-stat-val {
-  @apply text-sm font-bold text-white font-mono;
+  @apply text-sm font-semibold text-white font-mono;
 }
 
+/* ================= BUTTONS ================= */
+.shell-btn {
+  @apply px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+}
+
+.shell-btn:hover {
+  @apply bg-white/10;
+}
+
+.shell-btn.active {
+  background: var(--accent);
+  color: #041019;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.shell-btn-danger {
+  @apply text-rose-300;
+}
+
+.shell-btn-danger:hover {
+  background: rgba(244,63,94,0.15);
+}
+
+/* ================= LIVE PILL ================= */
 .gesture-live-pill {
-  @apply px-8 py-4 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-3xl 
-         text-xl font-bold tracking-tight shadow-2xl transition-all duration-300 translate-y-4;
+  @apply px-6 py-3 rounded-3xl text-lg font-semibold transition-all;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 .gesture-live-pill.stable {
-  @apply border-accent/50 text-accent translate-y-0 opacity-100;
+  opacity: 1;
+  transform: translateY(0);
+  color: var(--accent);
+  border-color: rgba(0,242,255,0.4);
 }
 
-/* --- ASSISTANT PRO --- */
-
+/* ================= ASSISTANT ================= */
 .assistant-root {
   @apply fixed bottom-8 right-8 z-[150] flex flex-col items-end gap-5;
 }
 
 .assistant-pro-panel {
-  @apply w-[380px] h-[520px] bg-black/40 backdrop-blur-[40px] border border-white/10 
-         rounded-[32px] shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden 
-         opacity-0 pointer-events-none translate-y-10 scale-95 transition-all duration-500 ease-out;
+  @apply w-[360px] h-[500px] flex flex-col overflow-hidden rounded-[28px];
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(30px);
+
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+  transition: var(--transition);
 }
 
 .assistant-open .assistant-pro-panel {
-  @apply opacity-100 pointer-events-auto translate-y-0 scale-100;
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
+/* ================= CHAT ================= */
 .assistant-msg {
-  @apply flex flex-col max-w-[85%] animate-[slideInUp_0.4s_ease-out];
+  @apply flex flex-col max-w-[85%];
+  animation: fadeUp 0.35s ease-out;
 }
 
 .assistant-msg-user { @apply ml-auto items-end; }
 .assistant-msg-assistant { @apply mr-auto items-start; }
 
 .assistant-msg-bubble {
-  @apply px-4 py-3 rounded-2xl text-sm leading-relaxed;
+  @apply px-4 py-3 rounded-2xl text-sm;
 }
 
 .assistant-msg-user .assistant-msg-bubble {
-  @apply bg-white text-black font-medium rounded-tr-none;
+  background: var(--accent);
+  color: black;
 }
 
 .assistant-msg-assistant .assistant-msg-bubble {
-  @apply bg-white/5 border border-white/10 text-slate-200 rounded-tl-none;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
 }
 
 .assistant-msg-time {
-  @apply text-[10px] text-slate-600 font-bold mt-1 uppercase tracking-tighter;
+  @apply text-[10px] text-slate-500 mt-1;
 }
 
-/* --- UI POLISH --- */
-
+/* ================= SCROLL ================= */
 .custom-scrollbar::-webkit-scrollbar {
-  @apply w-1;
+  width: 4px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
 }
 
-.glow-border {
-  @apply border-accent/40 shadow-[0_0_40px_rgba(0,242,255,0.1)];
-}
-
-/* Cam scan effect */
+/* ================= CAMERA EFFECT ================= */
 #camera-container::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 2px;
   background: linear-gradient(to right, transparent, var(--accent), transparent);
-  opacity: 0.1;
-  animation: scanline 8s linear infinite;
-  pointer-events: none;
+  opacity: 0.15;
+  animation: scanline 6s linear infinite;
 }
