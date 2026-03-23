@@ -25,10 +25,11 @@ The **Electron / Vite** UI is optional: it runs the same **gesture classifier** 
    | Peace (index + middle up, spread) | **PrintScreen** (once per stable pose, **1 s** cooldown) |
    | Thumbs up only | **Media play/pause** (**1 s** cooldown) |
    | Index point only | Move cursor with index tip; **left click** when pose becomes stable (**1 s** cooldown) |
+   | Pinch| Left Click |
 
    Press **ESC** in the OpenCV preview to exit (OpenCV is **off** when using `--api` alone; add **`--window`** if you want both the stream and a local preview).
 
-3. **Collective mode (recommended with Electron)** — one camera, one MediaPipe pipeline
+4. **Collective mode (recommended with Electron)** — one camera, one MediaPipe pipeline
 
    **Python** grabs the webcam, runs MediaPipe + PyAutoGUI, and serves:
 
@@ -52,7 +53,7 @@ The **Electron / Vite** UI is optional: it runs the same **gesture classifier** 
 
    If the bridge responds with **`vision.collective`**, the app switches to collective vision automatically.
 
-4. **Local camera mode** (no Python `--api`, or bridge down)
+5. **Local camera mode** (no Python `--api`, or bridge down)
 
    The app uses **getUserMedia** + **browser MediaPipe** and may still **`POST /gesture`** to Python for OS actions when the bridge is up.
    If Python cannot open the webcam (often because the browser already has it), the bridge still stays running for **`POST /gesture`**, but it disables **`vision.collective`** automatically.
