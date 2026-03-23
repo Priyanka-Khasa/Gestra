@@ -16,9 +16,9 @@ import logging
 import sys
 import threading
 import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from typing import Optional
-from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
 import cv2
@@ -75,7 +75,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 
-def _build_bridge_manifest() -> dict:
+def _build_bridge_manifest(collective: bool) -> dict:
     return {
         "ok": True,
         "service": "gestra-python-bridge",
@@ -85,10 +85,13 @@ def _build_bridge_manifest() -> dict:
             "description": "Renderer root for UI capture; same id as index.html #app-container.",
         },
         "vision": {
-            "collective": True,
+            # Only "collective" when the webcam could be opened.
+            # If the renderer already owns the webcam (common in local-camera mode),
+            # we still serve the HTTP API so `POST /gesture` can execute OS actions.
+            "collective": bool(collective),
             "mjpegPath": "/camera.mjpg",
             "statePath": "/api/v1/state",
-            "description": "Python owns camera + MediaPipe; Electron shows MJPEG and polls state JSON.",
+            "description": "Python owns camera + MediaPipe when possible; Electron shows MJPEG and polls state JSON.",
         },
         "endpoints": {
             "health": {"method": "GET", "path": "/health"},
@@ -105,16 +108,15 @@ def _build_bridge_manifest() -> dict:
     }
 
 
-_BRIDGE_MANIFEST = _build_bridge_manifest()
-
-
 def _optional_api_server(
     port: int,
     controller: ActionController,
     broadcast: VisionBroadcast,
+    manifest: dict,
 ) -> ThreadedHTTPServer:
     bc = broadcast
     ctrl = controller
+    bridge_manifest = dict(manifest)
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt: str, *args) -> None:
@@ -145,7 +147,7 @@ def _optional_api_server(
                 self._send_json(200, {"ok": True, "service": "gestra-python-bridge"})
                 return
             if path == "/api/v1/bridge":
-                self._send_json(200, dict(_BRIDGE_MANIFEST))
+                self._send_json(200, bridge_manifest)
                 logger.info("GET /api/v1/bridge")
                 return
             if path == "/api/v1/state":
@@ -158,6 +160,7 @@ def _optional_api_server(
                 self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
                 self._cors()
                 self.end_headers()
+
                 boundary = b"--frame\r\nContent-Type: image/jpeg\r\n\r\n"
                 suffix = b"\r\n"
                 last_id = -1
@@ -173,6 +176,7 @@ def _optional_api_server(
                 except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                     pass
                 return
+
             self.send_error(404, "Not Found")
 
         def _handle_gesture_post(self) -> None:
@@ -185,9 +189,14 @@ def _optional_api_server(
                     action = _GESTURE_TO_ACTION.get(str(data["gesture"]))
                 if action:
                     ok = ctrl.dispatch_renderer_action(str(action))
-                    logger.info("POST gesture → %s (%s)", action, "ok" if ok else "skipped/cooldown")
+                    logger.info(
+                        "POST gesture → %s (%s)",
+                        action,
+                        "ok" if ok else "skipped/cooldown",
+                    )
             except json.JSONDecodeError as exc:
                 logger.warning("POST gesture JSON error: %s", exc)
+
             self.send_response(204)
             self._cors()
             self.end_headers()
@@ -240,38 +249,51 @@ def run_pipeline(
     api_port: int,
 ) -> int:
     cap = cv2.VideoCapture(camera_index)
-    if not cap.isOpened():
+    camera_ok = cap.isOpened()
+    if not camera_ok:
         logger.error("Could not open camera index %s", camera_index)
-        return 1
+    else:
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        cap.set(cv2.CAP_PROP_FPS, 60)
 
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-    cap.set(cv2.CAP_PROP_FPS, 60)
-
-    sw, sh = pyautogui.size()
-    detector = GestureDetector(sw, sh)
     actions = ActionController()
     broadcast = VisionBroadcast()
 
     server: Optional[ThreadedHTTPServer] = None
     if api_enabled:
-        server = _optional_api_server(api_port, actions, broadcast)
+        server_manifest = _build_bridge_manifest(collective=camera_ok)
+        server = _optional_api_server(api_port, actions, broadcast, server_manifest)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         logger.info(
-            "Collective bridge @ http://127.0.0.1:%s — GET /camera.mjpg  GET /api/v1/state  …",
+            "Python bridge @ http://127.0.0.1:%s (collective=%s) — GET /api/v1/bridge  POST /gesture …",
             api_port,
+            camera_ok,
         )
 
+    detector: Optional[GestureDetector] = None
     window = "Gestra — Python (ESC to quit)"
-    if show_window:
-        cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-
-    prev_stable_id: Optional[str] = None
-    hand_logged = False
-    fps_smooth = 0.0
-    last_t = time.monotonic()
 
     try:
+        if not camera_ok:
+            if show_window or not api_enabled:
+                return 1
+
+            logger.warning("Camera unavailable; running bridge-only mode (POST /gesture works).")
+            while True:
+                time.sleep(1.0)
+
+        if show_window:
+            cv2.namedWindow(window, cv2.WINDOW_NORMAL)
+
+        sw, sh = pyautogui.size()
+        detector = GestureDetector(sw, sh)
+
+        prev_stable_id: Optional[str] = None
+        hand_logged = False
+        fps_smooth = 0.0
+        last_t = time.monotonic()
+
         while True:
             frame_t0 = time.monotonic()
             ok, frame = cap.read()
@@ -283,6 +305,7 @@ def run_pipeline(
             last_t = now
             fps_smooth = fps_smooth * 0.85 + (1.0 / dt) * 0.15
 
+            assert detector is not None
             g = detector.process_bgr(frame)
 
             if g.hand_detected:
@@ -330,15 +353,18 @@ def run_pipeline(
                 if key == 27:
                     break
             elif api_enabled:
-                # Headless: cap CPU ~45 FPS
                 slip = 1.0 / 45.0 - (time.monotonic() - frame_t0)
                 if slip > 0:
                     time.sleep(slip)
+
+    except KeyboardInterrupt:
+        return 0
     finally:
         cap.release()
         if show_window:
             cv2.destroyAllWindows()
-        detector.close()
+        if detector:
+            detector.close()
         if server:
             server.shutdown()
 
@@ -372,3 +398,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

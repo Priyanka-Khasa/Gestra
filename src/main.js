@@ -216,6 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
         onFrame: (state) => {
           updateOverlay(state);
           updateGestureActivity(state);
+          // Continuously forward index finger position for cursor movement
+          if (state.handDetected && state.gesture === 'index' && state.landmarks) {
+            fireAction(state);
+          }
         },
         onGesture: (state) => fireAction(state),
       });
