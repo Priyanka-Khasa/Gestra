@@ -78,7 +78,15 @@ function classifyGesture(landmarks) {
     return { gesture: 'thumb', confidence: 0.88 };
   }
 
-  // 5. Index Point - Only index up
+  // 5. Pinch - Index up and thumb tip close to index tip (click gesture)
+  if (indexUp && !middleUp && !ringUp && !pinkyUp) {
+    const pinchDist = distance(thumbTip, indexTip);
+    if (pinchDist < 0.07) {
+      return { gesture: 'pinch', confidence: 0.92 };
+    }
+  }
+
+  // 6. Index Point - Only index up (pointer movement)
   if (indexUp && !middleUp && !ringUp && !pinkyUp && !thumbUp) {
     return { gesture: 'index', confidence: 0.85 };
   }

@@ -11,7 +11,8 @@ export const gestureLabels = {
   fist: 'Scroll down',
   peace: 'Screenshot',
   thumb: 'Play or pause media',
-  index: 'Left click',
+  index: 'Move cursor',
+  pinch: 'Left click',
 };
 
 /**
@@ -24,7 +25,8 @@ const gestureToAction = {
   fist: 'scroll-down',
   peace: 'screenshot',
   thumb: 'play-pause',
-  index: 'left-click',
+  index: 'move-mouse',
+  pinch: 'left-click',
 };
 
 /** Min ms between non-repeating fires of the same action */
@@ -43,10 +45,11 @@ const actionCooldownMs = {
 
 const lastActionFireAt = new Map();
 
-const repeatableGestures = new Set(['palm', 'fist']);
+const repeatableGestures = new Set(['palm', 'fist', 'index']);
 const repeatDelayByGesture = {
   palm: 400,
   fist: 400,
+  index: 32,
 };
 
 function canFireAction(action, { bypassCooldown }) {
@@ -151,13 +154,34 @@ export async function probePythonBridge() {
 
 async function invokePerformAction(action, options = null, { silent = false } = {}) {
   if (pythonVisionCollective) {
-    return;
+    // In collective mode Python owns the actions already.
+    return true;
   }
 
-  const bridgeBase = DEFAULT_PYTHON_BRIDGE_URL.replace(/\/+$/, '');
-  console.log('[GestureOS/Renderer] Forwarding OS action to Python bridge if available:', action, options ?? '');
+  console.log('[GestureOS/Renderer] Performing OS action:', action, options ?? '');
 
+  // ── 1. Electron native path (nut-js via main process) ──
+  if (window.electronAPI?.performAction) {
+    try {
+      await window.electronAPI.performAction(action, options ?? null);
+      return true;
+    } catch (err) {
+      console.warn('[GestureOS/Renderer] Electron performAction failed:', err);
+      // Fall through to Python bridge as fallback
+    }
+  }
+
+  // ── 2. Screenshots work without any bridge (canvas capture) ──
+  if (action === 'screenshot') {
+    await captureCanvasScreenshot();
+    return true;
+  }
+
+  // ── 3. Python bridge fallback (browser mode) ──
+  const bridgeBase = DEFAULT_PYTHON_BRIDGE_URL.replace(/\/+$/, '');
   let bridgeOk = false;
+
+  // Try IPC proxy first (Electron → Python)
   if (window.electronAPI?.pythonBridge) {
     try {
       const r = await window.electronAPI.pythonBridge({
@@ -166,13 +190,12 @@ async function invokePerformAction(action, options = null, { silent = false } = 
         options: options ?? null,
       });
       bridgeOk = Boolean(r?.ok);
-      if (!bridgeOk && r?.error) {
-        console.warn('[GestureOS/Renderer] python-bridge IPC:', r.error);
-      }
     } catch (e) {
       console.warn('[GestureOS/Renderer] python-bridge IPC failed:', e);
     }
   }
+
+  // Direct HTTP fetch (browser → Python)
   if (!bridgeOk) {
     try {
       const res = await fetch(`${bridgeBase}/gesture`, {
@@ -182,24 +205,16 @@ async function invokePerformAction(action, options = null, { silent = false } = 
         mode: 'cors',
       });
       bridgeOk = res.ok;
-      if (!res.ok) {
-        console.warn('[GestureOS/Renderer] Python bridge returned', res.status);
-      }
     } catch {
-      // Run: cd python-core && python main.py --api
+      // Python bridge not running
     }
   }
 
-  if (action === 'screenshot') {
-    await captureCanvasScreenshot();
-    return;
+  if (!bridgeOk && !silent) {
+    showToast(`No action backend available. Run the Electron app or Python bridge (python main.py --api).`);
   }
 
-  if (!silent) {
-    showToast(
-      `Action “${action}” sent to Python OS bridge. If nothing happens, run: python main.py --api (see README).`
-    );
-  }
+  return bridgeOk;
 }
 
 function stopRepeatingAction() {
@@ -222,7 +237,8 @@ async function triggerGesture(gesture, { silent = false, bypassCooldown = false 
   }
 
   try {
-    await invokePerformAction(action, null, { silent });
+    const ok = await invokePerformAction(action, null, { silent });
+    if (!ok) return false;
   } catch (err) {
     console.error('[GestureOS/Renderer] performAction failed:', err);
     showToast(`Action failed: ${label}`);
@@ -266,6 +282,28 @@ export async function fireAction(gestureStateOrName) {
     return false;
   }
 
+  // For index (pointer move), pass landmark coordinates
+  if (gesture === 'index' && typeof gestureStateOrName === 'object' && gestureStateOrName?.landmarks) {
+    const indexTip = gestureStateOrName.landmarks[8];
+    if (indexTip) {
+      const nx = 1.0 - indexTip.x; // Mirror X for natural movement
+      const ny = indexTip.y;
+      return sendPointerMove(nx, ny);
+    }
+  }
+
   console.log('[GestureOS/Renderer] stable gesture detected →', gesture, '→', gestureToAction[gesture]);
   return triggerGesture(gesture, { silent: false, bypassCooldown: false });
+}
+
+/** Send pointer movement continuously (index gesture = cursor control). */
+async function sendPointerMove(nx, ny) {
+  const action = 'move-mouse';
+  if (!canFireAction(action, { bypassCooldown: false })) return false;
+  try {
+    await invokePerformAction(action, { nx, ny }, { silent: true });
+    return true;
+  } catch {
+    return false;
+  }
 }

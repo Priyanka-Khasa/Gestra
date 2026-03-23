@@ -24,9 +24,6 @@ export default defineConfig({
       },
       {
         entry: 'electron/preload.cjs',
-        onstart(options) {
-          options.reload();
-        },
         vite: {
           build: {
             lib: {

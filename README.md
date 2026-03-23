@@ -55,6 +55,7 @@ The **Electron / Vite** UI is optional: it runs the same **gesture classifier** 
 4. **Local camera mode** (no Python `--api`, or bridge down)
 
    The app uses **getUserMedia** + **browser MediaPipe** and may still **`POST /gesture`** to Python for OS actions when the bridge is up.
+   If Python cannot open the webcam (often because the browser already has it), the bridge still stays running for **`POST /gesture`**, but it disables **`vision.collective`** automatically.
 
    - **Electron** → **`electronAPI.pythonBridge`** (includes **`GET /api/v1/state`** for IPC). **`GET /api/v1/bridge`** returns the full manifest.
    - Optional env: **`GESTRA_PYTHON_URL`** / **`VITE_PYTHON_BRIDGE_URL`** if the bridge is not on `127.0.0.1:8765`.

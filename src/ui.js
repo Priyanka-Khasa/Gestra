@@ -4,6 +4,7 @@ const labelMap = {
   peace: 'Peace',
   thumb: 'Thumb',
   index: 'Index',
+  pinch: 'Pinch',
   none: 'Searching',
 };
 
@@ -45,7 +46,7 @@ export function updateOverlay(state) {
 }
 
 function updateGestureReferenceCards(activeGesture, isStable) {
-  ['palm', 'fist', 'peace', 'thumb', 'index'].forEach((gesture) => {
+  ['palm', 'fist', 'peace', 'thumb', 'index', 'pinch'].forEach((gesture) => {
     const card = document.getElementById(`gesture-${gesture}`);
     if (!card) return;
 
