@@ -7,6 +7,7 @@ const {
   Tray,
   nativeImage,
   session,
+  shell,
   screen: electronScreen,
 } = require('electron');
 const path = require('path');
@@ -22,10 +23,11 @@ const PYTHON_ENTRY = process.env.GESTRA_PYTHON_ENTRY || path.join(__dirname, '..
 let mainWindow = null;
 let tray = null;
 let pythonProcess = null;
+let pythonLaunchCommand = null;
 
 /** When true, window close proceeds and the process exits. */
 let appIsQuitting = false;
-/** User-toggle: keep small window above other apps (floating palette). */
+/** User-toggle: keep window above other apps. */
 let pinWindowAbove = false;
 
 const GEMINI_DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1';
@@ -35,9 +37,23 @@ const XAI_DEFAULT_MODEL = 'grok-3-latest';
 const OPENROUTER_DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
 const OPENROUTER_DEFAULT_MODEL = 'openrouter/auto';
 
-const FLOATING_WIDTH = 400;
-const FLOATING_HEIGHT = 640;
+const FLOATING_WIDTH = 1440;
+const FLOATING_HEIGHT = 900;
 const FLOATING_MARGIN = 16;
+const WINDOWS_CHROME_PATHS = [
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe'),
+];
+const WINDOWS_EDGE_PATHS = [
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  path.join(process.env.LOCALAPPDATA || '', 'Microsoft\\Edge\\Application\\msedge.exe'),
+];
+const WINDOWS_VOICE_SCRIPT_CANDIDATES = [
+  path.join(__dirname, 'windows-voice-once.ps1'),
+  path.join(__dirname, '../electron/windows-voice-once.ps1'),
+];
 
 function buildGeminiUrl(baseUrl, model, apiKey) {
   const normalizedBaseUrl = String(baseUrl || GEMINI_DEFAULT_BASE_URL).replace(/\/+$/, '');
@@ -195,6 +211,270 @@ function normalizeActionName(raw) {
     .replace(/_/g, '-');
 }
 
+function launchDetached(command, args = []) {
+  const child = spawn(command, args, {
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: true,
+  });
+  child.unref();
+}
+
+function findFirstExistingPath(candidates = []) {
+  const fs = require('fs');
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+async function yieldFocusToDesktop({ hideWindow = true, delayMs = 180 } = {}) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+
+  try {
+    if (hideWindow && mainWindow.isVisible()) {
+      mainWindow.hide();
+    } else {
+      mainWindow.blur();
+    }
+  } catch (_) {}
+
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+function canUsePythonAction(actionRaw) {
+  const action = normalizeActionName(actionRaw);
+  return ['scroll-up', 'scroll-down', 'left-click', 'screenshot', 'play-pause'].includes(action);
+}
+
+async function executeOsActionWithFallback(actionRaw, options = null) {
+  const action = normalizeActionName(actionRaw);
+
+  if (!action) {
+    return { ok: false, message: 'No action provided.' };
+  }
+
+  try {
+    if (canUsePythonAction(action)) {
+      const py = await pythonBridgeIpc({
+        op: 'gesture',
+        action,
+        options,
+      });
+
+      if (py?.ok) {
+        return { ok: true, message: `Executed ${action}.` };
+      }
+    }
+
+    await runOsAction(action, options);
+    return { ok: true, message: `Executed ${action}.` };
+  } catch (error) {
+    return {
+      ok: false,
+      message: `Action failed: ${String(error?.message || error)}`,
+    };
+  }
+}
+
+async function executeDesktopLaunch(targetRaw) {
+  const target = String(targetRaw || '')
+    .trim()
+    .toLowerCase();
+
+  if (!target) {
+    return { ok: false, message: 'No target provided.' };
+  }
+
+  try {
+    switch (target) {
+      case 'chrome':
+      case 'google chrome': {
+        await yieldFocusToDesktop({ hideWindow: true });
+        const chromePath = findFirstExistingPath(WINDOWS_CHROME_PATHS);
+        if (chromePath) {
+          launchDetached(chromePath);
+          return { ok: true, message: 'Opening Chrome.' };
+        }
+        launchDetached('cmd.exe', ['/c', 'start', '', 'chrome']);
+        return { ok: true, message: 'Opening Chrome.' };
+      }
+
+      case 'edge':
+      case 'microsoft edge': {
+        await yieldFocusToDesktop({ hideWindow: true });
+        const edgePath = findFirstExistingPath(WINDOWS_EDGE_PATHS);
+        if (edgePath) {
+          launchDetached(edgePath);
+          return { ok: true, message: 'Opening Microsoft Edge.' };
+        }
+        launchDetached('cmd.exe', ['/c', 'start', '', 'microsoft-edge:']);
+        return { ok: true, message: 'Opening Microsoft Edge.' };
+      }
+
+      case 'file explorer':
+      case 'explorer':
+      case 'folder':
+      case 'folders':
+        await yieldFocusToDesktop({ hideWindow: true });
+        launchDetached('explorer.exe');
+        return { ok: true, message: 'Opening File Explorer.' };
+
+      case 'notepad':
+        await yieldFocusToDesktop({ hideWindow: true });
+        launchDetached('notepad.exe');
+        return { ok: true, message: 'Opening Notepad.' };
+
+      case 'calculator':
+      case 'calc':
+        await yieldFocusToDesktop({ hideWindow: true });
+        launchDetached('calc.exe');
+        return { ok: true, message: 'Opening Calculator.' };
+
+      case 'settings':
+      case 'windows settings':
+        await yieldFocusToDesktop({ hideWindow: true });
+        await shell.openExternal('ms-settings:');
+        return { ok: true, message: 'Opening Windows Settings.' };
+
+      case 'command prompt':
+      case 'cmd':
+        await yieldFocusToDesktop({ hideWindow: true });
+        launchDetached('cmd.exe');
+        return { ok: true, message: 'Opening Command Prompt.' };
+
+      case 'powershell':
+      case 'terminal':
+        await yieldFocusToDesktop({ hideWindow: true });
+        launchDetached('powershell.exe');
+        return { ok: true, message: 'Opening PowerShell.' };
+
+      default:
+        return { ok: false, message: `I cannot open "${target}" yet.` };
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      message: `Failed to open ${target}: ${String(error?.message || error)}`,
+    };
+  }
+}
+
+async function executeVoiceCommand(payload) {
+  const type = String(payload?.type || '').trim().toLowerCase();
+
+  if (type === 'open-app') {
+    return executeDesktopLaunch(payload?.target);
+  }
+
+  if (type === 'os-action') {
+    const action = String(payload?.target || '').trim();
+    await yieldFocusToDesktop({ hideWindow: true });
+    return executeOsActionWithFallback(action, payload?.options ?? null);
+  }
+
+  if (type === 'window-action') {
+    const action = String(payload?.target || '').trim().toLowerCase();
+    if (action === 'show') {
+      mainWindow?.show();
+      mainWindow?.focus();
+      return { ok: true, message: 'Showing RunAnywhere.' };
+    }
+    if (action === 'hide') {
+      mainWindow?.hide();
+      return { ok: true, message: 'Hiding RunAnywhere.' };
+    }
+    if (action === 'pin') {
+      pinWindowAbove = true;
+      applyAlwaysOnTopPreference();
+      rebuildTrayMenu();
+      return { ok: true, message: 'Pinned above other windows.' };
+    }
+    if (action === 'unpin') {
+      pinWindowAbove = false;
+      applyAlwaysOnTopPreference();
+      rebuildTrayMenu();
+      return { ok: true, message: 'Pin disabled.' };
+    }
+  }
+
+  return { ok: false, message: 'Unknown voice command.' };
+}
+
+async function recognizeNativeSpeech(payload = {}) {
+  if (process.platform !== 'win32') {
+    return { ok: false, reason: 'unsupported', message: 'Native speech fallback is Windows-only.' };
+  }
+
+  const timeoutSeconds = Math.max(3, Math.min(15, Math.round(Number(payload?.timeoutSeconds) || 8)));
+  const voiceScriptPath = findFirstExistingPath(WINDOWS_VOICE_SCRIPT_CANDIDATES);
+
+  if (!voiceScriptPath) {
+    return { ok: false, reason: 'missing-script', message: 'Windows voice script not found.' };
+  }
+
+  return await new Promise((resolve) => {
+    const child = spawn('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      voiceScriptPath,
+      '-TimeoutSeconds',
+      String(timeoutSeconds),
+    ], {
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    let stdout = '';
+    let stderr = '';
+    let settled = false;
+
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+
+    child.stdout.on('data', (chunk) => {
+      stdout += String(chunk || '');
+    });
+
+    child.stderr.on('data', (chunk) => {
+      stderr += String(chunk || '');
+    });
+
+    child.on('error', (error) => {
+      finish({ ok: false, reason: 'spawn-failed', message: String(error?.message || error) });
+    });
+
+    child.on('exit', () => {
+      const text = stdout.trim();
+      if (!text) {
+        finish({
+          ok: false,
+          reason: 'empty',
+          message: stderr.trim() || 'Native speech recognizer returned no output.',
+        });
+        return;
+      }
+
+      try {
+        finish(JSON.parse(text));
+      } catch {
+        finish({
+          ok: false,
+          reason: 'invalid-json',
+          message: text,
+        });
+      }
+    });
+  });
+}
+
 async function runOsAction(actionRaw, options) {
   const action = normalizeActionName(actionRaw);
 
@@ -350,7 +630,9 @@ async function pythonBridgeIpc(payload) {
         ? `python bridge timeout for op "${op}"`
         : String(err?.message || err);
 
-    console.warn('[GestureOS/Main] python-bridge:', message);
+    if (!['bridge', 'health', 'state'].includes(String(op))) {
+      console.warn('[GestureOS/Main] python-bridge:', message);
+    }
     return withBase({ ok: false, error: message });
   }
 }
@@ -376,12 +658,14 @@ function setupMediaPermissions() {
 
 function placeFloatingWindow(win) {
   const { width: wa, height: wh, x: wx, y: wy } = electronScreen.getPrimaryDisplay().workArea;
+  const width = Math.max(1180, Math.floor(wa * 0.94));
+  const height = Math.max(760, Math.floor(wh * 0.92));
 
   win.setBounds({
-    x: wx + wa - FLOATING_WIDTH - FLOATING_MARGIN,
-    y: wy + wh - FLOATING_HEIGHT - FLOATING_MARGIN,
-    width: FLOATING_WIDTH,
-    height: FLOATING_HEIGHT,
+    x: wx + Math.max(FLOATING_MARGIN, Math.floor((wa - width) / 2)),
+    y: wy + Math.max(FLOATING_MARGIN, Math.floor((wh - height) / 2)),
+    width,
+    height,
   });
 }
 
@@ -441,10 +725,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: FLOATING_WIDTH,
     height: FLOATING_HEIGHT,
-    minWidth: 340,
-    minHeight: 480,
-    maxWidth: 720,
-    maxHeight: 900,
+    minWidth: 1100,
+    minHeight: 720,
     alwaysOnTop: false,
     autoHideMenuBar: true,
     frame: true,
@@ -503,38 +785,77 @@ function createTray() {
 
 function startPythonBackend() {
   if (pythonProcess) return;
+  const candidates =
+    process.platform === 'win32'
+      ? [
+          { cmd: 'py', args: ['-3', PYTHON_ENTRY, '--api'] },
+          { cmd: 'python', args: [PYTHON_ENTRY, '--api'] },
+          { cmd: 'python3', args: [PYTHON_ENTRY, '--api'] },
+        ]
+      : [
+          { cmd: 'python3', args: [PYTHON_ENTRY, '--api'] },
+          { cmd: 'python', args: [PYTHON_ENTRY, '--api'] },
+        ];
 
-  const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-  const args = [PYTHON_ENTRY, '--api'];
+  for (const candidate of candidates) {
+    try {
+      const child = spawn(candidate.cmd, candidate.args, {
+        cwd: path.dirname(PYTHON_ENTRY),
+        stdio: ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
+      });
 
-  try {
-    pythonProcess = spawn(pythonCmd, args, {
-      cwd: path.dirname(PYTHON_ENTRY),
-      stdio: ['ignore', 'pipe', 'pipe'],
-      windowsHide: true,
-    });
+      pythonProcess = child;
+      pythonLaunchCommand = candidate;
+      console.log(`[Python] launch attempted via: ${candidate.cmd} ${candidate.args.join(' ')}`);
 
-    pythonProcess.stdout.on('data', (data) => {
-      console.log(`[Python] ${String(data).trim()}`);
-    });
+      child.stdout.on('data', (data) => {
+        console.log(`[Python] ${String(data).trim()}`);
+      });
 
-    pythonProcess.stderr.on('data', (data) => {
-      console.error(`[Python ERROR] ${String(data).trim()}`);
-    });
+      child.stderr.on('data', (data) => {
+        console.error(`[Python ERROR] ${String(data).trim()}`);
+      });
 
-    pythonProcess.on('exit', (code) => {
-      console.warn(`[Python] exited with code ${code}`);
-      pythonProcess = null;
-    });
+      child.on('exit', (code) => {
+        console.warn(`[Python] exited with code ${code}`);
+        if (pythonProcess === child) {
+          pythonProcess = null;
+          pythonLaunchCommand = null;
+        }
+      });
 
-    pythonProcess.on('error', (error) => {
-      console.error('[Python] failed to start:', error);
-      pythonProcess = null;
-    });
-  } catch (error) {
-    console.error('[GestureOS/Main] startPythonBackend failed:', error);
-    pythonProcess = null;
+      child.on('error', (error) => {
+        console.error(`[Python] failed to start via ${candidate.cmd}:`, error);
+        if (pythonProcess === child) {
+          pythonProcess = null;
+          pythonLaunchCommand = null;
+        }
+      });
+
+      return;
+    } catch (error) {
+      console.error(`[Python] spawn threw for ${candidate.cmd}:`, error);
+    }
   }
+
+  console.error('[GestureOS/Main] startPythonBackend failed: no usable Python launcher found');
+}
+
+async function ensurePythonBackend() {
+  if (!pythonProcess) {
+    startPythonBackend();
+  }
+
+  return {
+    ok: Boolean(pythonProcess),
+    running: Boolean(pythonProcess),
+    launchCommand: pythonLaunchCommand
+      ? `${pythonLaunchCommand.cmd} ${pythonLaunchCommand.args.join(' ')}`
+      : null,
+    entry: PYTHON_ENTRY,
+    baseUrl: PYTHON_BRIDGE_BASE,
+  };
 }
 
 function stopPythonBackend() {
@@ -546,6 +867,7 @@ function stopPythonBackend() {
     console.warn('[Python] stop failed:', error);
   } finally {
     pythonProcess = null;
+    pythonLaunchCommand = null;
   }
 }
 
@@ -561,6 +883,8 @@ function registerIpcHandlers() {
   });
 
   ipcMain.handle('assistant-request', async (_event, payload) => proxyAssistantRequest(payload));
+  ipcMain.handle('execute-voice-command', async (_event, payload) => executeVoiceCommand(payload));
+  ipcMain.handle('recognize-native-speech', async (_event, payload) => recognizeNativeSpeech(payload));
 
   ipcMain.handle('set-overlay-mode', async (_event, enabled) => {
     return { ok: false, overlayModeEnabled: false, supported: false, requested: Boolean(enabled) };
@@ -596,6 +920,15 @@ function registerIpcHandlers() {
     overlayModeEnabled: false,
     floating: { width: FLOATING_WIDTH, height: FLOATING_HEIGHT },
   }));
+  ipcMain.handle('get-python-backend-status', async () => ({
+    running: Boolean(pythonProcess),
+    launchCommand: pythonLaunchCommand
+      ? `${pythonLaunchCommand.cmd} ${pythonLaunchCommand.args.join(' ')}`
+      : null,
+    entry: PYTHON_ENTRY,
+    baseUrl: PYTHON_BRIDGE_BASE,
+  }));
+  ipcMain.handle('ensure-python-backend', async () => ensurePythonBackend());
 }
 
 app.whenReady().then(() => {

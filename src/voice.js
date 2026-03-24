@@ -14,6 +14,8 @@ export function initVoiceActivation({
   commandWindowMs = 5000,
   onWakeWord = () => {},
   onCommand = () => {},
+  onSpeechStart = () => {},
+  onSpeechEnd = () => {},
   onStateChange = () => {}
 } = {}) {
   if (!SpeechRecognitionCtor) {
@@ -27,41 +29,78 @@ export function initVoiceActivation({
   }
 
   const recognition = new SpeechRecognitionCtor();
-
-  // 🔥 FIX 1: NO continuous loop
-  recognition.continuous = false;
+  recognition.continuous = true;
   recognition.interimResults = false;
   recognition.lang = 'en-US';
+  recognition.maxAlternatives = 1;
 
   let shouldRun = false;
   let mode = 'wake';
   let commandTimer = null;
+  let restartTimer = null;
   let lastWakeAt = 0;
+  let speechActive = false;
+  let isStarting = false;
 
   const wakeWordNormalized = normalize(wakeWord);
 
-  const emitState = () => {
-    onStateChange({ supported: true, running: shouldRun, mode });
+  const emitState = (extra = {}) => {
+    onStateChange({ supported: true, running: shouldRun, mode, speechActive, ...extra });
   };
 
-  const resetToWakeMode = () => {
-    mode = 'wake';
+  const clearRestartTimer = () => {
+    if (restartTimer) {
+      clearTimeout(restartTimer);
+      restartTimer = null;
+    }
+  };
+
+  const clearCommandTimer = () => {
     if (commandTimer) {
       clearTimeout(commandTimer);
       commandTimer = null;
     }
+  };
+
+  const resetToWakeMode = () => {
+    mode = 'wake';
+    clearCommandTimer();
     emitState();
   };
 
-  const enterCommandMode = () => {
+  const enterCommandMode = (overrideWindowMs) => {
     mode = 'command';
-    if (commandTimer) clearTimeout(commandTimer);
+    clearCommandTimer();
 
+    const windowMs = Number.isFinite(overrideWindowMs) ? overrideWindowMs : commandWindowMs;
     commandTimer = setTimeout(() => {
       resetToWakeMode();
-    }, commandWindowMs);
+    }, windowMs);
 
     emitState();
+  };
+
+  const safeStart = () => {
+    if (!shouldRun || isStarting) return;
+
+    isStarting = true;
+
+    try {
+      recognition.start();
+    } catch (_) {
+    } finally {
+      setTimeout(() => {
+        isStarting = false;
+      }, 250);
+    }
+  };
+
+  const scheduleRestart = (delayMs = 350) => {
+    if (!shouldRun) return;
+    clearRestartTimer();
+    restartTimer = setTimeout(() => {
+      safeStart();
+    }, delayMs);
   };
 
   const processTranscript = (text) => {
@@ -87,30 +126,57 @@ export function initVoiceActivation({
   };
 
   recognition.onresult = (event) => {
-    const result = event.results[0];
-    const transcript = result[0]?.transcript || '';
+    const result = event.results[event.resultIndex || 0];
+    const transcript = result?.[0]?.transcript || '';
     processTranscript(transcript);
   };
 
-  // 🔥 FIX 2: SAFE restart (no infinite loop)
+  recognition.onspeechstart = () => {
+    speechActive = true;
+    emitState();
+    onSpeechStart();
+  };
+
+  recognition.onspeechend = () => {
+    speechActive = false;
+    emitState();
+    onSpeechEnd();
+  };
+
   recognition.onend = () => {
+    speechActive = false;
+
     if (!shouldRun) {
+      clearRestartTimer();
       resetToWakeMode();
       return;
     }
 
-    // controlled restart
-    setTimeout(() => {
-      try {
-        recognition.start();
-      } catch (_) {}
-    }, 800);
+    emitState();
+    scheduleRestart(300);
   };
 
   recognition.onerror = (e) => {
-    console.warn('Voice error:', e.error);
-    onStateChange({ supported: true, running: false, mode, error: e.error });
+    const error = e?.error || 'unknown';
+    console.warn('Voice error:', error);
+    speechActive = false;
+
+    if (error === 'not-allowed' || error === 'service-not-allowed' || error === 'audio-capture') {
+      shouldRun = false;
+      clearRestartTimer();
+      emitState({ error });
+      return;
+    }
+
+    if (error === 'no-speech' || error === 'aborted' || error === 'network') {
+      emitState();
+      scheduleRestart(500);
+      return;
+    }
+
     shouldRun = false;
+    clearRestartTimer();
+    emitState({ error });
   };
 
   const start = () => {
@@ -118,19 +184,14 @@ export function initVoiceActivation({
 
     shouldRun = true;
     emitState();
-
-    try {
-      recognition.start();
-      return true;
-    } catch (_) {
-      shouldRun = false;
-      emitState();
-      return false;
-    }
+    safeStart();
+    return true;
   };
 
   const stop = () => {
     shouldRun = false;
+    speechActive = false;
+    clearRestartTimer();
 
     try {
       recognition.stop();
@@ -142,8 +203,9 @@ export function initVoiceActivation({
 
   const destroy = () => {
     shouldRun = false;
-
-    if (commandTimer) clearTimeout(commandTimer);
+    speechActive = false;
+    clearRestartTimer();
+    clearCommandTimer();
 
     try {
       recognition.abort();
@@ -157,6 +219,10 @@ export function initVoiceActivation({
   return {
     supported: true,
     start,
+    activateCommandMode: (overrideWindowMs) => {
+      enterCommandMode(overrideWindowMs);
+      return true;
+    },
     stop,
     destroy
   };

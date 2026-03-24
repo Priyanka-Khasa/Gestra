@@ -5,7 +5,9 @@ Finger up/down heuristics aligned with src/gesture-mediapipe.js.
 
 from __future__ import annotations
 
+import time
 import urllib.request
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -22,7 +24,7 @@ _MODEL_URL = (
     "hand_landmarker.task"
 )
 
-REQUIRED_STABLE_FRAMES = 6
+REQUIRED_STABLE_FRAMES = 3
 MAX_HISTORY = 12
 
 
@@ -30,12 +32,30 @@ def _default_model_path() -> Path:
     return Path(__file__).resolve().parent / "models" / "hand_landmarker.task"
 
 
+def _is_valid_task_archive(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    try:
+        return zipfile.is_zipfile(path)
+    except OSError:
+        return False
+
+
 def ensure_hand_model(path: Optional[Path] = None) -> Path:
     p = path or _default_model_path()
     p.parent.mkdir(parents=True, exist_ok=True)
-    if not p.is_file():
+
+    if not _is_valid_task_archive(p):
+        if p.exists():
+            print(f"[gesture] Existing model is invalid, replacing: {p}")
+            p.unlink()
+
         print(f"[gesture] Downloading hand landmarker model to {p} ...")
         urllib.request.urlretrieve(_MODEL_URL, p)
+
+        if not _is_valid_task_archive(p):
+            raise RuntimeError(f"Downloaded MediaPipe model is invalid: {p}")
+
     return p
 
 
@@ -52,12 +72,16 @@ def classify_gesture_from_landmarks(lm: Sequence[object]) -> Tuple[str, float]:
     """
     thumb_tip = lm[4]
     thumb_mcp = lm[2]
+
     index_tip = lm[8]
     index_pip = lm[6]
+
     middle_tip = lm[12]
     middle_pip = lm[10]
+
     ring_tip = lm[16]
     ring_pip = lm[14]
+
     pinky_tip = lm[20]
     pinky_pip = lm[18]
 
@@ -68,7 +92,7 @@ def classify_gesture_from_landmarks(lm: Sequence[object]) -> Tuple[str, float]:
 
     thumb_up = thumb_tip.y < thumb_mcp.y and thumb_tip.y < lm[5].y - 0.02
 
-    up_finger_count = sum(1 for u in (index_up, middle_up, ring_up, pinky_up) if u)
+    up_finger_count = sum(1 for is_up in (index_up, middle_up, ring_up, pinky_up) if is_up)
 
     if up_finger_count >= 4 and thumb_up:
         return "palm", 0.95
@@ -89,7 +113,7 @@ def classify_gesture_from_landmarks(lm: Sequence[object]) -> Tuple[str, float]:
     if index_up and not middle_up and not ring_up and not pinky_up and not thumb_up:
         return "index", 0.85
 
-    return "none", 0.4
+    return "none", 0.40
 
 
 @dataclass
@@ -121,46 +145,64 @@ class GestureDetector:
         self._sw = max(1, int(screen_width))
         self._sh = max(1, int(screen_height))
         self._min_confidence = min(0.98, max(0.5, min_confidence))
-        self._ts_ms = 0
         self._history: List[str] = []
+        self._last_ts_ms = 0
 
-        mp = ensure_hand_model(model_path)
+        model_file = ensure_hand_model(model_path)
+
         options = HandLandmarkerOptions(
-            base_options=BaseOptions(model_asset_path=str(mp)),
+            base_options=BaseOptions(
+                model_asset_path=str(model_file),
+                delegate=BaseOptions.Delegate.CPU,
+            ),
             running_mode=VisionTaskRunningMode.VIDEO,
             num_hands=1,
             min_hand_detection_confidence=min_hand_detection_confidence,
             min_hand_presence_confidence=min_hand_presence_confidence,
             min_tracking_confidence=min_tracking_confidence,
         )
+
         self._landmarker = HandLandmarker.create_from_options(options)
 
     def close(self) -> None:
         self._landmarker.close()
 
+    def _next_timestamp_ms(self) -> int:
+        now_ms = int(time.monotonic() * 1000)
+        if now_ms <= self._last_ts_ms:
+            now_ms = self._last_ts_ms + 1
+        self._last_ts_ms = now_ms
+        return now_ms
+
     def _stability_tuple(
-        self, gesture: str, hand_detected: bool, confidence: float
+        self,
+        gesture: str,
+        hand_detected: bool,
+        confidence: float,
     ) -> Tuple[bool, int, int, float]:
         self._history.append(gesture)
         self._history = self._history[-MAX_HISTORY:]
-        stable_count = sum(1 for g in self._history if g == gesture)
+
+        stable_count = sum(1 for item in self._history if item == gesture)
         history_len = len(self._history)
         stability = stable_count / max(history_len, 1)
+
         stable = (
             hand_detected
             and gesture != "none"
             and confidence >= self._min_confidence
             and stable_count >= REQUIRED_STABLE_FRAMES
         )
+
         return stable, stable_count, history_len, stability
 
-    def process_bgr(self, frame_bgr) -> GestureFrame:
+    def process_bgr(self, frame_bgr: np.ndarray) -> GestureFrame:
         rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         rgb = np.ascontiguousarray(rgb)
         mp_img = mp_image.Image(mp_image.ImageFormat.SRGB, rgb)
 
-        self._ts_ms += 33
-        result = self._landmarker.detect_for_video(mp_img, self._ts_ms)
+        ts_ms = self._next_timestamp_ms()
+        result = self._landmarker.detect_for_video(mp_img, ts_ms)
 
         if not result.hand_landmarks:
             self._history.clear()
@@ -179,25 +221,31 @@ class GestureDetector:
 
         lm = result.hand_landmarks[0]
         gesture, confidence = classify_gesture_from_landmarks(lm)
-        stable, stable_count, history_len, stability = self._stability_tuple(gesture, True, confidence)
+        stable, stable_count, history_len, stability = self._stability_tuple(
+            gesture,
+            True,
+            confidence,
+        )
 
         landmarks_norm: List[Dict[str, float]] = [
-            {"x": float(p.x), "y": float(p.y), "z": float(p.z)} for p in lm
+            {"x": float(point.x), "y": float(point.y), "z": float(point.z)}
+            for point in lm
         ]
 
         index_tip = lm[8]
         nx = 1.0 - float(index_tip.x)
         ny = float(index_tip.y)
-        cx = int(max(0, min(self._sw - 1, nx * self._sw)))
-        cy = int(max(0, min(self._sh - 1, ny * self._sh)))
+
+        cursor_x = int(max(0, min(self._sw - 1, nx * self._sw)))
+        cursor_y = int(max(0, min(self._sh - 1, ny * self._sh)))
 
         return GestureFrame(
             hand_detected=True,
             gesture=gesture,
             confidence=confidence,
             stable=stable,
-            cursor_x=cx,
-            cursor_y=cy,
+            cursor_x=cursor_x,
+            cursor_y=cursor_y,
             stable_count=stable_count,
             history_len=history_len,
             stability=stability,

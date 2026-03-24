@@ -20,5 +20,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   quitApp: () => ipcRenderer.invoke('quit-app'),
 
+  getPythonBackendStatus: () => ipcRenderer.invoke('get-python-backend-status'),
+
+  ensurePythonBackend: () => ipcRenderer.invoke('ensure-python-backend'),
+
   assistantRequest: (payload) => ipcRenderer.invoke('assistant-request', payload),
+
+  executeVoiceCommand: (payload) => ipcRenderer.invoke('execute-voice-command', payload),
+
+  recognizeNativeSpeech: (payload) => ipcRenderer.invoke('recognize-native-speech', payload),
 });

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import time
+import ctypes
 from typing import Optional
 
 import pyautogui
@@ -18,8 +19,57 @@ pyautogui.PAUSE = 0
 # 1s between click, PrintScreen, and media play/pause (per user spec).
 DISCRETE_COOLDOWN_S = 1.0
 # Continuous scroll while palm/fist stable (aligned with renderer repeat interval).
-SCROLL_REPEAT_INTERVAL_S = 0.4
-SCROLL_CLICKS_PER_TICK = 3
+SCROLL_REPEAT_INTERVAL_S = 0.12
+SCROLL_CLICKS_PER_TICK = 6
+
+_IS_WINDOWS = __import__("sys").platform.startswith("win")
+_WHEEL_DELTA = 120
+_MOUSEEVENTF_LEFTDOWN = 0x0002
+_MOUSEEVENTF_LEFTUP = 0x0004
+_MOUSEEVENTF_WHEEL = 0x0800
+_KEYEVENTF_KEYUP = 0x0002
+_VK_MEDIA_PLAY_PAUSE = 0xB3
+_VK_SNAPSHOT = 0x2C
+
+
+def _mouse_event(flags: int, data: int = 0) -> None:
+    if _IS_WINDOWS:
+        ctypes.windll.user32.mouse_event(flags, 0, 0, int(data), 0)
+
+
+def _key_tap(vk_code: int) -> None:
+    if _IS_WINDOWS:
+        ctypes.windll.user32.keybd_event(int(vk_code), 0, 0, 0)
+        ctypes.windll.user32.keybd_event(int(vk_code), 0, _KEYEVENTF_KEYUP, 0)
+
+
+def _native_scroll(steps: int) -> bool:
+    if not _IS_WINDOWS:
+        return False
+    _mouse_event(_MOUSEEVENTF_WHEEL, steps * _WHEEL_DELTA)
+    return True
+
+
+def _native_left_click() -> bool:
+    if not _IS_WINDOWS:
+        return False
+    _mouse_event(_MOUSEEVENTF_LEFTDOWN)
+    _mouse_event(_MOUSEEVENTF_LEFTUP)
+    return True
+
+
+def _native_media_play_pause() -> bool:
+    if not _IS_WINDOWS:
+        return False
+    _key_tap(_VK_MEDIA_PLAY_PAUSE)
+    return True
+
+
+def _native_printscreen() -> bool:
+    if not _IS_WINDOWS:
+        return False
+    _key_tap(_VK_SNAPSHOT)
+    return True
 
 
 class ActionController:
@@ -72,7 +122,8 @@ class ActionController:
             return False
         self._last_left_click = time.monotonic()
         logger.info("Click triggered (index point)")
-        pyautogui.click()
+        if not _native_left_click():
+            pyautogui.click()
         return True
 
     def screenshot_printscreen(self) -> bool:
@@ -80,7 +131,8 @@ class ActionController:
             return False
         self._last_screenshot = time.monotonic()
         logger.info("Screenshot triggered (PrintScreen)")
-        pyautogui.press("printscreen")
+        if not _native_printscreen():
+            pyautogui.press("printscreen")
         return True
 
     def media_play_pause(self) -> bool:
@@ -88,7 +140,8 @@ class ActionController:
             return False
         self._last_playpause = time.monotonic()
         logger.info("Play/pause triggered")
-        pyautogui.press("playpause")
+        if not _native_media_play_pause():
+            pyautogui.press("playpause")
         return True
 
     def tick_scroll_up(self) -> bool:
@@ -96,8 +149,9 @@ class ActionController:
         if now - self._last_scroll_up < self._scroll_repeat_interval_s:
             return False
         self._last_scroll_up = now
-        logger.debug("Scroll up (open palm)")
-        pyautogui.scroll(SCROLL_CLICKS_PER_TICK)
+        logger.info("Scroll up triggered")
+        if not _native_scroll(SCROLL_CLICKS_PER_TICK):
+            pyautogui.scroll(SCROLL_CLICKS_PER_TICK)
         return True
 
     def tick_scroll_down(self) -> bool:
@@ -105,8 +159,9 @@ class ActionController:
         if now - self._last_scroll_down < self._scroll_repeat_interval_s:
             return False
         self._last_scroll_down = now
-        logger.debug("Scroll down (fist)")
-        pyautogui.scroll(-SCROLL_CLICKS_PER_TICK)
+        logger.info("Scroll down triggered")
+        if not _native_scroll(-SCROLL_CLICKS_PER_TICK):
+            pyautogui.scroll(-SCROLL_CLICKS_PER_TICK)
         return True
 
     def dispatch_renderer_action(self, name: str) -> bool:

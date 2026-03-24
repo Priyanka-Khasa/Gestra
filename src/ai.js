@@ -31,15 +31,6 @@ function buildOpenRouterUrl(baseUrl) {
 }
 
 function resolveProviderConfig(options = {}) {
-  const openRouterApiKey = options.openRouterApiKey ?? import.meta.env.VITE_OPENROUTER_API_KEY;
-  if (openRouterApiKey) {
-    return {
-      provider: 'openrouter',
-      apiKey: openRouterApiKey,
-      model: (options.openRouterModel ?? import.meta.env.VITE_OPENROUTER_MODEL ?? OPENROUTER_DEFAULT_MODEL).trim(),
-      baseUrl: options.openRouterBaseUrl ?? import.meta.env.VITE_OPENROUTER_BASE_URL ?? OPENROUTER_DEFAULT_BASE_URL,
-    };
-  }
   const xaiApiKey = options.xaiApiKey ?? import.meta.env.VITE_XAI_API_KEY;
   if (xaiApiKey) {
     return {
@@ -47,6 +38,15 @@ function resolveProviderConfig(options = {}) {
       apiKey: xaiApiKey,
       model: (options.xaiModel ?? import.meta.env.VITE_XAI_MODEL ?? XAI_DEFAULT_MODEL).trim(),
       baseUrl: options.xaiBaseUrl ?? import.meta.env.VITE_XAI_BASE_URL ?? XAI_DEFAULT_BASE_URL,
+    };
+  }
+  const openRouterApiKey = options.openRouterApiKey ?? import.meta.env.VITE_OPENROUTER_API_KEY;
+  if (openRouterApiKey) {
+    return {
+      provider: 'openrouter',
+      apiKey: openRouterApiKey,
+      model: (options.openRouterModel ?? import.meta.env.VITE_OPENROUTER_MODEL ?? OPENROUTER_DEFAULT_MODEL).trim(),
+      baseUrl: options.openRouterBaseUrl ?? import.meta.env.VITE_OPENROUTER_BASE_URL ?? OPENROUTER_DEFAULT_BASE_URL,
     };
   }
   const geminiApiKey = options.geminiApiKey ?? options.apiKey ?? import.meta.env.VITE_GEMINI_API_KEY;
