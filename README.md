@@ -38,7 +38,7 @@ RunAnywhere AI is a desktop shell for gesture-driven control, system manipulatio
 
 1. **Clone or download the project**:
    ```bash
-   cd "c:\Users\yashi\Downloads\hack x treme\Gestra"
+   cd "Your Path"
    ```
 
 2. **Install Node.js dependencies**:
