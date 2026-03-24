@@ -2,6 +2,7 @@ import './style.css';
 import { initGestureEngine, setGestureMinConfidence, startGestureEngine } from './gesture-mediapipe.js';
 import {
   fireAction,
+  fireNamedAction,
   probePythonBridge,
   updateGestureActivity,
   setPythonVisionCollective,
@@ -40,9 +41,57 @@ function waitForVideoReady(video, timeoutMs = 15000) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const startBtn = document.getElementById('start-btn');
-  const landingPage = document.getElementById('landing-page');
+function waitForImageReady(img, timeoutMs = 5000) {
+  return new Promise((resolve, reject) => {
+    if (img.complete && img.naturalWidth > 0) {
+      resolve();
+      return;
+    }
+
+    const onLoad = () => {
+      clearTimeout(timer);
+      img.removeEventListener('load', onLoad);
+      img.removeEventListener('error', onError);
+      resolve();
+    };
+    const onError = () => {
+      clearTimeout(timer);
+      img.removeEventListener('load', onLoad);
+      img.removeEventListener('error', onError);
+      reject(new Error('Python camera stream failed to load.'));
+    };
+    const timer = setTimeout(() => {
+      img.removeEventListener('load', onLoad);
+      img.removeEventListener('error', onError);
+      reject(new Error('Python camera stream timed out.'));
+    }, timeoutMs);
+
+    img.addEventListener('load', onLoad, { once: true });
+    img.addEventListener('error', onError, { once: true });
+  });
+}
+
+async function waitForPythonBridgeReady({ timeoutMs = 20000, intervalMs = 1000 } = {}) {
+  const startedAt = Date.now();
+  let lastBridge = null;
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const bridge = await probePythonBridge();
+    lastBridge = bridge;
+    if (bridge?.ok) {
+      return bridge;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  return lastBridge;
+}
+
+function initAppShell() {
+  document.body.dataset.gestraInitialized = '';
+  const introScreen = document.getElementById('intro-screen');
+  const loginScreen = document.getElementById('login-screen');
+  const licenseScreen = document.getElementById('license-screen');
   const appContainer = document.getElementById('app-container');
   const videoElement = document.getElementById('webcam-feed');
   const pythonVisionImg = document.getElementById('python-vision-feed');
@@ -60,8 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const quitAppBtn = document.getElementById('quit-app-btn');
 
   let pythonVisionPollTimer = null;
+  let startupInFlight = false;
 
-  if (!startBtn || !landingPage || !appContainer || !videoElement) {
+  if (!appContainer || !videoElement) {
     console.error('Missing required DOM elements');
     return;
   }
@@ -88,20 +138,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  startBtn.addEventListener('click', async () => {
+  const handleStart = async () => {
+    if (startupInFlight) {
+      return;
+    }
+    startupInFlight = true;
+
     try {
+      introScreen?.classList.add('hidden');
+      introScreen?.classList.remove('flex');
+      loginScreen?.classList.add('hidden');
+      loginScreen?.classList.remove('flex');
+      licenseScreen?.classList.add('hidden');
+      licenseScreen?.classList.remove('flex');
       appContainer.classList.remove('hidden');
+      const startBtn = document.getElementById('start-btn');
+      startBtn?.setAttribute('aria-busy', 'true');
+      if (startBtn) startBtn.disabled = true;
 
       updateSystemStatus('Neural Link Initializing...', 'bg-accent');
-      landingPage.style.opacity = '0';
-      setTimeout(() => {
-        landingPage.classList.add('hidden');
-      }, 700);
 
       if (loadingText) loadingText.innerText = 'Checking Python vision bridge...';
       if (loadingBar) loadingBar.style.width = '15%';
 
-      const bridge = await probePythonBridge();
+      if (window.electronAPI?.ensurePythonBackend) {
+        await window.electronAPI.ensurePythonBackend().catch(() => null);
+      }
+
+      let bridge = await probePythonBridge();
+      if (!bridge?.ok && window.electronAPI?.getPythonBackendStatus) {
+        const backend = await window.electronAPI.getPythonBackendStatus().catch(() => null);
+        if (backend?.running || backend?.launchCommand) {
+          if (loadingText) loadingText.innerText = 'Starting local runtime...';
+          bridge = await waitForPythonBridgeReady();
+        }
+      }
       const collective = Boolean(bridge.ok && bridge.data?.vision?.collective);
       const baseUrl = String(bridge.baseUrl || '').replace(/\/+$/, '');
 
@@ -119,6 +190,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const mjpegPath = bridge.data?.vision?.mjpegPath || '/camera.mjpg';
         const path = mjpegPath.startsWith('/') ? mjpegPath : `/${mjpegPath}`;
         pythonVisionImg.src = `${baseUrl}${path}`;
+        try {
+          await waitForImageReady(pythonVisionImg, 5000);
+        } catch (streamError) {
+          console.warn('Python MJPEG unavailable, falling back to local camera:', streamError);
+          showToast('Python video stream unavailable. Falling back to local webcam preview.');
+          await startLocalCameraMode();
+          return;
+        }
 
         initTTS().catch((error) => console.warn('TTS init failed:', error));
 
@@ -134,10 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
               if (!raw) return;
               const state = mapPythonStateToOverlay(raw);
               updateOverlay(state);
+              updateGestureActivity(state);
               if (state.stable && state.gesture !== 'none') {
                 if (!lastHud.stable || lastHud.gesture !== state.gesture) {
                   logAction(state.gesture, gestureLabels[state.gesture]);
                   speakFeedback(gestureLabels[state.gesture]);
+                  if (state.gesture === 'index') {
+                    fireNamedAction('left-click');
+                  } else if (state.gesture === 'thumb') {
+                    fireAction('thumb');
+                  } else if (state.gesture === 'peace') {
+                    fireAction('peace');
+                  }
                 }
               }
               lastHud = { stable: state.stable, gesture: state.gesture };
@@ -153,9 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingBar) loadingBar.style.width = '100%';
         setTimeout(() => loadingOverlay?.classList.add('hidden'), 500);
         updateSystemStatus('Neural Interface: Active (Python)', 'bg-accent');
+        document.body.dataset.gestraInitialized = '1';
         await syncShellControls();
+        startupInFlight = false;
         return;
       }
+
+      await startLocalCameraMode();
+      return;
 
       setPythonVisionCollective(false);
       videoElement.classList.remove('hidden');
@@ -166,7 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loadingBar) loadingBar.style.width = '30%';
 
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error('Camera API unavailable. Use the Electron app or a secure context (HTTPS / localhost).');
+        if (loadingText) loadingText.innerText = 'Desktop shell ready. Camera unavailable in this view.';
+        if (loadingBar) loadingBar.style.width = '100%';
+        loadingOverlay?.classList.add('hidden');
+        updateSystemStatus('Desktop Shell Active', 'bg-amber-500');
+        showToast('Camera API unavailable in this Electron view. The app shell is active; start the Python bridge for vision.');
+        document.body.dataset.gestraInitialized = '1';
+        await syncShellControls();
+        startupInFlight = false;
+        return;
       }
 
       const videoConstraints = {
@@ -260,7 +360,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loadingBar) loadingBar.style.width = '100%';
       setTimeout(() => loadingOverlay?.classList.add('hidden'), 500);
       updateSystemStatus('Neural Interface: Active', 'bg-accent');
+      document.body.dataset.gestraInitialized = '1';
       await syncShellControls();
+      startupInFlight = false;
     } catch (error) {
       console.error('App startup failed:', error);
       setPythonVisionCollective(false);
@@ -298,8 +400,144 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (msg.includes('timed out') || msg.includes('0×0') || msg.includes('no resolution')) {
         showToast(msg);
       }
+      document.body.dataset.gestraInitialized = '';
+      const startBtn = document.getElementById('start-btn');
+      if (startBtn) {
+        startBtn.disabled = false;
+        startBtn.removeAttribute('aria-busy');
+      }
+      startupInFlight = false;
     }
-  });
+  };
+
+  const startLocalCameraMode = async () => {
+    setPythonVisionCollective(false);
+    videoElement.classList.remove('hidden');
+    pythonVisionImg?.classList.add('hidden');
+    if (pythonVisionImg) pythonVisionImg.removeAttribute('src');
+
+    if (loadingText) loadingText.innerText = 'Synchronizing Hand Tracking...';
+    if (loadingBar) loadingBar.style.width = '30%';
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      if (loadingText) loadingText.innerText = 'Desktop shell ready. Camera unavailable in this view.';
+      if (loadingBar) loadingBar.style.width = '100%';
+      loadingOverlay?.classList.add('hidden');
+      updateSystemStatus('Desktop Shell Active', 'bg-amber-500');
+      showToast('Camera API unavailable in this Electron view. The app shell is active; start the Python bridge for vision.');
+      document.body.dataset.gestraInitialized = '1';
+      await syncShellControls();
+      startupInFlight = false;
+      return;
+    }
+
+    const videoConstraints = {
+      facingMode: 'user',
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      frameRate: { ideal: 60, max: 60 },
+    };
+
+    async function openCameraStream() {
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: videoConstraints,
+        });
+      } catch (firstError) {
+        const retriable =
+          firstError?.name === 'OverconstrainedError' || firstError?.name === 'ConstraintNotSatisfiedError';
+        if (retriable) {
+          return navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+        }
+        throw firstError;
+      }
+    }
+
+    const [gestureOutcome, streamOutcome] = await Promise.allSettled([
+      initGestureEngine(),
+      openCameraStream(),
+    ]);
+
+    if (gestureOutcome.status === 'rejected') {
+      if (streamOutcome.status === 'fulfilled') {
+        streamOutcome.value.getTracks().forEach((t) => t.stop());
+      }
+      throw gestureOutcome.reason;
+    }
+    if (streamOutcome.status === 'rejected') {
+      throw streamOutcome.reason;
+    }
+
+    const stream = streamOutcome.value;
+
+    if (loadingText) loadingText.innerText = 'Calibrating Vision Stream...';
+    if (loadingBar) loadingBar.style.width = '65%';
+
+    videoElement.muted = true;
+    videoElement.setAttribute('playsinline', '');
+    videoElement.playsInline = true;
+    videoElement.srcObject = stream;
+
+    await waitForVideoReady(videoElement);
+    try {
+      await videoElement.play();
+    } catch (playError) {
+      console.warn('video.play():', playError);
+      showToast('Could not start camera preview. Try clicking the window or toggling the camera.');
+    }
+
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+
+    if (videoElement.videoWidth === 0) {
+      throw new Error('Camera opened but video has no resolution (0x0). Try another webcam or update GPU drivers.');
+    }
+
+    initTTS().catch((error) => console.warn('TTS init failed:', error));
+
+    startGestureEngine(videoElement, {
+      onFrame: (state) => {
+        updateOverlay(state);
+        updateGestureActivity(state);
+        if (state.handDetected && state.gesture === 'index' && state.landmarks) {
+          fireAction(state);
+        }
+      },
+      onGesture: (state) => fireAction(state),
+    });
+
+    probePythonBridge()
+      .then(({ ok, via, data }) => {
+        if (!ok) return;
+        const id = data?.electron?.appContainerId;
+        const hint = id ? ` (UI root #${id})` : '';
+        const route = via === 'electron' ? 'Electron to Python' : 'Browser to Python';
+        showToast(`Python bridge online${hint} - ${route} (gesture relay only in local camera mode).`);
+      })
+      .catch(() => {});
+
+    if (loadingText) loadingText.innerText = 'Neural Engine Ready.';
+    if (loadingBar) loadingBar.style.width = '100%';
+    setTimeout(() => loadingOverlay?.classList.add('hidden'), 500);
+    updateSystemStatus('Neural Interface: Active', 'bg-accent');
+    document.body.dataset.gestraInitialized = '1';
+    await syncShellControls();
+    startupInFlight = false;
+  };
+
+  window.__gestraInitStart = handleStart;
+  window.addEventListener('gestra:start-requested', handleStart);
+  const startBtn = document.getElementById('start-btn');
+  if (startBtn) {
+    startBtn.onclick = handleStart;
+    startBtn.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleStart();
+      }
+    });
+  }
 
   if (clearLogBtn && actionLog) {
     clearLogBtn.addEventListener('click', () => {
@@ -346,4 +584,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   syncShellControls();
-});
+
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAppShell, { once: true });
+} else {
+  initAppShell();
+}

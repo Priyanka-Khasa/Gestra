@@ -1,269 +1,659 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RunAnywhere AI</title>
+  <title>RunAnywhere AI OS</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
 </head>
 
-<body class="bg-[#050A14] text-slate-200 font-['Outfit'] h-screen overflow-hidden selection:bg-accent/30 selection:text-white">
-  
-  <!-- Landing Entry -->
-  <div id="landing-page"
-    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050A14] transition-all duration-700 ease-in-out">
-    <div class="relative w-full max-w-xl text-center px-8">
-      <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-accent/20 blur-[100px] rounded-full"></div>
-      
-      <h1 class="text-7xl font-bold tracking-tight mb-6 relative">
-        <span class="bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500">
-          RunAnywhere
-        </span>
-        <span class="absolute -top-4 -right-8 text-xs font-black bg-accent text-[#050A14] px-1.5 py-0.5 rounded rotate-12">PRO</span>
-      </h1>
+<body class="bg-[#050A14] text-slate-100 font-['Inter'] h-screen overflow-hidden selection:bg-cyan-400/20 selection:text-white">
+  <!-- APP ROOT -->
+  <div id="shell" class="relative w-screen h-screen overflow-hidden bg-[#050A14]">
 
-      <p class="text-lg text-slate-400 mb-10 font-light leading-relaxed max-w-sm mx-auto">
-        Next-gen spatial interface with <span class="text-white font-medium">real-time vision control</span> and a <span class="text-accent font-medium">RunAnywhere AI</span> assistant.
-      </p>
+    <!-- BACKGROUND -->
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -top-40 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl"></div>
+      <div class="absolute bottom-[-10rem] right-[-8rem] h-[24rem] w-[24rem] rounded-full bg-blue-500/10 blur-3xl"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.05),transparent_35%)]"></div>
+    </div>
 
-      <button id="start-btn"
-        class="group relative px-10 py-5 bg-white text-[#050A14] font-bold rounded-2xl transition-all hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.4)] overflow-hidden">
-        <span class="relative z-10 flex items-center gap-3">
-          Initialize System
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </span>
-        <div class="absolute inset-0 bg-gradient-to-r from-accent to-cyan-400 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+    <!-- ================= INTRO SCREEN ================= -->
+    <section
+      id="intro-screen"
+      class="absolute inset-0 z-[60] flex items-center justify-center px-6"
+    >
+      <div class="w-full max-w-5xl">
+        <div class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+          <div class="space-y-8">
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
+              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              RunAnywhere AI Runtime
+            </div>
+
+            <div class="space-y-4">
+              <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl xl:text-7xl">
+                RunAnywhere
+                <span class="block bg-gradient-to-r from-cyan-300 via-white to-slate-400 bg-clip-text text-transparent">
+                  Spatial OS
+                </span>
+              </h1>
+
+              <p class="max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
+                A cinematic on-device gesture operating layer powered by real-time vision,
+                private local inference, and system-wide control.
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">What it feels like</p>
+                <p class="mt-2 text-sm leading-7 text-slate-300">
+                  A real product experience — not a demo page.
+                </p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Core promise</p>
+                <p class="mt-2 text-sm leading-7 text-slate-300">
+                  Hands-free interaction across your screen with an AI-native interface.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <button
+                id="go-to-login-btn"
+                type="button"
+                class="rounded-2xl bg-white px-7 py-4 text-sm font-bold text-[#041019] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
+              >
+                Enter Experience
+              </button>
+              <button
+                id="skip-intro-btn"
+                type="button"
+                class="rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+              >
+                Skip Intro
+              </button>
+            </div>
+          </div>
+
+          <!-- Intro Feature Story -->
+          <div class="rounded-[32px] border border-white/10 bg-black/30 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+            <div class="mb-5 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Why RunAnywhere</p>
+                <h2 class="mt-2 text-2xl font-bold text-white">On-device intelligence</h2>
+              </div>
+              <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-300">
+                Private
+              </div>
+            </div>
+
+            <div id="runanywhere-lines" class="space-y-3">
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
+                Production-grade on-device AI platform for local inference.
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
+                Built for privacy, lower latency, and offline-capable AI experiences.
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
+                Supports core capabilities like LLM, STT, TTS, vision, and voice AI.
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
+                Designed across platforms with a unified developer experience.
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
+                A strong foundation for fast, local-first multimodal applications.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= LOGIN SCREEN ================= -->
+    <section
+      id="login-screen"
+      class="absolute inset-0 z-[55] hidden items-center justify-center px-6"
+    >
+      <div class="w-full max-w-5xl">
+        <div class="grid overflow-hidden rounded-[36px] border border-white/10 bg-black/30 shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-2xl lg:grid-cols-[0.95fr_1.05fr]">
+          <div class="relative hidden min-h-[680px] overflow-hidden border-r border-white/10 lg:block">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_35%),linear-gradient(180deg,#07111f_0%,#050A14_100%)]"></div>
+            <div class="relative z-10 flex h-full flex-col justify-between p-10">
+              <div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-300">
+                  Spatial Access
+                </div>
+                <h2 class="mt-8 text-4xl font-extrabold leading-tight text-white">
+                  Sign in to unlock the full desktop gesture layer
+                </h2>
+                <p class="mt-5 max-w-md text-sm leading-8 text-slate-300">
+                  Use a polished, system-level interface with local AI control, gesture commands,
+                  and assistant workflows that feel like a real shipped product.
+                </p>
+              </div>
+
+              <div class="space-y-4">
+                <div class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Secure shell</p>
+                  <p class="mt-2 text-sm text-slate-200">Desktop-grade permission flow and app session entry.</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Live runtime</p>
+                  <p class="mt-2 text-sm text-slate-200">Vision, gestures, HUD, control routing, and assistant access.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-8 sm:p-10 lg:p-12">
+            <div class="mx-auto w-full max-w-md">
+              <div class="mb-8">
+                <p class="text-xs font-black uppercase tracking-[0.24em] text-slate-500">Account Login</p>
+                <h3 class="mt-3 text-3xl font-bold text-white">Welcome back</h3>
+                <p class="mt-2 text-sm leading-7 text-slate-400">
+                  Sign in to continue into the RunAnywhere AI desktop experience.
+                </p>
+              </div>
+
+              <form id="login-form" class="space-y-5">
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-300">Email</label>
+                  <input
+                    id="login-email"
+                    type="email"
+                    placeholder="you@company.com"
+                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-300">Password</label>
+                  <input
+                    id="login-password"
+                    type="password"
+                    placeholder="Enter your password"
+                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                  />
+                </div>
+
+                <div class="flex items-center justify-between text-sm">
+                  <label class="flex items-center gap-2 text-slate-400">
+                    <input type="checkbox" class="rounded border-white/10 bg-white/5" />
+                    Keep me signed in
+                  </label>
+                  <button type="button" class="font-semibold text-cyan-300">
+                    Forgot password?
+                  </button>
+                </div>
+
+                <button
+                  id="login-submit-btn"
+                  type="submit"
+                  class="w-full rounded-2xl bg-white px-6 py-4 text-sm font-bold text-[#041019] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5"
+                >
+                  Continue
+                </button>
+
+                <div class="relative py-2 text-center">
+                  <span class="relative z-10 bg-transparent px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-600">or</span>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]">
+                    Sign in with Google
+                  </button>
+                  <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]">
+                    Enterprise SSO
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= LICENSE SCREEN ================= -->
+    <section
+      id="license-screen"
+      class="absolute inset-0 z-[52] hidden items-center justify-center px-6"
+    >
+      <div class="w-full max-w-3xl rounded-[36px] border border-white/10 bg-black/35 p-8 shadow-[0_40px_100px_rgba(0,0,0,0.55)] backdrop-blur-2xl sm:p-10">
+        <div class="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Runtime Consent</p>
+            <h3 class="mt-3 text-3xl font-bold text-white">Desktop Interaction License</h3>
+            <p class="mt-3 max-w-2xl text-sm leading-8 text-slate-400">
+              This application requests permission to stay visible on your screen, read gesture input,
+              and control desktop actions during the active session.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+            Verified Runtime
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Screen presence</p>
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              Allows the app shell to remain visible while gestures are being interpreted.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Input routing</p>
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              Enables OS-level commands such as scroll, click, media control, and cursor movement.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Vision processing</p>
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              Uses camera input for hand gesture analysis and action mapping.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Session scope</p>
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              Permissions apply only while the application is active and initialized.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <label class="flex items-start gap-3 text-sm leading-7 text-slate-300">
+            <input id="license-check" type="checkbox" class="mt-1 rounded border-white/10 bg-white/5" />
+            I understand that this application can remain on screen and simulate desktop interaction while the session is active.
+          </label>
+        </div>
+
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <button
+            id="back-to-login-btn"
+            type="button"
+            class="rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
+          >
+            Back
+          </button>
+
+          <button
+            id="accept-license-btn"
+            type="button"
+            class="rounded-2xl bg-white px-7 py-4 text-sm font-bold text-[#041019] transition hover:-translate-y-0.5"
+          >
+            Accept & Enter Home
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HOME APP ================= -->
+    <div id="app-container" class="hidden h-screen w-screen bg-[#050A14]">
+      <div class="flex h-full w-full flex-col">
+
+        <!-- NAVBAR -->
+        <header class="border-b border-white/10 bg-black/30 px-6 py-4 backdrop-blur-2xl">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400 text-[#041019] text-lg font-black">
+                R
+              </div>
+              <div>
+                <h1 class="text-lg font-bold text-white">RunAnywhere AI OS</h1>
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Spatial Runtime Dashboard
+                </p>
+              </div>
+            </div>
+
+            <nav class="hidden items-center gap-2 lg:flex">
+              <button class="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-300">
+                Home
+              </button>
+              <button class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300">
+                Gestures
+              </button>
+              <button class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300">
+                Assistant
+              </button>
+              <button class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300">
+                Runtime
+              </button>
+            </nav>
+
+            <div class="flex items-center gap-3">
+              <button id="pin-window-btn" class="shell-btn" type="button">Pin</button>
+              <button id="hide-window-btn" class="shell-btn" type="button">Hide</button>
+              <button id="quit-app-btn" class="shell-btn shell-btn-danger" type="button">Quit</button>
+            </div>
+          </div>
+        </header>
+
+        <!-- CONTENT -->
+        <div class="flex min-h-0 flex-1 overflow-hidden">
+
+          <!-- LEFT PANEL -->
+          <aside class="hidden min-h-0 w-[300px] shrink-0 overflow-hidden border-r border-white/10 bg-black/20 p-5 backdrop-blur-2xl lg:flex lg:flex-col xl:w-[340px]">
+            <div class="mb-6">
+              <p class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Gesture Library</p>
+              <h2 class="mt-2 text-2xl font-bold text-white">Control Map</h2>
+              <p class="mt-2 text-sm leading-7 text-slate-400">
+                Cleaner gesture guidance so users understand actions instantly.
+              </p>
+            </div>
+
+            <div class="min-h-0 flex-1 space-y-4 overflow-y-scroll pr-2 custom-scrollbar">
+              <div id="gesture-palm" class="gesture-card group">
+                <div class="gesture-icon-box">
+                  <span class="text-lg">🖐️</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-200">Open Palm</h3>
+                  <p class="text-xs text-slate-500">Scroll up through content</p>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+              <div id="gesture-fist" class="gesture-card group">
+                <div class="gesture-icon-box">
+                  <span class="text-lg">✊</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-200">Closed Fist</h3>
+                  <p class="text-xs text-slate-500">Scroll down through content</p>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+              <div id="gesture-peace" class="gesture-card group">
+                <div class="gesture-icon-box">
+                  <span class="text-lg">✌️</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-200">Peace Sign</h3>
+                  <p class="text-xs text-slate-500">Capture a screenshot</p>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+              <div id="gesture-thumb" class="gesture-card group">
+                <div class="gesture-icon-box">
+                  <span class="text-lg">👍</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-200">Thumbs Up</h3>
+                  <p class="text-xs text-slate-500">Play or pause media</p>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+              <div id="gesture-index" class="gesture-card group">
+                <div class="gesture-icon-box">
+                  <span class="text-lg">☝️</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-200">Pointing</h3>
+                  <p class="text-xs text-slate-500">Move cursor on screen</p>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+
+              <div id="gesture-pinch" class="gesture-card group">
+                <div class="gesture-icon-box">
+                  <span class="text-lg">🤏</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-slate-200">Pinch</h3>
+                  <p class="text-xs text-slate-500">Trigger left click</p>
+                </div>
+                <div class="status-indicator"></div>
+              </div>
+            </div>
+
+            <div class="mt-6 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Confidence</span>
+                <span id="threshold-value" class="text-sm font-mono text-cyan-300">0.70</span>
+              </div>
+              <input
+                type="range"
+                id="confidence-slider"
+                min="0.6"
+                max="0.95"
+                step="0.05"
+                value="0.7"
+                class="mt-4 w-full cursor-pointer accent-cyan-400"
+              />
+            </div>
+          </aside>
+
+          <!-- CENTER -->
+          <main class="flex min-h-0 flex-1 flex-col overflow-hidden p-6 lg:p-8">
+            <!-- top stats -->
+            <div class="mb-6 grid gap-4 md:grid-cols-3">
+              <div class="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">System Status</p>
+                <h3 id="system-status-text" class="mt-3 text-2xl font-bold text-white">System Ready</h3>
+                <div class="mt-4 flex items-center gap-2 text-sm text-slate-400">
+                  <div id="system-status-dot" class="h-2 w-2 rounded-full bg-slate-700"></div>
+                  Native Bridge
+                </div>
+              </div>
+
+              <div class="hud-stat rounded-[28px] !items-start !p-5">
+                <span class="hud-stat-label">FPS</span>
+                <span id="fps-counter" class="hud-stat-val text-2xl">0</span>
+              </div>
+
+              <div class="hud-stat rounded-[28px] !items-start !p-5">
+                <span class="hud-stat-label">Stability</span>
+                <span id="stability-counter" class="hud-stat-val text-2xl">0%</span>
+              </div>
+            </div>
+
+            <!-- camera -->
+            <div
+              id="camera-container"
+              class="relative flex min-h-0 flex-1 overflow-hidden rounded-[36px] border border-white/10 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.45)]"
+            >
+              <video id="webcam-feed" class="h-full w-full object-cover scale-x-[-1]" autoplay playsinline muted></video>
+              <img id="python-vision-feed" class="hidden absolute inset-0 h-full w-full object-cover scale-x-[-1]" alt="" />
+
+              <div id="loading-overlay" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#050A14]/80 backdrop-blur-xl transition-opacity duration-700">
+                <div class="relative mb-6 h-24 w-24">
+                  <div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
+                  <div class="absolute inset-0 animate-spin rounded-full border-4 border-cyan-400 border-t-transparent"></div>
+                </div>
+                <p id="loading-text" class="text-xl font-semibold text-white">Neural Engine Offline</p>
+                <div class="mt-5 h-1.5 w-56 overflow-hidden rounded-full bg-white/10">
+                  <div id="loading-bar" class="h-full w-0 bg-cyan-400 transition-all duration-300"></div>
+                </div>
+              </div>
+
+              <div class="pointer-events-none absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-4">
+                <div id="detected-gesture-label" class="gesture-live-pill opacity-0">
+                  Show Gesture
+                </div>
+                <div class="h-2 w-56 overflow-hidden rounded-full bg-black/40 backdrop-blur-md">
+                  <div id="confidence-bar" class="h-full w-0 bg-cyan-400 transition-all duration-300"></div>
+                </div>
+              </div>
+
+              <div class="absolute left-6 top-6 z-20 rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-xl">
+                <div class="flex items-center gap-4">
+                  <span class="text-xs font-bold text-slate-300">Overlay Mode</span>
+                  <label class="relative inline-flex cursor-pointer items-center">
+                    <input id="overlay-mode-toggle" type="checkbox" class="peer sr-only" />
+                    <div class="h-6 w-11 rounded-full bg-slate-800 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-cyan-400 peer-checked:after:translate-x-full"></div>
+                  </label>
+                </div>
+                <p id="overlay-mode-hint" class="mt-2 text-[10px] font-medium text-slate-500">
+                  Disabled for stability
+                </p>
+              </div>
+            </div>
+          </main>
+
+          <!-- RIGHT PANEL -->
+          <aside class="hidden min-h-0 w-[300px] shrink-0 overflow-hidden border-l border-white/10 bg-black/20 p-5 backdrop-blur-2xl xl:flex xl:flex-col 2xl:w-[340px]">
+            <div class="mb-5 flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Action Feed</p>
+                <h3 class="mt-2 text-xl font-bold text-white">Live Activity</h3>
+              </div>
+              <button id="clear-log-btn" class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 transition hover:text-cyan-300">
+                Clear
+              </button>
+            </div>
+
+            <div id="action-log" class="min-h-0 flex-1 space-y-3 overflow-y-scroll custom-scrollbar pr-2">
+              <!-- log -->
+            </div>
+
+            <div class="mt-6 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+              <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Quick Notes</p>
+              <ul class="mt-4 space-y-3 text-sm leading-7 text-slate-300">
+                <li>• Use smooth open-palm holds for consistent scrolling.</li>
+                <li>• Pinch should feel like a click, not a hold.</li>
+                <li>• Cursor control works best in clear lighting.</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-container" class="fixed left-1/2 top-8 z-[200] flex -translate-x-1/2 flex-col gap-2"></div>
+
+    <!-- ASSISTANT -->
+    <section id="assistant-root" class="assistant-root">
+      <button
+        id="assistant-toggle"
+        class="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-105"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+        </svg>
+        Assistant Engine
       </button>
 
-      <div class="mt-12 flex flex-col items-center gap-4">
-        <div class="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
-           <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-           <span class="text-[11px] font-bold tracking-[0.15em] text-slate-500 uppercase">System Ready</span>
+      <div id="assistant-panel" class="assistant-pro-panel" aria-hidden="true">
+        <header class="flex items-center justify-between border-b border-white/10 p-5">
+          <div>
+            <h3 class="text-sm font-bold tracking-tight">RunAnywhere AI</h3>
+            <p id="assistant-status" class="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">Ready</p>
+          </div>
+          <div class="flex gap-2">
+            <button id="assistant-mic-toggle" class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition hover:bg-white/10">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="22"/>
+              </svg>
+            </button>
+            <button id="assistant-close" class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition hover:bg-white/10">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 6 6 18"/>
+                <path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="assistant-voice-shell">
+          <div id="assistant-voice-orb" class="assistant-voice-orb" aria-hidden="true">
+            <span class="assistant-voice-core"></span>
+            <span class="assistant-voice-ring assistant-voice-ring-a"></span>
+            <span class="assistant-voice-ring assistant-voice-ring-b"></span>
+          </div>
+          <p id="assistant-voice-caption" class="assistant-voice-caption">Voice standby</p>
         </div>
+
+        <div id="assistant-messages" class="custom-scrollbar flex-1 overflow-y-auto p-5 space-y-4"></div>
+
+        <form id="assistant-form" class="border-t border-white/10 bg-white/5 p-4">
+          <div class="relative flex items-center gap-2">
+            <input
+              id="assistant-input"
+              type="text"
+              placeholder="Ask RunAnywhere AI..."
+              autocomplete="off"
+              class="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400"
+            />
+            <button type="submit" class="rounded-xl bg-white p-3 text-black transition hover:bg-cyan-300">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </form>
       </div>
-    </div>
+    </section>
   </div>
 
-  <!-- App Core -->
-  <div id="app-container" class="hidden flex h-screen w-full bg-[#050A14]">
-    
-    <!-- Sidebar -->
-    <aside class="w-[300px] border-r border-white/5 bg-black/20 backdrop-blur-3xl flex flex-col p-6 z-50 shrink-0">
-      <div class="mb-10 flex items-center gap-3">
-        <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-[#050A14] font-black italic">G</div>
-        <h2 class="text-lg font-bold tracking-tight">RunAnywhere AI</h2>
-      </div>
+  <script>
+    (() => {
+      const introScreen = document.getElementById('intro-screen');
+      const loginScreen = document.getElementById('login-screen');
+      const licenseScreen = document.getElementById('license-screen');
+      const appContainer = document.getElementById('app-container');
 
-      <div class="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-        <p class="text-[10px] font-black text-slate-600 tracking-[0.2em] uppercase mb-2">Detected Mappings</p>
-        
-        <!-- Gesture Cards -->
-        <div id="gesture-palm" class="gesture-card group">
-          <div class="gesture-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v10"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-xs font-bold text-slate-300">Open Palm</h3>
-            <p class="text-[10px] text-slate-500 font-medium">Scroll Up</p>
-          </div>
-          <div class="status-indicator"></div>
-        </div>
+      const goToLoginBtn = document.getElementById('go-to-login-btn');
+      const skipIntroBtn = document.getElementById('skip-intro-btn');
+      const loginForm = document.getElementById('login-form');
+      const backToLoginBtn = document.getElementById('back-to-login-btn');
+      const acceptLicenseBtn = document.getElementById('accept-license-btn');
+      const licenseCheck = document.getElementById('license-check');
 
-        <div id="gesture-fist" class="gesture-card group">
-          <div class="gesture-icon-box">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/><path d="M18 10h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-1a2 2 0 0 1 2-2h2"/><path d="M6 10v4"/><path d="M10 10v4"/><path d="M14 10v4"/></svg>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-xs font-bold text-slate-300">Closed Fist</h3>
-            <p class="text-[10px] text-slate-500 font-medium">Scroll Down</p>
-          </div>
-          <div class="status-indicator"></div>
-        </div>
+      const showScreen = (screen) => {
+        [introScreen, loginScreen, licenseScreen].forEach((el) => {
+          if (!el) return;
+          el.classList.add('hidden');
+          el.classList.remove('flex');
+        });
 
-        <div id="gesture-peace" class="gesture-card group">
-          <div class="gesture-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10V4a2 2 0 1 1 4 0v6"/><path d="M14 10V6a2 2 0 1 1 4 0v4"/><path d="M18 10V8a2 2 0 1 1 4 0v4"/><path d="M7 22h10a3 3 0 0 0 3-3v-2l-6-6h-4l-6 6v2a3 3 0 0 0 3 3z"/></svg>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-xs font-bold text-slate-300">Peace Sign</h3>
-            <p class="text-[10px] text-slate-500 font-medium">Capture Screen</p>
-          </div>
-          <div class="status-indicator"></div>
-        </div>
+        if (screen) {
+          screen.classList.remove('hidden');
+          screen.classList.add('flex');
+        }
+      };
 
-        <div id="gesture-thumb" class="gesture-card group">
-          <div class="gesture-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12h3V10H7z"/><path d="M10 10c0-2 1-3 2-4s2-2 3-2h1c1 0 2 1 2 2v6h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5h-6l-1-1v-8z"/></svg>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-xs font-bold text-slate-300">Thumbs Up</h3>
-            <p class="text-[10px] text-slate-500 font-medium">Play / Pause</p>
-          </div>
-          <div class="status-indicator"></div>
-        </div>
+      goToLoginBtn?.addEventListener('click', () => showScreen(loginScreen));
+      skipIntroBtn?.addEventListener('click', () => showScreen(loginScreen));
 
-        <div id="gesture-index" class="gesture-card group">
-          <div class="gesture-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10V2a2 2 0 1 1 4 0v8"/><path d="M18 12V10a2 2 0 1 1 4 0v2"/><path d="M7 22h10a3 3 0 0 0 3-3v-2l-6-6h-4l-6 6v2a3 3 0 0 0 3 3z"/></svg>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-xs font-bold text-slate-300">Pointing</h3>
-            <p class="text-[10px] text-slate-500 font-medium">Move Cursor</p>
-          </div>
-          <div class="status-indicator"></div>
-        </div>
+      loginForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        showScreen(licenseScreen);
+      });
 
-        <div id="gesture-pinch" class="gesture-card group">
-          <div class="gesture-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>
-          </div>
-          <div class="flex-1">
-            <h3 class="text-xs font-bold text-slate-300">Pinch</h3>
-            <p class="text-[10px] text-slate-500 font-medium">Left Click</p>
-          </div>
-          <div class="status-indicator"></div>
-        </div>
-      </div>
+      backToLoginBtn?.addEventListener('click', () => showScreen(loginScreen));
 
-      <!-- System Status Minimal -->
-      <div class="mt-auto pt-6 border-t border-white/5 space-y-4">
-        <div class="flex items-center justify-between">
-           <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Confidence</span>
-           <span id="threshold-value" class="text-xs font-mono text-accent">0.70</span>
-        </div>
-        <input type="range" id="confidence-slider" min="0.6" max="0.95" step="0.05" value="0.7"
-          class="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-accent" />
-        
-        <div class="flex items-center justify-between text-[11px] text-slate-400">
-          <span>Native Bridge</span>
-          <div id="system-status-dot" class="w-2 h-2 rounded-full bg-slate-700"></div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main View -->
-    <main class="flex-1 flex min-h-0 flex-col p-8 relative overflow-hidden">
-      <!-- Top HUD -->
-      <div class="flex justify-between items-center mb-8 z-10">
-        <div>
-          <h2 class="text-2xl font-bold text-white tracking-tight" id="system-status-text">System Initializing</h2>
-          <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">RunAnywhere Model Engine</p>
-        </div>
-        <div class="flex items-center gap-2">
-           <button id="pin-window-btn" class="shell-btn" type="button">Pin</button>
-           <button id="hide-window-btn" class="shell-btn" type="button">Hide</button>
-           <button id="quit-app-btn" class="shell-btn shell-btn-danger" type="button">Quit</button>
-           <div class="hud-stat">
-             <span class="hud-stat-label">FPS</span>
-             <span id="fps-counter" class="hud-stat-val">0</span>
-           </div>
-           <div class="hud-stat">
-             <span class="hud-stat-label">Stability</span>
-             <span id="stability-counter" class="hud-stat-val">0%</span>
-           </div>
-        </div>
-      </div>
-
-      <!-- Camera Feed Wrapper -->
-      <div id="camera-container" 
-        class="relative flex min-h-0 flex-1 rounded-[40px] overflow-hidden border border-white/5 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.6)] group">
-        
-        <video id="webcam-feed" class="w-full h-full object-cover transform scale-x-[-1]" autoplay playsinline muted></video>
-        <img id="python-vision-feed" class="hidden absolute inset-0 w-full h-full object-cover transform scale-x-[-1]" alt="" />
-
-        <!-- Loading HUD -->
-        <div id="loading-overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050A14]/80 backdrop-blur-xl transition-opacity duration-700">
-           <div class="relative w-24 h-24 mb-6">
-             <div class="absolute inset-0 border-4 border-white/5 rounded-full"></div>
-             <div class="absolute inset-0 border-4 border-accent rounded-full border-t-transparent animate-spin"></div>
-           </div>
-           <p id="loading-text" class="text-xl font-medium tracking-tight mb-2">Neural Engine Offline</p>
-           <div class="w-48 h-1 bg-white/5 rounded-full mt-4 overflow-hidden">
-             <div id="loading-bar" class="h-full bg-accent w-0 transition-all duration-300"></div>
-           </div>
-        </div>
-
-        <!-- Real-time HUD Elements -->
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-20 pointer-events-none">
-          <div id="detected-gesture-label" class="gesture-live-pill opacity-0">
-             Show Gesture
-          </div>
-          <div class="relative w-48 h-1.5 bg-black/40 rounded-full overflow-hidden backdrop-blur-md">
-            <div id="confidence-bar" class="h-full bg-accent w-0 transition-all duration-300"></div>
-          </div>
-        </div>
-
-        <!-- Native Mode Toggle Overlay -->
-        <div class="absolute top-6 left-6 p-4 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center gap-4 group-hover:opacity-100 opacity-0 transition-opacity">
-           <span class="text-xs font-bold text-slate-300">Overlay Mode</span>
-           <label class="relative inline-flex items-center cursor-pointer">
-             <input id="overlay-mode-toggle" type="checkbox" class="sr-only peer">
-             <div class="w-11 h-6 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-accent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-           </label>
-           <span id="overlay-mode-hint" class="text-[10px] font-medium text-slate-500">Disabled for stability</span>
-        </div>
-      </div>
-
-      <!-- Action History Overlay-right -->
-      <div class="absolute top-32 right-12 w-80 max-h-[400px] pointer-events-none">
-        <div class="flex items-center justify-between mb-4 pointer-events-auto">
-           <h3 class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Action Feed</h3>
-           <button id="clear-log-btn" class="text-[10px] text-slate-500 hover:text-accent font-bold uppercase transition-colors">Clear</button>
-        </div>
-        <div id="action-log" class="space-y-3 custom-scrollbar overflow-y-auto max-h-[350px]">
-           <!-- Log entries -->
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Toast Notifier -->
-  <div id="toast-container" class="fixed top-10 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2"></div>
-
-  <!-- AI Assistant Panel (PRO GLASS) -->
-  <section id="assistant-root" class="assistant-root">
-    <button id="assistant-toggle" class="bg-white text-black px-6 py-3 rounded-2xl font-bold shadow-2xl hover:scale-105 transition-all text-sm flex items-center gap-2">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-      Assistant Engine
-    </button>
-
-    <div id="assistant-panel" class="assistant-pro-panel" aria-hidden="true">
-      <header class="p-5 flex justify-between items-center border-b border-white/10">
-        <div>
-          <h3 class="text-sm font-bold tracking-tight">RunAnywhere AI</h3>
-          <p id="assistant-status" class="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">Ready</p>
-        </div>
-        <div class="flex gap-2">
-          <button id="assistant-mic-toggle" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-          </button>
-          <button id="assistant-close" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
-        </div>
-      </header>
-
-      <div id="assistant-messages" class="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar"></div>
-
-      <form id="assistant-form" class="p-4 bg-white/5 border-t border-white/10">
-        <div class="relative flex items-center gap-2">
-           <input id="assistant-input" type="text" placeholder="Ask RunAnywhere AI..." 
-             class="flex-1 bg-black/40 border border-white/10 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-accent transition-colors" autocomplete="off" />
-           <button type="submit" class="p-3 bg-white text-black rounded-xl hover:bg-accent transition-colors">
-             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-           </button>
-        </div>
-      </form>
-    </div>
-  </section>
+      acceptLicenseBtn?.addEventListener('click', () => {
+        if (!licenseCheck?.checked) return;
+        introScreen?.classList.add('hidden');
+        loginScreen?.classList.add('hidden');
+        licenseScreen?.classList.add('hidden');
+        appContainer?.classList.remove('hidden');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('gestra:start-requested'));
+        }, 60);
+      });
+    })();
+  </script>
 
   <script type="module" src="/src/main.js"></script>
   <script type="module" src="/src/assistant.js"></script>
 </body>
-
 </html>
