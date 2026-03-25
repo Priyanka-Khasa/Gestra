@@ -10,6 +10,8 @@ RunAnywhere AI is a desktop shell for gesture-driven control, system manipulatio
 - **Voice activation**: Wake-word detection + command parsing with direct app launching
 - **System tray integration**: Window pinning, minimize, quit controls
 - **Hybrid action execution**: Primary Python bridge with Electron native fallback
+- **User Authentication**: Secure login and registration system with MongoDB database
+- **Session Management**: JWT token-based authentication with persistent sessions
 
 ## Technology Stack
 
@@ -26,6 +28,13 @@ RunAnywhere AI is a desktop shell for gesture-driven control, system manipulatio
 - MediaPipe 0.10.9+ - Hand landmark detection
 - PyAutoGUI 0.9.54+ - OS-level mouse/keyboard automation
 - Built-in HTTP server - Serves MJPEG streams and JSON state
+
+### Authentication Backend (Node.js/Express)
+- Express 4.18 - Web framework
+- MongoDB 8.0+ - User database
+- JWT - Token-based authentication
+- bcryptjs - Password hashing
+- CORS enabled - Cross-origin request support
 
 ## Prerequisites
 
@@ -46,7 +55,21 @@ RunAnywhere AI is a desktop shell for gesture-driven control, system manipulatio
    npm install
    ```
 
-3. **Set up Python environment**:
+3. **Set up MongoDB** (for authentication):
+   - Install MongoDB Community Edition from https://www.mongodb.com/try/download/community
+   - Or use MongoDB Atlas (cloud): https://www.mongodb.com/cloud/atlas
+   - Default connection: `mongodb://localhost:27017/gestra`
+
+4. **Set up authentication backend**:
+   ```bash
+   cd backend
+   npm install
+   copy .env.example .env
+   # Edit .env with your MongoDB URI and JWT secret
+   cd ..
+   ```
+
+5. **Set up Python environment**:
    ```bash
    cd python-core
    pip install -r requirements.txt
@@ -54,6 +77,21 @@ RunAnywhere AI is a desktop shell for gesture-driven control, system manipulatio
    ```
 
 ## Configuration
+
+### Authentication Backend
+The authentication backend runs on port 3001 and handles:
+- User registration and login
+- JWT token generation
+- User session management
+- MongoDB integration
+
+Edit `backend/.env`:
+```env
+MONGODB_URI=mongodb://localhost:27017/gestra
+JWT_SECRET=your_jwt_secret_key_here_change_in_production
+PORT=3001
+NODE_ENV=development
+```
 
 ### API Keys (Optional)
 Create a `.env` file in the root directory for AI features:
@@ -75,18 +113,36 @@ The following are automatically configured but can be overridden:
 
 ### Development Mode
 
-1. **Start the Python backend** (optional, for Collective mode):
+1. **Start the authentication backend** (required):
+   ```bash
+   cd backend
+   npm run dev
+   ```
+   - Runs on http://localhost:3001
+   - Connects to MongoDB
+   - Auto-reloads on file changes
+
+2. **Start the Python backend** (optional, for Collective mode):
    ```bash
    cd python-core
    python main.py --api
    ```
    This starts the HTTP server on port 8765.
 
-2. **Start the Electron app**:
+3. **Start the Electron app** (in a new terminal):
    ```bash
    npm run dev
    ```
    This launches the application in development mode.
+
+### Combined Development (All services at once):
+```bash
+npm run dev:full
+```
+This requires installing `concurrently` to the root package.json:
+```bash
+npm install -D concurrently
+```
 
 ### Production Mode
 
@@ -145,6 +201,46 @@ The following are automatically configured but can be overridden:
 - Context-aware responses
 - Direct command execution
 
+## Authentication System
+
+### Overview
+RunAnywhere AI now includes a complete user authentication system with the following features:
+
+- **User Registration**: Create new accounts with email and password
+- **Secure Login**: Password hashing with bcryptjs
+- **JWT Tokens**: Token-based authentication with 7-day expiration
+- **Session Management**: Persistent user sessions stored in localStorage
+- **MongoDB Database**: Secure user data storage
+
+### Authentication Flow
+
+1. **First Launch**: User sees introduction screen
+2. **Sign In / Register**: User can log in or create a new account
+3. **Email & Password Validation**: Client-side and server-side validation
+4. **Token Generation**: Backend generates JWT token upon successful authentication
+5. **License Acceptance**: User must accept runtime permissions
+6. **App Access**: Authenticated user can access the main application
+
+### User Registration
+New users can create an account with:
+- **Full Name**: Required
+- **Email**: Must be valid and unique
+- **Password**: Minimum 6 characters
+- **Password Confirmation**: Must match password
+
+### User Login
+Existing users can log in with:
+- **Email**: Account email address
+- **Password**: Account password
+
+### Backend API Documentation
+See [backend/README.md](backend/README.md) for complete API documentation including:
+- Registration endpoint
+- Login endpoint
+- User profile endpoint
+- Token verification
+- Logout endpoint
+
 ## Project Architecture
 
 ```
@@ -154,20 +250,25 @@ The following are automatically configured but can be overridden:
                                  │ IPC/HTTP
            ┌─────────────────────┴──────────────────┐
            │  Vite Renderer (Web UI)                 │
-           │  Gesture detection, action routing      │
+           │  Auth flow, gesture detection, actions  │
            │  AI assistant, voice control            │
            └─────────────────────┬──────────────────┘
                                  │ HTTP
-           ┌─────────────────────┴──────────────────┐
-           │  Python Backend (Optional)              │
-           │  Camera → MediaPipe → Actions           │
-           └─────────────────────────────────────────┘
+           ┌─────────────────────┼──────────────────┐
+           │                     │                  │
+    ┌──────┴──────────────┐  ┌──┴──────────────┐   │
+    │  Auth Backend       │  │  Python Backend │   │
+    │  (Node.js/Express)  │  │  (Optional)     │   │
+    │  port: 3001         │  │  port: 8765     │   │
+    │  MongoDB            │  │  Camera → ML    │   │
+    └─────────────────────┘  └─────────────────┘   │
 ```
 
 ## Key Components
 
 ### Frontend (`src/`)
-- `main.js` - App orchestration and startup flow
+- `main.js` - App orchestration, authentication flow, and startup
+- `auth.js` - Authentication service (login, register, token management)
 - `gesture-mediapipe.js` - Browser hand detection and classification
 - `actions.js` - Gesture-to-action mapping and execution
 - `voice.js` - Voice recognition and wake-word detection
@@ -185,6 +286,11 @@ The following are automatically configured but can be overridden:
 - `main.py` - HTTP server and camera processing loop
 - `gesture.py` - MediaPipe landmark classification
 - `actions.py` - PyAutoGUI action execution with smoothing
+
+### Authentication Backend (`backend/`)
+- `server.js` - Express app setup, MongoDB connection, middleware
+- `routes/auth.js` - Authentication endpoints (register, login, verify token)
+- `models/User.js` - MongoDB user schema with password hashing
 
 ## Building for Distribution
 

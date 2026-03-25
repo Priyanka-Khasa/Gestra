@@ -12,6 +12,7 @@ import {
 } from './actions.js';
 import { initTTS, speakFeedback } from './tts.js';
 import { showToast, updateOverlay, updateSystemStatus, logAction } from './ui.js';
+import { authService } from './auth.js';
 
 function waitForVideoReady(video, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
@@ -88,8 +89,20 @@ async function waitForPythonBridgeReady({ timeoutMs = 20000, intervalMs = 1000 }
 }
 
 function initAppShell() {
+  console.log('[INIT] ========== APP INITIALIZATION START ==========');
   document.body.dataset.gestraInitialized = '';
+  
+  // Debug: Check what token exists
+  const tokenBefore = localStorage.getItem('gestra_auth_token');
+  console.log('[INIT] Token in storage before startup:', tokenBefore ? `${tokenBefore.substring(0, 30)}... (${tokenBefore.length} chars)` : 'NONE');
+  
+  // In Electron app, we want to start FRESH unless token is absolutely valid
+  // So we'll be extra strict about token validation
+  const token = authService.getToken();
+  console.log('[INIT] Token validation result:', token ? 'VALID FORMAT' : 'INVALID/MISSING');
+  
   const introScreen = document.getElementById('intro-screen');
+  const registrationScreen = document.getElementById('registration-screen');
   const loginScreen = document.getElementById('login-screen');
   const licenseScreen = document.getElementById('license-screen');
   const appContainer = document.getElementById('app-container');
@@ -583,7 +596,322 @@ function initAppShell() {
     await window.electronAPI?.quitApp?.();
   });
 
+  // ================= AUTHENTICATION SETUP =================
+  const setupAuthFlow = async () => {
+    console.log('[STARTUP] =======================================');
+    console.log('[STARTUP] Starting authentication check on app load');
+    
+    // Helper function to hide all screens
+    const hideAllScreens = () => {
+      introScreen?.classList.add('hidden');
+      introScreen?.classList.remove('flex');
+      loginScreen?.classList.add('hidden');
+      loginScreen?.classList.remove('flex');
+      registrationScreen?.classList.add('hidden');
+      registrationScreen?.classList.remove('flex');
+      licenseScreen?.classList.add('hidden');
+      licenseScreen?.classList.remove('flex');
+    };
+    
+    // STEP 0: Hide all screens first
+    console.log('[STARTUP] Step 0: Hiding ALL screens');
+    hideAllScreens();
+    
+    // STEP 1: Check if token exists in storage
+    console.log('[STARTUP] Step 1: Checking localStorage for token...');
+    const token = authService.getToken();
+    console.log('[STARTUP] Token from getToken():', token ? `Valid format (${token.length} chars)` : 'NONE/INVALID');
+    
+    if (!token) {
+      console.log('[STARTUP] ✅ No valid token - showing INTRO screen');
+      // Add small delay to ensure DOM is ready
+      await new Promise(r => setTimeout(r, 50));
+      hideAllScreens();
+      introScreen?.classList.remove('hidden');
+      introScreen?.classList.add('flex');
+      console.log('[STARTUP] =======================================');
+      return;
+    }
+    
+    // STEP 2: Token exists, verify it with backend
+    console.log('[STARTUP] Step 2: Token exists - verifying with backend...');
+    let user = null;
+    try {
+      user = await authService.getCurrentUser();
+      console.log('[STARTUP] Backend response:', user ? `User ${user.email}` : 'NULL');
+    } catch (error) {
+      console.error('[STARTUP] Backend error:', error.message);
+    }
+    
+    // STEP 3: Check if validation succeeded
+    if (user && user.email) {
+      console.log('[STARTUP] ✅ Backend confirmed valid user:', user.email);
+      console.log('[STARTUP] -> Showing LICENSE screen');
+      await new Promise(r => setTimeout(r, 50));
+      hideAllScreens();
+      licenseScreen?.classList.remove('hidden');
+      licenseScreen?.classList.add('flex');
+      console.log('[STARTUP] =======================================');
+      return;
+    }
+    
+    // STEP 4: Token was invalid - clear it and show intro
+    console.log('[STARTUP] ❌ Backend validation failed - clearing token and showing INTRO');
+    authService.clearToken();
+    await new Promise(r => setTimeout(r, 50));
+    hideAllScreens();
+    introScreen?.classList.remove('hidden');
+    introScreen?.classList.add('flex');
+    console.log('[STARTUP] =======================================');
+  };
+
+  // Setup navigation between auth screens
+  const goToLoginBtn = document.getElementById('go-to-login-btn');
+  const goToRegisterBtn = document.getElementById('go-to-register-btn');
+  const goToRegistrationBtn = document.getElementById('go-to-registration-btn');
+  const goToLoginFromRegisterBtn = document.getElementById('go-to-login-from-register-btn');
+  const backToLoginBtn = document.getElementById('back-to-login-btn');
+
+  goToLoginBtn?.addEventListener('click', () => {
+    introScreen?.classList.add('hidden');
+    introScreen?.classList.remove('flex');
+    loginScreen?.classList.add('flex');
+    loginScreen?.classList.remove('hidden');
+  });
+
+  goToRegisterBtn?.addEventListener('click', () => {
+    introScreen?.classList.add('hidden');
+    introScreen?.classList.remove('flex');
+    registrationScreen?.classList.add('flex');
+    registrationScreen?.classList.remove('hidden');
+  });
+
+  goToRegistrationBtn?.addEventListener('click', () => {
+    loginScreen?.classList.add('hidden');
+    loginScreen?.classList.remove('flex');
+    registrationScreen?.classList.add('flex');
+    registrationScreen?.classList.remove('hidden');
+  });
+
+  goToLoginFromRegisterBtn?.addEventListener('click', () => {
+    registrationScreen?.classList.add('hidden');
+    registrationScreen?.classList.remove('flex');
+    loginScreen?.classList.add('flex');
+    loginScreen?.classList.remove('hidden');
+  });
+
+  backToLoginBtn?.addEventListener('click', () => {
+    licenseScreen?.classList.add('hidden');
+    licenseScreen?.classList.remove('flex');
+    loginScreen?.classList.add('flex');
+    loginScreen?.classList.remove('hidden');
+  });
+
+  // ================= REGISTRATION HANDLER =================
+  const registrationForm = document.getElementById('registration-form');
+  registrationForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('register-name')?.value.trim();
+    const email = document.getElementById('register-email')?.value.trim();
+    const password = document.getElementById('register-password')?.value;
+    const confirmPassword = document.getElementById('register-confirm-password')?.value;
+    const registrationError = document.getElementById('registration-error');
+    const registerSubmitBtn = document.getElementById('register-submit-btn');
+
+    // Clear previous errors
+    document.querySelectorAll('[id$="-error"]').forEach((el) => {
+      if (el.id.startsWith('register-') || el.id.startsWith('name-') || el.id.startsWith('email-') || el.id.startsWith('password-') || el.id.startsWith('confirm-')) {
+        el.classList.add('hidden');
+        el.textContent = '';
+      }
+    });
+
+    // Validation
+    let hasError = false;
+    if (!name) {
+      document.getElementById('name-error').classList.remove('hidden');
+      document.getElementById('name-error').textContent = 'Name is required';
+      hasError = true;
+    }
+    if (!email) {
+      document.getElementById('email-error').classList.remove('hidden');
+      document.getElementById('email-error').textContent = 'Email is required';
+      hasError = true;
+    }
+    if (!password || password.length < 6) {
+      document.getElementById('password-error').classList.remove('hidden');
+      document.getElementById('password-error').textContent = 'Password must be at least 6 characters';
+      hasError = true;
+    }
+    if (password !== confirmPassword) {
+      document.getElementById('confirm-password-error').classList.remove('hidden');
+      document.getElementById('confirm-password-error').textContent = 'Passwords do not match';
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    try {
+      registrationError?.classList.add('hidden');
+      registerSubmitBtn.disabled = true;
+      registerSubmitBtn.textContent = 'Creating account...';
+      
+      const result = await authService.register(email, password, name);
+      
+      // Check response explicitly
+      if (result && result.success && result.token) {
+        showToast('Account created successfully! Proceeding to license...');
+        // Hide ALL screens, show only license
+        introScreen?.classList.add('hidden');
+        introScreen?.classList.remove('flex');
+        loginScreen?.classList.add('hidden');
+        loginScreen?.classList.remove('flex');
+        registrationScreen?.classList.add('hidden');
+        registrationScreen?.classList.remove('flex');
+        licenseScreen?.classList.add('flex');
+        licenseScreen?.classList.remove('hidden');
+      } else {
+        throw new Error('Registration failed - no valid response from server');
+      }
+    } catch (error) {
+      console.error('Registration error details:', error);
+      registrationError?.classList.remove('hidden');
+      registrationError.textContent = error.message || 'Registration failed. Please try again.';
+    } finally {
+      registerSubmitBtn.disabled = false;
+      registerSubmitBtn.textContent = 'Create Account';
+    }
+  });
+
+  // ================= LOGIN HANDLER =================
+  const loginForm = document.getElementById('login-form');
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('login-email')?.value.trim();
+    const password = document.getElementById('login-password')?.value;
+    const loginError = document.getElementById('login-error');
+    const loginSubmitBtn = document.getElementById('login-submit-btn');
+
+    // Clear previous errors
+    document.getElementById('login-email-error')?.classList.add('hidden');
+    document.getElementById('login-password-error')?.classList.add('hidden');
+    loginError?.classList.add('hidden');
+
+    // Step 1: Validate form inputs are not empty
+    if (!email) {
+      document.getElementById('login-email-error')?.classList.remove('hidden');
+      document.getElementById('login-email-error').textContent = 'Email is required';
+      return;
+    }
+    if (!password) {
+      document.getElementById('login-password-error')?.classList.remove('hidden');
+      document.getElementById('login-password-error').textContent = 'Password is required';
+      return;
+    }
+
+    // Step 2: Disable form while checking credentials
+    loginSubmitBtn.disabled = true;
+    loginSubmitBtn.textContent = 'Logging in...';
+
+    // Step 3: Try to login - if ANY error happens, we catch it
+    try {
+      const result = await authService.login(email, password);
+      
+      // If we reach here, login was successful (authService.login throws on failure)
+      // But double-check the response has what we need
+      if (!result || !result.token || !result.user || !result.user.email) {
+        throw new Error('Invalid response from server');
+      }
+
+      // SUCCESS - All checks passed, can proceed
+      console.log('[LOGIN] ✅ LOGIN SUCCESSFUL for:', result.user.email);
+      showToast('Login successful!');
+      
+      // Hide ALL screens, show only license
+      introScreen?.classList.add('hidden');
+      introScreen?.classList.remove('flex');
+      loginScreen?.classList.add('hidden');
+      loginScreen?.classList.remove('flex');
+      registrationScreen?.classList.add('hidden');
+      registrationScreen?.classList.remove('flex');
+      licenseScreen?.classList.remove('hidden');
+      licenseScreen?.classList.add('flex');
+      
+    } catch (error) {
+      // LOGIN FAILED - Show error and STAY on login page
+      console.error('[LOGIN] ❌ LOGIN FAILED:', error.message);
+      loginError?.classList.remove('hidden');
+      loginError.textContent = error.message || 'Invalid email or password';
+      
+      // Make absolutely sure license screen is hidden
+      licenseScreen?.classList.add('hidden');
+      licenseScreen?.classList.remove('flex');
+      
+    } finally {
+      // Always re-enable button
+      loginSubmitBtn.disabled = false;
+      loginSubmitBtn.textContent = 'Continue';
+    }
+  });
+
+  // ================= LICENSE ACCEPTANCE =================
+  const licenseCheck = document.getElementById('license-check');
+  const acceptLicenseBtn = document.getElementById('accept-license-btn');
+
+  licenseCheck?.addEventListener('change', () => {
+    acceptLicenseBtn.disabled = !licenseCheck.checked;
+  });
+
+  // Set initial state
+  acceptLicenseBtn.disabled = true;
+
+  acceptLicenseBtn?.addEventListener('click', async () => {
+    // SECURITY: Verify user is actually authenticated before proceeding
+    if (!authService.isAuthenticated()) {
+      showToast('Session expired. Please log in again.');
+      // Reset to login screen
+      licenseScreen?.classList.add('hidden');
+      licenseScreen?.classList.remove('flex');
+      loginScreen?.classList.add('flex');
+      loginScreen?.classList.remove('hidden');
+      return;
+    }
+
+    // Verify token is still valid
+    const userInfo = await authService.getCurrentUser().catch(() => null);
+    if (!userInfo) {
+      showToast('Session expired. Please log in again.');
+      authService.clearToken();
+      // Reset to login screen
+      licenseScreen?.classList.add('hidden');
+      licenseScreen?.classList.remove('flex');
+      loginScreen?.classList.add('flex');
+      loginScreen?.classList.remove('hidden');
+      return;
+    }
+
+    if (!licenseCheck.checked) {
+      showToast('Please accept the license to continue.');
+      return;
+    }
+
+    licenseScreen?.classList.add('hidden');
+    licenseScreen?.classList.remove('flex');
+    appContainer?.classList.remove('hidden');
+    handleStart(); // Start the app
+  });
+
   syncShellControls();
+
+  // Initialize authentication on startup
+  console.log('[INIT] Calling setupAuthFlow...');
+  setupAuthFlow().then(() => {
+    console.log('[INIT] ========== APP INITIALIZATION COMPLETE ==========');
+  }).catch(error => {
+    console.error('[INIT] ========== setupAuthFlow ERROR ==========', error);
+  });
 
 }
 

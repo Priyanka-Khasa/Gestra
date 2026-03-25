@@ -6,6 +6,9 @@
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "backend:start": "cd backend && npm start",
+    "backend:dev": "cd backend && npm run dev",
+    "dev:full": "concurrently \"npm run backend:dev\" \"npm run dev\"",
     "electron:dev": "vite",
     "start": "vite",
     "build": "vite build",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
     "electron": "^41.0.3",
     "electron-builder": "^26.8.1",
     "postcss": "^8.4.38",

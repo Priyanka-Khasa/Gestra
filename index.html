@@ -73,14 +73,14 @@
                 type="button"
                 class="rounded-2xl bg-white px-7 py-4 text-sm font-bold text-[#041019] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
               >
-                Enter Experience
+                Sign In
               </button>
               <button
-                id="skip-intro-btn"
+                id="go-to-register-btn"
                 type="button"
                 class="rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
               >
-                Skip Intro
+                Create Account
               </button>
             </div>
           </div>
@@ -113,6 +113,127 @@
               <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
                 A strong foundation for fast, local-first multimodal applications.
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= REGISTRATION SCREEN ================= -->
+    <section
+      id="registration-screen"
+      class="absolute inset-0 z-[55] hidden items-center justify-center px-6"
+    >
+      <div class="w-full max-w-5xl">
+        <div class="grid overflow-hidden rounded-[36px] border border-white/10 bg-black/30 shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-2xl lg:grid-cols-[0.95fr_1.05fr]">
+          <div class="relative hidden min-h-[680px] overflow-hidden border-r border-white/10 lg:block">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_35%),linear-gradient(180deg,#07111f_0%,#050A14_100%)]"></div>
+            <div class="relative z-10 flex h-full flex-col justify-between p-10">
+              <div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-300">
+                  Create Account
+                </div>
+                <h2 class="mt-8 text-4xl font-extrabold leading-tight text-white">
+                  Join the gesture revolution
+                </h2>
+                <p class="mt-5 max-w-md text-sm leading-8 text-slate-300">
+                  Create your account to unlock a full-featured desktop gesture layer with local AI control and assistant workflows.
+                </p>
+              </div>
+
+              <div class="space-y-4">
+                <div class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Secure account</p>
+                  <p class="mt-2 text-sm text-slate-200">Password-protected with encrypted authentication.</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Private data</p>
+                  <p class="mt-2 text-sm text-slate-200">Your data stored securely in our MongoDB database.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-8 sm:p-10 lg:p-12">
+            <div class="mx-auto w-full max-w-md">
+              <div class="mb-8">
+                <p class="text-xs font-black uppercase tracking-[0.24em] text-slate-500">Create Account</p>
+                <h3 class="mt-3 text-3xl font-bold text-white">Sign up</h3>
+                <p class="mt-2 text-sm leading-7 text-slate-400">
+                  Create a new account to get started with RunAnywhere AI.
+                </p>
+              </div>
+
+              <form id="registration-form" class="space-y-5">
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-300">Full Name</label>
+                  <input
+                    id="register-name"
+                    type="text"
+                    placeholder="Your name"
+                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                    required
+                  />
+                  <span id="name-error" class="text-xs text-red-400 hidden"></span>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-300">Email</label>
+                  <input
+                    id="register-email"
+                    type="email"
+                    placeholder="you@company.com"
+                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                    required
+                  />
+                  <span id="email-error" class="text-xs text-red-400 hidden"></span>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-300">Password</label>
+                  <input
+                    id="register-password"
+                    type="password"
+                    placeholder="At least 6 characters"
+                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                    required
+                  />
+                  <span id="password-error" class="text-xs text-red-400 hidden"></span>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-semibold text-slate-300">Confirm Password</label>
+                  <input
+                    id="register-confirm-password"
+                    type="password"
+                    placeholder="Confirm your password"
+                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                    required
+                  />
+                  <span id="confirm-password-error" class="text-xs text-red-400 hidden"></span>
+                </div>
+
+                <button
+                  id="register-submit-btn"
+                  type="submit"
+                  class="w-full rounded-2xl bg-white px-6 py-4 text-sm font-bold text-[#041019] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5"
+                >
+                  Create Account
+                </button>
+
+                <p class="text-center text-sm text-slate-400">
+                  Already have an account?
+                  <button
+                    id="go-to-login-from-register-btn"
+                    type="button"
+                    class="font-semibold text-cyan-300 hover:text-cyan-200"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </form>
+
+              <div id="registration-error" class="mt-4 hidden rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-300"></div>
             </div>
           </div>
         </div>
@@ -173,7 +294,9 @@
                     type="email"
                     placeholder="you@company.com"
                     class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                    required
                   />
+                  <span id="login-email-error" class="text-xs text-red-400 hidden"></span>
                 </div>
 
                 <div class="space-y-2">
@@ -183,17 +306,16 @@
                     type="password"
                     placeholder="Enter your password"
                     class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
+                    required
                   />
+                  <span id="login-password-error" class="text-xs text-red-400 hidden"></span>
                 </div>
 
                 <div class="flex items-center justify-between text-sm">
                   <label class="flex items-center gap-2 text-slate-400">
-                    <input type="checkbox" class="rounded border-white/10 bg-white/5" />
+                    <input id="keep-signed-in" type="checkbox" class="rounded border-white/10 bg-white/5" />
                     Keep me signed in
                   </label>
-                  <button type="button" class="font-semibold text-cyan-300">
-                    Forgot password?
-                  </button>
                 </div>
 
                 <button
@@ -204,19 +326,19 @@
                   Continue
                 </button>
 
-                <div class="relative py-2 text-center">
-                  <span class="relative z-10 bg-transparent px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-600">or</span>
-                </div>
-
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]">
-                    Sign in with Google
+                <p class="text-center text-sm text-slate-400">
+                  Don't have an account?
+                  <button
+                    id="go-to-registration-btn"
+                    type="button"
+                    class="font-semibold text-cyan-300 hover:text-cyan-200"
+                  >
+                    Sign up
                   </button>
-                  <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]">
-                    Enterprise SSO
-                  </button>
-                </div>
+                </p>
               </form>
+
+              <div id="login-error" class="mt-4 hidden rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-300"></div>
             </div>
           </div>
         </div>
