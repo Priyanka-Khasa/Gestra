@@ -617,47 +617,9 @@ function initAppShell() {
     console.log('[STARTUP] Step 0: Hiding ALL screens');
     hideAllScreens();
     
-    // STEP 1: Check if token exists in storage
-    console.log('[STARTUP] Step 1: Checking localStorage for token...');
-    const token = authService.getToken();
-    console.log('[STARTUP] Token from getToken():', token ? `Valid format (${token.length} chars)` : 'NONE/INVALID');
-    
-    if (!token) {
-      console.log('[STARTUP] ✅ No valid token - showing INTRO screen');
-      // Add small delay to ensure DOM is ready
-      await new Promise(r => setTimeout(r, 50));
-      hideAllScreens();
-      introScreen?.classList.remove('hidden');
-      introScreen?.classList.add('flex');
-      console.log('[STARTUP] =======================================');
-      return;
-    }
-    
-    // STEP 2: Token exists, verify it with backend
-    console.log('[STARTUP] Step 2: Token exists - verifying with backend...');
-    let user = null;
-    try {
-      user = await authService.getCurrentUser();
-      console.log('[STARTUP] Backend response:', user ? `User ${user.email}` : 'NULL');
-    } catch (error) {
-      console.error('[STARTUP] Backend error:', error.message);
-    }
-    
-    // STEP 3: Check if validation succeeded
-    if (user && user.email) {
-      console.log('[STARTUP] ✅ Backend confirmed valid user:', user.email);
-      console.log('[STARTUP] -> Showing LICENSE screen');
-      await new Promise(r => setTimeout(r, 50));
-      hideAllScreens();
-      licenseScreen?.classList.remove('hidden');
-      licenseScreen?.classList.add('flex');
-      console.log('[STARTUP] =======================================');
-      return;
-    }
-    
-    // STEP 4: Token was invalid - clear it and show intro
-    console.log('[STARTUP] ❌ Backend validation failed - clearing token and showing INTRO');
-    authService.clearToken();
+    // STEP 1: Always show intro screen first (regardless of token)
+    console.log('[STARTUP] Step 1: Showing INTRO screen (always start here)');
+    // Add small delay to ensure DOM is ready
     await new Promise(r => setTimeout(r, 50));
     hideAllScreens();
     introScreen?.classList.remove('hidden');
@@ -845,7 +807,13 @@ function initAppShell() {
       loginError?.classList.remove('hidden');
       loginError.textContent = error.message || 'Invalid email or password';
       
-      // Make absolutely sure license screen is hidden
+      // Ensure login screen is visible and other screens are hidden
+      introScreen?.classList.add('hidden');
+      introScreen?.classList.remove('flex');
+      loginScreen?.classList.remove('hidden');
+      loginScreen?.classList.add('flex');
+      registrationScreen?.classList.add('hidden');
+      registrationScreen?.classList.remove('flex');
       licenseScreen?.classList.add('hidden');
       licenseScreen?.classList.remove('flex');
       

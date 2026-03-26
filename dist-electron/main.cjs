@@ -1,9 +1,8 @@
-"use strict";
-const require$$0 = require("electron");
-const require$$1 = require("path");
-const require$$2 = require("child_process");
-const require$$3 = require("@nut-tree-fork/nut-js");
-const require$$4 = require("fs");
+import require$$0 from "electron";
+import require$$1 from "path";
+import require$$2 from "child_process";
+import require$$3 from "@nut-tree-fork/nut-js";
+import require$$4 from "fs";
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -825,4 +824,8 @@ function requireMain() {
 }
 var mainExports = requireMain();
 const main = /* @__PURE__ */ getDefaultExportFromCjs(mainExports);
+export {
+  main as default
+};
+xports);
 module.exports = main;
