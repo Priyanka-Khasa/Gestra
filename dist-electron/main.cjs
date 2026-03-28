@@ -1,9 +1,8 @@
-"use strict";
-const require$$0 = require("electron");
-const require$$1 = require("path");
-const require$$2 = require("child_process");
-const require$$3 = require("@nut-tree-fork/nut-js");
-const require$$4 = require("fs");
+import require$$0 from "electron";
+import require$$1 from "path";
+import require$$2 from "child_process";
+import require$$3 from "@nut-tree-fork/nut-js";
+import require$$4 from "fs";
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -34,6 +33,7 @@ function requireMain() {
   let tray = null;
   let pythonProcess = null;
   let pythonLaunchCommand = null;
+  let activeAppContextCache = { value: null, at: 0 };
   let appIsQuitting = false;
   let pinWindowAbove = false;
   const GEMINI_DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1";
@@ -59,6 +59,10 @@ function requireMain() {
     path.join(__dirname, "windows-voice-once.ps1"),
     path.join(__dirname, "../electron/windows-voice-once.ps1")
   ];
+  const WINDOWS_INPUT_SCRIPT_CANDIDATES = [
+    path.join(__dirname, "windows-input-once.ps1"),
+    path.join(__dirname, "../electron/windows-input-once.ps1")
+  ];
   function buildGeminiUrl(baseUrl, model, apiKey) {
     const normalizedBaseUrl = String(baseUrl || GEMINI_DEFAULT_BASE_URL).replace(/\/+$/, "");
     const normalizedModel = String(model || GEMINI_DEFAULT_MODEL).trim().replace(/^models\//, "");
@@ -79,7 +83,7 @@ function requireMain() {
       model,
       prompt,
       history,
-      systemPrompt = "You are RunAnywhere AI. Keep answers concise."
+      systemPrompt = "You are Gestra Assistant. Keep answers concise."
     } = payload || {};
     if (!apiKey) {
       throw new Error(
@@ -203,8 +207,9 @@ function requireMain() {
   }
   async function yieldFocusToDesktop({ hideWindow = true, delayMs = 180 } = {}) {
     if (!mainWindow || mainWindow.isDestroyed()) return;
+    const wasVisible = mainWindow.isVisible();
     try {
-      if (hideWindow && mainWindow.isVisible()) {
+      if (hideWindow && wasVisible) {
         mainWindow.hide();
       } else {
         mainWindow.blur();
@@ -212,10 +217,41 @@ function requireMain() {
     } catch (_) {
     }
     await new Promise((resolve) => setTimeout(resolve, delayMs));
+    if (process.platform === "win32" && hideWindow && wasVisible) {
+      try {
+        await runWindowsInputAction("alt-tab");
+      } catch (error) {
+        console.warn("[Gestra/Main] alt-tab focus yield failed:", error);
+      }
+    }
   }
   function canUsePythonAction(actionRaw) {
     const action = normalizeActionName(actionRaw);
     return ["scroll-up", "scroll-down", "left-click", "screenshot", "play-pause"].includes(action);
+  }
+  function requiresDesktopFocusYield(actionRaw) {
+    const action = normalizeActionName(actionRaw);
+    return [
+      "scroll-up",
+      "scroll-down",
+      "left-click",
+      "right-click",
+      "play-pause",
+      "media-toggle",
+      "browser-back",
+      "browser-forward",
+      "refresh",
+      "screenshot",
+      "next-slide",
+      "previous-slide",
+      "start-slideshow",
+      "end-slideshow",
+      "blackout-slide",
+      "alt-tab",
+      "volume-up",
+      "volume-down",
+      "mute-audio"
+    ].includes(action);
   }
   async function executeOsActionWithFallback(actionRaw, options = null) {
     const action = normalizeActionName(actionRaw);
@@ -223,6 +259,9 @@ function requireMain() {
       return { ok: false, message: "No action provided." };
     }
     try {
+      if (requiresDesktopFocusYield(action)) {
+        await yieldFocusToDesktop({ hideWindow: true, delayMs: action === "move-mouse" ? 60 : 180 });
+      }
       if (canUsePythonAction(action)) {
         const py = await pythonBridgeIpc({
           op: "gesture",
@@ -327,11 +366,11 @@ function requireMain() {
       if (action === "show") {
         mainWindow == null ? void 0 : mainWindow.show();
         mainWindow == null ? void 0 : mainWindow.focus();
-        return { ok: true, message: "Showing RunAnywhere." };
+        return { ok: true, message: "Showing Gestra." };
       }
       if (action === "hide") {
         mainWindow == null ? void 0 : mainWindow.hide();
-        return { ok: true, message: "Hiding RunAnywhere." };
+        return { ok: true, message: "Hiding Gestra." };
       }
       if (action === "pin") {
         pinWindowAbove = true;
@@ -409,20 +448,132 @@ function requireMain() {
       });
     });
   }
+  async function runWindowsInputAction(actionRaw) {
+    if (process.platform !== "win32") {
+      return false;
+    }
+    const action = normalizeActionName(actionRaw);
+    const inputScriptPath = findFirstExistingPath(WINDOWS_INPUT_SCRIPT_CANDIDATES);
+    if (!inputScriptPath) {
+      return false;
+    }
+    return await new Promise((resolve, reject) => {
+      const child = spawn(
+        "powershell.exe",
+        ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", inputScriptPath, "-Action", action],
+        {
+          windowsHide: true,
+          stdio: ["ignore", "pipe", "pipe"]
+        }
+      );
+      let stderr = "";
+      child.stderr.on("data", (chunk) => {
+        stderr += String(chunk || "");
+      });
+      child.on("error", (error) => {
+        reject(error);
+      });
+      child.on("exit", (code) => {
+        if (code === 0) {
+          resolve(true);
+          return;
+        }
+        reject(new Error(stderr.trim() || `Windows input helper failed for "${action}" (exit ${code}).`));
+      });
+    });
+  }
+  async function getActiveAppContext() {
+    const now = Date.now();
+    if (activeAppContextCache.value && now - activeAppContextCache.at < 1200) {
+      return activeAppContextCache.value;
+    }
+    if (process.platform !== "win32") {
+      const fallback = { processName: "", title: "", pid: 0 };
+      activeAppContextCache = { value: fallback, at: now };
+      return fallback;
+    }
+    const command = `
+Add-Type @"
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+public static class GestraForeground {
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll", SetLastError=true)] public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+  [DllImport("user32.dll", SetLastError=true)] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+}
+"@;
+$hwnd = [GestraForeground]::GetForegroundWindow();
+$titleBuilder = New-Object System.Text.StringBuilder 512;
+[GestraForeground]::GetWindowText($hwnd, $titleBuilder, $titleBuilder.Capacity) | Out-Null;
+$pid = 0;
+[GestraForeground]::GetWindowThreadProcessId($hwnd, [ref]$pid) | Out-Null;
+$process = Get-Process -Id $pid -ErrorAction SilentlyContinue;
+[pscustomobject]@{
+  processName = if ($process) { $process.ProcessName } else { '' }
+  title = $titleBuilder.ToString()
+  pid = [int]$pid
+} | ConvertTo-Json -Compress
+  `.trim();
+    const result = await new Promise((resolve) => {
+      const child = spawn("powershell.exe", ["-NoProfile", "-Command", command], {
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "pipe"]
+      });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.on("data", (chunk) => {
+        stdout += String(chunk || "");
+      });
+      child.stderr.on("data", (chunk) => {
+        stderr += String(chunk || "");
+      });
+      child.on("error", () => {
+        resolve({ processName: "", title: "", pid: 0 });
+      });
+      child.on("exit", () => {
+        try {
+          resolve(JSON.parse(stdout.trim() || "{}"));
+        } catch {
+          if (stderr.trim()) {
+            console.warn("[Gestra/Main] getActiveAppContext failed:", stderr.trim());
+          }
+          resolve({ processName: "", title: "", pid: 0 });
+        }
+      });
+    });
+    activeAppContextCache = { value: result, at: now };
+    return result;
+  }
   async function runOsAction(actionRaw, options) {
     const action = normalizeActionName(actionRaw);
     switch (action) {
       case "scroll-up":
       case "scrollup":
-        await mouse.scrollUp(1200);
+        try {
+          await mouse.scrollUp(1200);
+        } catch (error) {
+          console.warn("[Gestra/Main] mouse.scrollUp failed, using native fallback:", error);
+          await runWindowsInputAction("scroll-up");
+        }
         break;
       case "scroll-down":
       case "scrolldown":
-        await mouse.scrollDown(1200);
+        try {
+          await mouse.scrollDown(1200);
+        } catch (error) {
+          console.warn("[Gestra/Main] mouse.scrollDown failed, using native fallback:", error);
+          await runWindowsInputAction("scroll-down");
+        }
         break;
       case "left-click":
       case "leftclick":
-        await mouse.leftClick();
+        try {
+          await mouse.leftClick();
+        } catch (error) {
+          console.warn("[Gestra/Main] mouse.leftClick failed, using native fallback:", error);
+          await runWindowsInputAction("left-click");
+        }
         break;
       case "right-click":
       case "rightclick":
@@ -431,10 +582,46 @@ function requireMain() {
       case "play-pause":
       case "playpause":
       case "media-toggle":
-        await keyboard.type(Key.AudioPlay);
+        try {
+          await keyboard.type(Key.AudioPlay);
+        } catch (error) {
+          console.warn("[Gestra/Main] keyboard AudioPlay failed, using native fallback:", error);
+          await runWindowsInputAction("play-pause");
+        }
+        break;
+      case "browser-back":
+        await keyboard.pressKey(Key.LeftAlt, Key.Left);
+        await keyboard.releaseKey(Key.Left, Key.LeftAlt);
+        break;
+      case "browser-forward":
+        await keyboard.pressKey(Key.LeftAlt, Key.Right);
+        await keyboard.releaseKey(Key.Right, Key.LeftAlt);
+        break;
+      case "refresh":
+        await keyboard.type(Key.F5);
         break;
       case "screenshot":
-        await keyboard.type(Key.Print);
+        try {
+          await keyboard.type(Key.Print);
+        } catch (error) {
+          console.warn("[Gestra/Main] keyboard Print failed, using native fallback:", error);
+          await runWindowsInputAction("screenshot");
+        }
+        break;
+      case "next-slide":
+        await keyboard.type(Key.RightArrow);
+        break;
+      case "previous-slide":
+        await keyboard.type(Key.LeftArrow);
+        break;
+      case "start-slideshow":
+        await keyboard.type(Key.F5);
+        break;
+      case "end-slideshow":
+        await keyboard.type(Key.Escape);
+        break;
+      case "blackout-slide":
+        await keyboard.type(Key.B);
         break;
       case "alt-tab":
       case "alttab":
@@ -449,7 +636,11 @@ function requireMain() {
       case "volumedown":
         await keyboard.type(Key.AudioVolDown);
         break;
+      case "mute-audio":
+        await keyboard.type(Key.AudioVolMute);
+        break;
       case "move-mouse":
+      case "laser-pointer":
       case "movemouse": {
         const nx = Number(options == null ? void 0 : options.nx);
         const ny = Number(options == null ? void 0 : options.ny);
@@ -464,7 +655,7 @@ function requireMain() {
         break;
       }
       default:
-        console.warn("[GestureOS/Main] Unknown action:", actionRaw);
+        console.warn("[Gestra/Main] Unknown action:", actionRaw);
     }
   }
   async function pythonBridgeIpc(payload) {
@@ -517,6 +708,18 @@ function requireMain() {
         const { res, data } = await fetchJson(`${PYTHON_BRIDGE_BASE}/api/v1/state`, 1200);
         return withBase({ ok: res.ok, status: res.status, data });
       }
+      if (op === "runtime") {
+        const enabled = Boolean(payload == null ? void 0 : payload.enabled);
+        const res = await postJson(`${PYTHON_BRIDGE_BASE}/api/v1/runtime`, { enabled }, 1500);
+        const text = await res.text();
+        let data = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch {
+          data = { raw: text };
+        }
+        return withBase({ ok: res.ok, status: res.status, data });
+      }
       if (op === "gesture") {
         const action = payload == null ? void 0 : payload.action;
         const options = (payload == null ? void 0 : payload.options) ?? null;
@@ -531,7 +734,7 @@ function requireMain() {
     } catch (err) {
       const message = (err == null ? void 0 : err.name) === "AbortError" ? `python bridge timeout for op "${op}"` : String((err == null ? void 0 : err.message) || err);
       if (!["bridge", "health", "state"].includes(String(op))) {
-        console.warn("[GestureOS/Main] python-bridge:", message);
+        console.warn("[Gestra/Main] python-bridge:", message);
       }
       return withBase({ ok: false, error: message });
     }
@@ -574,7 +777,7 @@ function requireMain() {
     tray.setContextMenu(
       Menu.buildFromTemplate([
         {
-          label: "Show RunAnywhere AI",
+          label: "Show Gestra",
           click: () => {
             mainWindow == null ? void 0 : mainWindow.show();
             mainWindow == null ? void 0 : mainWindow.focus();
@@ -617,7 +820,7 @@ function requireMain() {
       autoHideMenuBar: true,
       frame: true,
       backgroundColor: "#081121",
-      title: "RunAnywhere AI",
+      title: "Gestra",
       show: false,
       webPreferences: {
         preload: path.join(__dirname, "preload.cjs"),
@@ -650,7 +853,7 @@ function requireMain() {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9s2son8AAAAASUVORK5CYII="
       )
     );
-    tray.setToolTip("GestureOS — runs in background; use Quit to exit");
+    tray.setToolTip("Gestra runs in the background. Use Quit to exit.");
     rebuildTrayMenu();
     tray.on("double-click", () => {
       if (mainWindow == null ? void 0 : mainWindow.isVisible()) {
@@ -706,7 +909,7 @@ function requireMain() {
         console.error(`[Python] spawn threw for ${candidate.cmd}:`, error);
       }
     }
-    console.error("[GestureOS/Main] startPythonBackend failed: no usable Python launcher found");
+    console.error("[Gestra/Main] startPythonBackend failed: no usable Python launcher found");
   }
   async function ensurePythonBackend() {
     if (!pythonProcess) {
@@ -736,14 +939,20 @@ function requireMain() {
     ipcMain.handle("perform-action", async (_event, payload) => {
       const action = typeof payload === "string" ? payload : payload == null ? void 0 : payload.action;
       const options = typeof payload === "object" && payload ? payload.options : null;
-      await runOsAction(action, options);
-      return { ok: true };
+      return executeOsActionWithFallback(action, options);
     });
     ipcMain.handle("assistant-request", async (_event, payload) => proxyAssistantRequest(payload));
     ipcMain.handle("execute-voice-command", async (_event, payload) => executeVoiceCommand(payload));
     ipcMain.handle("recognize-native-speech", async (_event, payload) => recognizeNativeSpeech(payload));
     ipcMain.handle("set-overlay-mode", async (_event, enabled) => {
       return { ok: false, overlayModeEnabled: false, supported: false, requested: Boolean(enabled) };
+    });
+    ipcMain.handle("yield-focus-to-desktop", async (_event, payload) => {
+      await yieldFocusToDesktop({
+        hideWindow: (payload == null ? void 0 : payload.hideWindow) !== false,
+        delayMs: Number(payload == null ? void 0 : payload.delayMs) || 180
+      });
+      return { ok: true };
     });
     ipcMain.handle("hide-window", async () => {
       mainWindow == null ? void 0 : mainWindow.hide();
@@ -778,6 +987,7 @@ function requireMain() {
       baseUrl: PYTHON_BRIDGE_BASE
     }));
     ipcMain.handle("ensure-python-backend", async () => ensurePythonBackend());
+    ipcMain.handle("get-active-app-context", async () => getActiveAppContext());
   }
   app.whenReady().then(() => {
     if (!app.requestSingleInstanceLock()) {
@@ -825,4 +1035,8 @@ function requireMain() {
 }
 var mainExports = requireMain();
 const main = /* @__PURE__ */ getDefaultExportFromCjs(mainExports);
+export {
+  main as default
+};
+xports);
 module.exports = main;

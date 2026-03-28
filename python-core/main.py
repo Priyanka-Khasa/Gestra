@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Camera → MediaPipe Hands → gesture classification → PyAutoGUI.
+Camera to MediaPipe Hands to gesture classification to PyAutoGUI.
 
-- python main.py              Standalone: OpenCV preview window only (no HTTP).
-- python main.py --api        Collective: camera + MediaPipe in Python; stream video to Electron
-                              over MJPEG and HUD state over JSON (no OpenCV window).
+- python main.py                  Standalone: OpenCV preview window only (no HTTP).
+- python main.py --api            Collective: camera + MediaPipe in Python; stream video to Electron
+                                  over MJPEG and HUD state over JSON (no OpenCV window).
 - python main.py --api --window   Also show OpenCV (debug).
 """
 
@@ -32,6 +32,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
+    stream=sys.stdout,
 )
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,23 @@ class VisionBroadcast:
             return dict(self.state)
 
 
+class RuntimeControl:
+    """Thread-safe on/off switch for Python-owned gesture execution."""
+
+    def __init__(self, enabled: bool = True) -> None:
+        self._lock = threading.Lock()
+        self._enabled = bool(enabled)
+
+    def set_enabled(self, enabled: bool) -> bool:
+        with self._lock:
+            self._enabled = bool(enabled)
+            return self._enabled
+
+    def is_enabled(self) -> bool:
+        with self._lock:
+            return self._enabled
+
+
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -98,6 +116,7 @@ def _build_bridge_manifest(collective: bool) -> dict:
             "bridge": {"method": "GET", "path": "/api/v1/bridge"},
             "state": {"method": "GET", "path": "/api/v1/state"},
             "camera": {"method": "GET", "path": "/camera.mjpg"},
+            "runtime": {"method": "POST", "path": "/api/v1/runtime", "body": {"enabled": "true | false"}},
             "gesture": {
                 "method": "POST",
                 "path": "/gesture",
@@ -113,10 +132,12 @@ def _optional_api_server(
     controller: ActionController,
     broadcast: VisionBroadcast,
     manifest: dict,
+    runtime_control: RuntimeControl,
 ) -> ThreadedHTTPServer:
     bc = broadcast
     ctrl = controller
     bridge_manifest = dict(manifest)
+    runtime = runtime_control
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt: str, *args) -> None:
@@ -129,12 +150,15 @@ def _optional_api_server(
 
         def _send_json(self, status: int, obj: dict) -> None:
             body = json.dumps(obj).encode("utf-8")
-            self.send_response(status)
-            self._cors()
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            try:
+                self.send_response(status)
+                self._cors()
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                return
 
         def do_OPTIONS(self) -> None:
             self.send_response(204)
@@ -184,16 +208,19 @@ def _optional_api_server(
             raw = self.rfile.read(length) if length else b"{}"
             try:
                 data = json.loads(raw.decode("utf-8"))
+                source = str(data.get("source") or "").strip().lower()
                 action = data.get("action")
                 if not action and data.get("gesture"):
                     action = _GESTURE_TO_ACTION.get(str(data["gesture"]))
+                collective = bool(bridge_manifest.get("vision", {}).get("collective"))
+                if collective and source in {"gestureos-renderer", "electron-main"}:
+                    self.send_response(204)
+                    self._cors()
+                    self.end_headers()
+                    return
                 if action:
                     ok = ctrl.dispatch_renderer_action(str(action))
-                    logger.info(
-                        "POST gesture → %s (%s)",
-                        action,
-                        "ok" if ok else "skipped/cooldown",
-                    )
+                    logger.info("POST gesture -> %s (%s)", action, "ok" if ok else "skipped/cooldown")
             except json.JSONDecodeError as exc:
                 logger.warning("POST gesture JSON error: %s", exc)
 
@@ -201,8 +228,25 @@ def _optional_api_server(
             self._cors()
             self.end_headers()
 
+        def _handle_runtime_post(self) -> None:
+            length = int(self.headers.get("Content-Length", "0") or 0)
+            raw = self.rfile.read(length) if length else b"{}"
+
+            try:
+                data = json.loads(raw.decode("utf-8"))
+            except json.JSONDecodeError:
+                data = {}
+
+            enabled = bool(data.get("enabled"))
+            runtime.set_enabled(enabled)
+            logger.info("POST runtime -> %s", "enabled" if enabled else "paused")
+            self._send_json(200, {"ok": True, "runtimeEnabled": runtime.is_enabled()})
+
         def do_POST(self) -> None:
             path = urlparse(self.path).path.rstrip("/") or "/"
+            if path == "/api/v1/runtime":
+                self._handle_runtime_post()
+                return
             if path in ("/gesture", "/api/v1/gesture"):
                 self._handle_gesture_post()
                 return
@@ -212,7 +256,7 @@ def _optional_api_server(
 
 
 def _draw_hud(preview, g: GestureFrame) -> None:
-    line1 = f"{g.gesture}  conf={g.confidence:.2f}  {'STABLE' if g.stable else '…'}"
+    line1 = f"{g.gesture}  conf={g.confidence:.2f}  {'STABLE' if g.stable else '...'}"
     cv2.putText(preview, line1, (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 220, 0), 2, cv2.LINE_AA)
     cv2.putText(
         preview,
@@ -241,6 +285,22 @@ def _gesture_frame_to_state(g: GestureFrame, fps_smooth: float) -> dict:
     }
 
 
+def _runtime_paused_state(fps_smooth: float) -> dict:
+    return {
+        "handDetected": False,
+        "gesture": "none",
+        "confidence": 0.0,
+        "stable": False,
+        "stableCount": 0,
+        "historyLen": 0,
+        "stability": 0.0,
+        "fps": round(fps_smooth, 1),
+        "landmarks": [],
+        "source": "python",
+        "runtimeEnabled": False,
+    }
+
+
 def run_pipeline(
     *,
     camera_index: int,
@@ -259,20 +319,21 @@ def run_pipeline(
 
     actions = ActionController()
     broadcast = VisionBroadcast()
+    runtime_control = RuntimeControl(enabled=True)
 
     server: Optional[ThreadedHTTPServer] = None
     if api_enabled:
         server_manifest = _build_bridge_manifest(collective=camera_ok)
-        server = _optional_api_server(api_port, actions, broadcast, server_manifest)
+        server = _optional_api_server(api_port, actions, broadcast, server_manifest, runtime_control)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         logger.info(
-            "Python bridge @ http://127.0.0.1:%s (collective=%s) — GET /api/v1/bridge  POST /gesture …",
+            "Python bridge @ http://127.0.0.1:%s (collective=%s) - GET /api/v1/bridge  POST /gesture ...",
             api_port,
             camera_ok,
         )
 
     detector: Optional[GestureDetector] = None
-    window = "Gestra — Python (ESC to quit)"
+    window = "Gestra - Python (ESC to quit)"
 
     try:
         if not camera_ok:
@@ -307,8 +368,9 @@ def run_pipeline(
 
             assert detector is not None
             g = detector.process_bgr(frame)
+            runtime_enabled = runtime_control.is_enabled()
 
-            if g.hand_detected:
+            if runtime_enabled and g.hand_detected:
                 if not hand_logged:
                     logger.info("Hand detected")
                     hand_logged = True
@@ -341,7 +403,8 @@ def run_pipeline(
 
             preview = cv2.flip(frame, 1)
             _draw_hud(preview, g)
-            state = _gesture_frame_to_state(g, fps_smooth)
+            state = _gesture_frame_to_state(g, fps_smooth) if runtime_enabled else _runtime_paused_state(fps_smooth)
+            state["runtimeEnabled"] = runtime_enabled
 
             ok_enc, jpg = cv2.imencode(".jpg", preview, [cv2.IMWRITE_JPEG_QUALITY, 72])
             if ok_enc:
@@ -372,7 +435,7 @@ def run_pipeline(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Gestra Python gesture → OS control")
+    parser = argparse.ArgumentParser(description="Gestra Python gesture to OS control")
     parser.add_argument("--camera", type=int, default=0, help="OpenCV camera index")
     parser.add_argument(
         "--api",

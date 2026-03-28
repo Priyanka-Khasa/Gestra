@@ -14,6 +14,16 @@ function extractErrorMessage(errorText, fallback) {
   }
 }
 
+function describeNetworkFailure(config) {
+  if (config.provider === 'openrouter') {
+    return 'OpenRouter request could not reach the server. Check internet access, CORS, or the configured base URL/API key.';
+  }
+  if (config.provider === 'xai') {
+    return 'xAI request could not reach the server. Check internet access, CORS, or the configured base URL/API key.';
+  }
+  return 'Gemini request could not reach the server. Check internet access, CORS, or the configured base URL/API key.';
+}
+
 function buildGeminiUrl(baseUrl, model, apiKey) {
   const normalizedBaseUrl = String(baseUrl || GEMINI_DEFAULT_BASE_URL).replace(/\/+$/, '');
   const normalizedModel = String(model || GEMINI_DEFAULT_MODEL)
@@ -61,7 +71,7 @@ function resolveProviderConfig(options = {}) {
 export function createAIClient(options = {}) {
   const config = resolveProviderConfig(options);
   const hasApiKey = Boolean(config.apiKey);
-  async function sendRequest(prompt, history = [], systemPrompt = 'You are RunAnywhere AI. Keep answers concise.') {
+  async function sendRequest(prompt, history = [], systemPrompt = 'You are Gestra Assistant. Keep answers concise.') {
     if (window.electronAPI?.assistantRequest) {
       return window.electronAPI.assistantRequest({
         provider: config.provider,
@@ -101,7 +111,7 @@ export function createAIClient(options = {}) {
       }
 
       const data = await response.json();
-      return data?.choices?.[0]?.message?.content || 'No response from RunAnywhere AI.';
+      return data?.choices?.[0]?.message?.content || 'No response from Gestra Assistant.';
     }
 
     if (config.provider === 'xai') {
@@ -131,7 +141,7 @@ export function createAIClient(options = {}) {
       }
 
       const data = await response.json();
-      return data?.choices?.[0]?.message?.content || 'No response from RunAnywhere AI.';
+      return data?.choices?.[0]?.message?.content || 'No response from Gestra Assistant.';
     }
 
     const response = await fetch(buildGeminiUrl(config.baseUrl, config.model, config.apiKey), {
@@ -156,13 +166,13 @@ export function createAIClient(options = {}) {
       throw new Error(`AI request failed (${response.status}): ${errorBody}`);
     }
     const data = await response.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from RunAnywhere AI.';
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gestra Assistant.';
   }
 
   async function askAssistant({
     message,
     history = [],
-    systemPrompt = 'You are RunAnywhere AI. Keep answers concise.'
+    systemPrompt = 'You are Gestra Assistant. Keep answers concise.'
   }) {
     if (!message || !message.trim()) return 'Please ask a question.';
     if (!hasApiKey) {
@@ -178,6 +188,9 @@ export function createAIClient(options = {}) {
       return await sendRequest(prompt, history, systemPrompt);
     } catch (error) {
       console.error('AI Error:', error);
+      if (error.message === 'Failed to fetch' || /NetworkError|Load failed|fetch/i.test(error.message)) {
+        return describeNetworkFailure(config);
+      }
       if (error.message.includes('429')) {
         if (config.provider === 'openrouter') {
           return 'AI rate limit or credit limit reached (429). Check your provider account.';

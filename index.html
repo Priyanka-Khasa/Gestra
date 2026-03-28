@@ -1,337 +1,974 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RunAnywhere AI OS</title>
+  <title>Gestra</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
     rel="stylesheet"
   />
 </head>
 
-<body class="bg-[#050A14] text-slate-100 font-['Inter'] h-screen overflow-hidden selection:bg-cyan-400/20 selection:text-white">
-  <!-- APP ROOT -->
-  <div id="shell" class="relative w-screen h-screen overflow-hidden bg-[#050A14]">
+<body class="h-screen overflow-hidden selection:bg-[#A27B5C]/25 selection:text-[#2C3930]">
 
-    <!-- BACKGROUND -->
-    <div class="pointer-events-none absolute inset-0">
-      <div class="absolute -top-40 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl"></div>
-      <div class="absolute bottom-[-10rem] right-[-8rem] h-[24rem] w-[24rem] rounded-full bg-blue-500/10 blur-3xl"></div>
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.05),transparent_35%)]"></div>
+  <!-- APP ROOT -->
+  <div id="shell" class="relative h-screen min-w-full overflow-hidden">
+
+    <!-- BACKGROUND BLOBS — cinematic multi-layer orbs -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div class="absolute -top-[10%] left-[38%] h-[50rem] w-[50rem] -translate-x-1/2 rounded-full blur-[120px] bg-gradient-to-br from-[#A27B5C]/28 to-transparent animate-[heroOrbFloat_14s_ease-in-out_infinite] opacity-65"></div>
+      <div class="absolute bottom-[-22%] right-[-8%] h-[42rem] w-[42rem] rounded-full blur-[110px] bg-gradient-to-tl from-[#E8BCB9]/22 to-[#3F4F44]/45 animate-[heroOrbDrift_20s_ease-in-out_infinite_reverse] opacity-70"></div>
+      <div class="absolute top-[18%] left-[-12%] h-[30rem] w-[30rem] rounded-full blur-[100px] bg-gradient-to-r from-[#2C3930]/50 to-[#A27B5C]/18 animate-[heroOrbPulse_17s_ease-in-out_infinite] opacity-55"></div>
+      <!-- Deep center ambient glow -->
+      <div class="absolute top-1/2 left-1/2 h-[20rem] w-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px] bg-[#A27B5C]/8 pointer-events-none"></div>
     </div>
 
-    <!-- ================= INTRO SCREEN ================= -->
+    <!-- ═══════════════════════════════════════
+         INTRO SCREEN — CINEMATIC LANDING
+    ═══════════════════════════════════════ -->
     <section
       id="intro-screen"
       class="absolute inset-0 z-[60] flex items-center justify-center px-6"
     >
+      <!-- ══ AMBIENT / FX LAYER ══ -->
+      <div class="intro-ambient-layer" aria-hidden="true">
+        <!-- Neon scan lines that sweep top→bottom -->
+        <div class="intro-neon-scan"></div>
+        <div class="intro-neon-scan-2"></div>
+
+        <!-- Grid mesh -->
+        <div class="intro-scan-grid"></div>
+
+        <!-- Orbiting dashed rings -->
+        <div class="intro-orbit-ring intro-orbit-ring-a"></div>
+        <div class="intro-orbit-ring intro-orbit-ring-b"></div>
+
+        <!-- Rotating arc sweeps -->
+        <div class="intro-tracking-ring intro-tracking-ring-a"></div>
+        <div class="intro-tracking-ring intro-tracking-ring-b"></div>
+        <div class="intro-sweep-arc intro-sweep-arc-a"></div>
+        <div class="intro-sweep-arc intro-sweep-arc-b"></div>
+
+        <!-- Glowing trace lines -->
+        <div class="intro-trace-line intro-trace-line-a"></div>
+        <div class="intro-trace-line intro-trace-line-b"></div>
+        <div class="intro-trace-line intro-trace-line-c"></div>
+
+        <!-- Comet streaks -->
+        <div class="intro-comet"></div>
+        <div class="intro-comet-2"></div>
+
+        <!-- Vertical data-stream particles -->
+        <div class="intro-data-stream intro-ds-1"></div>
+        <div class="intro-data-stream intro-ds-2"></div>
+        <div class="intro-data-stream intro-ds-3"></div>
+        <div class="intro-data-stream intro-ds-4"></div>
+        <div class="intro-data-stream intro-ds-5"></div>
+
+        <!-- Hand gesture skeleton — left bg -->
+        <div class="intro-gesture-cluster intro-gesture-cluster-left">
+          <span class="gesture-node gesture-node-palm"></span>
+          <span class="gesture-node gesture-node-thumb"></span>
+          <span class="gesture-node gesture-node-index"></span>
+          <span class="gesture-node gesture-node-middle"></span>
+          <span class="gesture-node gesture-node-ring"></span>
+          <span class="gesture-node gesture-node-pinky"></span>
+          <span class="gesture-bone gesture-bone-thumb"></span>
+          <span class="gesture-bone gesture-bone-index"></span>
+          <span class="gesture-bone gesture-bone-middle"></span>
+          <span class="gesture-bone gesture-bone-ring"></span>
+          <span class="gesture-bone gesture-bone-pinky"></span>
+        </div>
+        <!-- Hand gesture skeleton — right bg -->
+        <div class="intro-gesture-cluster intro-gesture-cluster-right">
+          <span class="gesture-node gesture-node-palm"></span>
+          <span class="gesture-node gesture-node-thumb"></span>
+          <span class="gesture-node gesture-node-index"></span>
+          <span class="gesture-node gesture-node-middle"></span>
+          <span class="gesture-node gesture-node-ring"></span>
+          <span class="gesture-node gesture-node-pinky"></span>
+          <span class="gesture-bone gesture-bone-thumb"></span>
+          <span class="gesture-bone gesture-bone-index"></span>
+          <span class="gesture-bone gesture-bone-middle"></span>
+          <span class="gesture-bone gesture-bone-ring"></span>
+          <span class="gesture-bone gesture-bone-pinky"></span>
+        </div>
+      </div>
+
       <div class="w-full max-w-5xl">
         <div class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-          <div class="space-y-8">
-            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-300">
-              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              RunAnywhere AI Runtime
+
+          <!-- ── LEFT COPY ──────────────────────── -->
+          <div class="intro-copy space-y-7" data-intro-depth="18">
+
+            <!-- Live badge -->
+            <div class="intro-badge inline-flex items-center gap-2.5 rounded-full border border-white/[0.09] bg-white/[0.05] px-4 py-2 text-[10px] font-black uppercase tracking-[0.26em] text-slate-300 backdrop-blur-md shadow-[0_4px_24px_rgba(162,123,92,0.1)]">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="intro-badge-dot-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-65"></span>
+                <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.7)]"></span>
+              </span>
+              Gestra Desktop Control
+              <span class="ml-0.5 rounded-full bg-[#A27B5C]/20 px-2 py-0.5 text-[8px] font-black tracking-[0.16em] text-[#DCD7C9]">v2</span>
             </div>
 
+            <!-- Headline — aurora gradient animated -->
             <div class="space-y-4">
-              <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl xl:text-7xl">
-                RunAnywhere
-                <span class="block bg-gradient-to-r from-cyan-300 via-white to-slate-400 bg-clip-text text-transparent">
-                  Spatial OS
+              <h1 class="intro-title text-5xl font-extrabold leading-[1.06] tracking-tight text-white sm:text-6xl xl:text-7xl">
+                Gestra
+                <span class="intro-title-accent block bg-gradient-to-r from-[#A27B5C] via-[#DCD7C9] to-[#E8BCB9] bg-clip-text text-transparent">
+                  Gesture Workspace
                 </span>
               </h1>
-
-              <p class="max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-                A cinematic on-device gesture operating layer powered by real-time vision,
-                private local inference, and system-wide control.
+              <p class="intro-lead max-w-lg text-base leading-8 text-slate-400 sm:text-lg">
+                A local-first desktop gesture workspace powered by real-time vision,
+                clear runtime feedback, and system-wide control.
               </p>
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2">
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
-                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">What it feels like</p>
-                <p class="mt-2 text-sm leading-7 text-slate-300">
-                  A real product experience — not a demo page.
-                </p>
+            <!-- Stat mini-row -->
+            <div class="intro-actions flex flex-wrap items-center gap-5 border-t border-white/[0.06] pt-5">
+              <div class="text-center">
+                <p class="text-xl font-black text-white tabular-nums tracking-tight">6+</p>
+                <p class="mt-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">Gestures</p>
               </div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4">
-                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Core promise</p>
-                <p class="mt-2 text-sm leading-7 text-slate-300">
-                  Hands-free interaction across your screen with an AI-native interface.
-                </p>
+              <div class="h-7 w-px bg-white/[0.08]"></div>
+              <div class="text-center">
+                <p class="text-xl font-black text-white tabular-nums tracking-tight">30fps</p>
+                <p class="mt-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">Runtime</p>
+              </div>
+              <div class="h-7 w-px bg-white/[0.08]"></div>
+              <div class="text-center">
+                <p class="text-xl font-black text-white tabular-nums tracking-tight">Local</p>
+                <p class="mt-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">First</p>
+              </div>
+              <div class="h-7 w-px bg-white/[0.08]"></div>
+              <div class="text-center">
+                <p class="text-xl font-black text-white tabular-nums tracking-tight">0ms</p>
+                <p class="mt-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">Cloud lag</p>
               </div>
             </div>
 
-            <div class="flex flex-wrap gap-3">
+            <!-- Feature chips -->
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="intro-feature-card group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 cursor-default">
+                <div class="absolute inset-0 rounded-2xl transition-all duration-500 bg-gradient-to-br from-[#A27B5C]/0 to-[#A27B5C]/0 group-hover:from-[#A27B5C]/[0.07] group-hover:to-[#3F4F44]/[0.1]"></div>
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#A27B5C]/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+                <p class="relative text-[9px] font-black uppercase tracking-[0.22em] text-slate-600">What it feels like</p>
+                <p class="relative mt-2 text-sm leading-7 text-slate-300">A real product experience, not a demo page.</p>
+              </div>
+              <div class="intro-feature-card group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 cursor-default">
+                <div class="absolute inset-0 rounded-2xl transition-all duration-500 bg-gradient-to-br from-[#E8BCB9]/0 to-[#E8BCB9]/0 group-hover:from-[#E8BCB9]/[0.05] group-hover:to-[#A27B5C]/[0.08]"></div>
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8BCB9]/50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+                <p class="relative text-[9px] font-black uppercase tracking-[0.22em] text-slate-600">Core promise</p>
+                <p class="relative mt-2 text-sm leading-7 text-slate-300">Clear desktop control through gestures, runtime states, and assistant help.</p>
+              </div>
+            </div>
+
+            <!-- CTA buttons with premium hover effects -->
+            <div class="intro-actions flex flex-wrap gap-3">
+              <button
+                id="open-master-guide-btn"
+                type="button"
+                class="group relative overflow-hidden rounded-2xl border border-[#A27B5C]/30 bg-[#A27B5C]/10 px-7 py-4 text-sm font-semibold text-[#F7F2EA] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A27B5C]/50 hover:bg-[#A27B5C]/16 hover:shadow-[0_8px_28px_rgba(162,123,92,0.2)]"
+              >
+                <span class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_120%,rgba(162,123,92,0.22),transparent_65%)]"></span>
+                <span class="relative">Explore Master Guide</span>
+              </button>
               <button
                 id="go-to-login-btn"
                 type="button"
-                class="rounded-2xl bg-white px-7 py-4 text-sm font-bold text-[#041019] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:scale-[1.02]"
+                class="intro-cta-primary group relative overflow-hidden rounded-2xl px-7 py-4 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_18px_44px_rgba(44,57,48,0.45)] active:scale-[0.99]"
               >
-                Enter Experience
+                <!-- Gradient fill -->
+                <span class="absolute inset-0 bg-gradient-to-br from-[#A27B5C] via-[#8A6448] to-[#3F4F44]"></span>
+                <!-- Top highlight -->
+                <span class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></span>
+                <!-- Hover overlay -->
+                <span class="absolute inset-0 bg-white/0 transition-all duration-300 group-hover:bg-white/10"></span>
+                <span class="relative text-white">Start Setup →</span>
               </button>
               <button
                 id="skip-intro-btn"
                 type="button"
-                class="rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                class="group relative overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.04] px-7 py-4 text-sm font-semibold text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.18] hover:bg-white/[0.08] hover:text-white"
               >
-                Skip Intro
+                <span class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.07),transparent_70%)]"></span>
+                <span class="relative">Skip to Workspace</span>
               </button>
             </div>
           </div>
 
-          <!-- Intro Feature Story -->
-          <div class="rounded-[32px] border border-white/10 bg-black/30 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-            <div class="mb-5 flex items-center justify-between">
+          <!-- ── RIGHT SHOWCASE CARD ─────────────── -->
+          <div class="intro-showcase rounded-[32px] border border-white/[0.09] bg-black/30 p-6 shadow-[0_40px_100px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-2xl" data-intro-depth="34">
+            <div class="intro-showcase-glow" aria-hidden="true"></div>
+
+            <!-- SVG animated gesture trail -->
+            <svg class="pointer-events-none absolute inset-0 w-full h-full opacity-20" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M80 320 Q120 200 200 160 Q280 120 340 180" stroke="url(#gestureGrad)" stroke-width="1.5" stroke-dasharray="400" fill="none" style="animation: fingerTrailLoop 6s ease-in-out infinite;"/>
+              <path d="M60 200 Q140 160 220 190 Q300 220 360 160" stroke="url(#gestureGrad2)" stroke-width="1" stroke-dasharray="400" fill="none" style="animation: fingerTrailLoop 8s ease-in-out 2s infinite;"/>
+              <defs>
+                <linearGradient id="gestureGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#A27B5C" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#DCD7C9" stop-opacity="1"/>
+                  <stop offset="100%" stop-color="#E8BCB9" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="gestureGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#E8BCB9" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#A27B5C" stop-opacity="0.8"/>
+                  <stop offset="100%" stop-color="#DCD7C9" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <!-- Floating pills -->
+            <div class="intro-float-pill intro-float-pill-a flex items-center gap-1.5">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>
+              Vision-led
+            </div>
+            <div class="intro-float-pill intro-float-pill-b flex items-center gap-1.5">
+              <span class="h-1.5 w-1.5 rounded-full bg-[#A27B5C] shadow-[0_0_6px_rgba(162,123,92,0.8)]"></span>
+              Desktop ready
+            </div>
+
+            <div class="mb-5 flex items-start justify-between gap-3">
               <div>
-                <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Why RunAnywhere</p>
-                <h2 class="mt-2 text-2xl font-bold text-white">On-device intelligence</h2>
+                <p class="text-[9px] font-black uppercase tracking-[0.24em] text-slate-600">Why Gestra</p>
+                <h2 class="mt-2 text-xl font-bold text-white">What improves the feel</h2>
               </div>
-              <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-300">
-                Private
+              <div class="shrink-0 rounded-xl border border-[#A27B5C]/25 bg-[#A27B5C]/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-[#DCD7C9]">
+                Local-first
               </div>
             </div>
 
-            <div id="runanywhere-lines" class="space-y-3">
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
-                Production-grade on-device AI platform for local inference.
+            <div id="gestra-lines" class="space-y-2">
+              <div class="flex cursor-default items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 py-3.5 text-sm leading-7 text-slate-300">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A27B5C] shadow-[0_0_6px_rgba(162,123,92,0.6)]"></span>
+                One product name, one visual language, and one clear runtime story.
               </div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
-                Built for privacy, lower latency, and offline-capable AI experiences.
+              <div class="flex cursor-default items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 py-3.5 text-sm leading-7 text-slate-300">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A27B5C] shadow-[0_0_6px_rgba(162,123,92,0.6)]"></span>
+                Onboarding that prepares the user instead of pretending to authenticate.
               </div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
-                Supports core capabilities like LLM, STT, TTS, vision, and voice AI.
+              <div class="flex cursor-default items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 py-3.5 text-sm leading-7 text-slate-300">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A27B5C] shadow-[0_0_6px_rgba(162,123,92,0.6)]"></span>
+                Feedback for camera status, gesture lock, action dispatch, and cooldown.
               </div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
-                Designed across platforms with a unified developer experience.
+              <div class="flex cursor-default items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 py-3.5 text-sm leading-7 text-slate-300">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A27B5C] shadow-[0_0_6px_rgba(162,123,92,0.6)]"></span>
+                Cleaner copy so the app sounds like a tool, not a concept trailer.
               </div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm leading-7 text-slate-300">
-                A strong foundation for fast, local-first multimodal applications.
+              <div class="flex cursor-default items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 py-3.5 text-sm leading-7 text-slate-300">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A27B5C] shadow-[0_0_6px_rgba(162,123,92,0.6)]"></span>
+                A stronger base for real desktop control with less visual noise.
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ================= LOGIN SCREEN ================= -->
+    <!-- ═══════════════════════════════════════
+         LOGIN / SETUP SCREEN
+    ═══════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════
+         EXPLORE MASTER GUIDE SCREEN (REDESIGNED)
+    ═══════════════════════════════════════ -->
+    <section
+      id="guide-screen"
+      class="absolute inset-0 z-[58] hidden overflow-y-auto"
+    >
+      <!-- Ambient BG FX -->
+      <div class="gmg-ambient" aria-hidden="true">
+        <div class="gmg-orb gmg-orb-a"></div>
+        <div class="gmg-orb gmg-orb-b"></div>
+        <div class="gmg-grid-mesh"></div>
+      </div>
+
+      <div class="gmg-shell">
+
+        <!-- ── CINEMATIC HERO ── -->
+        <header class="gmg-hero">
+          <div class="gmg-hero-left">
+            <div class="gmg-hero-badge">
+              <span class="gmg-hero-badge-dot"></span>
+              Master Guide
+              <span class="gmg-hero-badge-version">v2</span>
+            </div>
+            <h1 class="gmg-hero-title">
+              Learn Gestra.<br/>
+              <span class="gmg-hero-title-accent">Control everything.</span>
+            </h1>
+            <p class="gmg-hero-lead">
+              One complete guide to the gesture language, workspace panels, runtime states, and the fastest path to reliable desktop control.
+            </p>
+            <div class="gmg-hero-stats">
+              <div class="gmg-hero-stat"><span>6+</span>Gestures</div>
+              <div class="gmg-hero-divider"></div>
+              <div class="gmg-hero-stat"><span>30</span>FPS</div>
+              <div class="gmg-hero-divider"></div>
+              <div class="gmg-hero-stat"><span>0ms</span>Cloud lag</div>
+              <div class="gmg-hero-divider"></div>
+              <div class="gmg-hero-stat"><span>100%</span>Local</div>
+            </div>
+            <div class="gmg-hero-actions">
+              <button id="guide-start-setup-btn" type="button" class="gmg-cta-primary">
+                <span>Start Setup</span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+              <button id="guide-enter-workspace-btn" type="button" class="gmg-cta-secondary">Skip to Workspace</button>
+              <button id="guide-back-home-btn" type="button" class="gmg-cta-ghost">← Back</button>
+            </div>
+          </div>
+          <div class="gmg-hero-right">
+            <div class="gmg-hero-img-frame">
+              <img src="/gesture_hero.png" alt="Gestra gesture recognition" class="gmg-hero-img" />
+              <div class="gmg-hero-img-overlay">
+                <div class="gmg-hero-scan-line"></div>
+              </div>
+              <div class="gmg-hero-float-pill gmg-hfp-a">
+                <span class="gmg-live-dot"></span>Vision Active
+              </div>
+              <div class="gmg-hero-float-pill gmg-hfp-b">
+                <span class="gmg-accent-dot"></span>Desktop Ready
+              </div>
+              <!-- Animated tracking nodes overlay -->
+              <div class="gmg-tracking-nodes">
+                <span class="gmg-tnode gmg-tn-1"></span>
+                <span class="gmg-tnode gmg-tn-2"></span>
+                <span class="gmg-tnode gmg-tn-3"></span>
+                <span class="gmg-tnode gmg-tn-4"></span>
+                <span class="gmg-tnode gmg-tn-5"></span>
+                <svg class="gmg-tnode-lines" viewBox="0 0 200 200" fill="none">
+                  <line x1="100" y1="160" x2="60" y2="80" stroke="rgba(140,103,72,0.35)" stroke-width="1"/>
+                  <line x1="100" y1="160" x2="85" y2="30" stroke="rgba(140,103,72,0.35)" stroke-width="1"/>
+                  <line x1="100" y1="160" x2="115" y2="20" stroke="rgba(140,103,72,0.35)" stroke-width="1"/>
+                  <line x1="100" y1="160" x2="145" y2="40" stroke="rgba(140,103,72,0.35)" stroke-width="1"/>
+                  <line x1="100" y1="160" x2="165" y2="90" stroke="rgba(140,103,72,0.35)" stroke-width="1"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- ── HOW IT WORKS — ANIMATED TIMELINE ── -->
+        <section class="gmg-section gmg-flow-section">
+          <div class="gmg-section-head">
+            <p class="gmg-eyebrow">Product Flow</p>
+            <h2 class="gmg-section-title">From zero to gesture-controlled desktop in six steps</h2>
+          </div>
+          <div class="gmg-timeline">
+            <div class="gmg-timeline-spine"></div>
+            <article class="gmg-tstep" style="--delay:0s">
+              <div class="gmg-tstep-node">
+                <div class="gmg-tstep-node-ring"></div>
+                <span>01</span>
+              </div>
+              <div class="gmg-tstep-card">
+                <div class="gmg-tstep-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <div class="gmg-tstep-text">
+                  <h3>Read the guide</h3>
+                  <p>Understand the gesture language, workspace panels, and what the runtime does before enabling anything.</p>
+                </div>
+                <div class="gmg-tstep-arrow">→</div>
+              </div>
+            </article>
+            <article class="gmg-tstep" style="--delay:0.08s">
+              <div class="gmg-tstep-node">
+                <div class="gmg-tstep-node-ring"></div>
+                <span>02</span>
+              </div>
+              <div class="gmg-tstep-card">
+                <div class="gmg-tstep-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M1 12h3m14 0h3M12 1v3m0 14v3M4.22 4.22l2.12 2.12m11.32 11.32l2.12 2.12M4.22 19.78l2.12-2.12m11.32-11.32l2.12-2.12"/></svg>
+                </div>
+                <div class="gmg-tstep-text">
+                  <h3>Complete setup</h3>
+                  <p>Confirm camera readiness, lighting, and permissions so Gestra can read hand posture safely.</p>
+                </div>
+                <div class="gmg-tstep-arrow">→</div>
+              </div>
+            </article>
+            <article class="gmg-tstep" style="--delay:0.16s">
+              <div class="gmg-tstep-node">
+                <div class="gmg-tstep-node-ring"></div>
+                <span>03</span>
+              </div>
+              <div class="gmg-tstep-card">
+                <div class="gmg-tstep-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div class="gmg-tstep-text">
+                  <h3>Start runtime</h3>
+                  <p>The app activates the live camera feed, feedback overlays, and gesture recognition engine.</p>
+                </div>
+                <div class="gmg-tstep-arrow">→</div>
+              </div>
+            </article>
+            <article class="gmg-tstep" style="--delay:0.24s">
+              <div class="gmg-tstep-node">
+                <div class="gmg-tstep-node-ring"></div>
+                <span>04</span>
+              </div>
+              <div class="gmg-tstep-card">
+                <div class="gmg-tstep-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-16 0"/></svg>
+                </div>
+                <div class="gmg-tstep-text">
+                  <h3>Perform gestures</h3>
+                  <p>Hold steadily until lock triggers. Gestra maps to pointer, click, scroll, media, or screenshot.</p>
+                </div>
+                <div class="gmg-tstep-arrow">→</div>
+              </div>
+            </article>
+            <article class="gmg-tstep" style="--delay:0.32s">
+              <div class="gmg-tstep-node">
+                <div class="gmg-tstep-node-ring"></div>
+                <span>05</span>
+              </div>
+              <div class="gmg-tstep-card">
+                <div class="gmg-tstep-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div class="gmg-tstep-text">
+                  <h3>Watch feedback</h3>
+                  <p>FPS, stability, action feed, and cooldown indicators tell you exactly what was seen and sent.</p>
+                </div>
+                <div class="gmg-tstep-arrow">→</div>
+              </div>
+            </article>
+            <article class="gmg-tstep" style="--delay:0.40s">
+              <div class="gmg-tstep-node">
+                <div class="gmg-tstep-node-ring"></div>
+                <span>06</span>
+              </div>
+              <div class="gmg-tstep-card">
+                <div class="gmg-tstep-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                </div>
+                <div class="gmg-tstep-text">
+                  <h3>Refine controls</h3>
+                  <p>Tune confidence, deadzone, smoothing, hold timing, packs, and profiles to feel natural.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ── GESTURE LIBRARY ── -->
+        <section class="gmg-section gmg-gesture-lib-section">
+          <div class="gmg-section-head">
+            <p class="gmg-eyebrow">Gesture Library</p>
+            <h2 class="gmg-section-title">Every supported gesture and what it does</h2>
+          </div>
+
+          <!-- Featured hero gesture with image -->
+          <div class="gmg-featured-gesture">
+            <div class="gmg-feat-img-col">
+              <div class="gmg-feat-img-wrap">
+                <img src="/gesture_palm.png" alt="Open palm gesture" class="gmg-feat-img" />
+                <div class="gmg-feat-img-shimmer"></div>
+                <div class="gmg-feat-nodes">
+                  <span class="gmg-fn gmg-fn-1"></span>
+                  <span class="gmg-fn gmg-fn-2"></span>
+                  <span class="gmg-fn gmg-fn-3"></span>
+                  <span class="gmg-fn gmg-fn-4"></span>
+                  <span class="gmg-fn gmg-fn-5"></span>
+                </div>
+                <div class="gmg-feat-badge">
+                  <span class="gmg-live-dot"></span> Live-tracked
+                </div>
+              </div>
+            </div>
+            <div class="gmg-feat-copy-col">
+              <div class="gmg-feat-gesture-tag">Featured</div>
+              <h3 class="gmg-feat-gesture-name">Open Palm</h3>
+              <div class="gmg-feat-gesture-action">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                Scroll upward
+              </div>
+              <p class="gmg-feat-gesture-desc">Keep all five fingers open and fully visible. The model locks once the palm plane is stable for the configured hold duration. Works best with frontal lighting and centered framing in the camera preview.</p>
+              <div class="gmg-feat-tips">
+                <div class="gmg-feat-tip">
+                  <span class="gmg-feat-tip-icon">✦</span>
+                  <p>Keep fingers spread apart, not tensed together.</p>
+                </div>
+                <div class="gmg-feat-tip">
+                  <span class="gmg-feat-tip-icon">✦</span>
+                  <p>Face your palm squarely toward the camera lens.</p>
+                </div>
+                <div class="gmg-feat-tip">
+                  <span class="gmg-feat-tip-icon">✦</span>
+                  <p>Hold the pose for the full configured hold duration.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other 5 gestures horizontal scroll -->
+          <div class="gmg-gesture-cards-wrap">
+            <article class="gmg-gcard">
+              <div class="gmg-gcard-vis">
+                <svg viewBox="0 0 120 120"><path d="M35 88c-2-11 1-23 8-31l8-9c4-5 12-4 14 3l1 4 6-7c4-5 12-4 14 2l2 6 5-5c5-4 12-2 13 5l2 9c2 8-1 16-7 22-7 8-16 13-27 16-13 4-27 3-39-15z" fill="rgba(196,191,177,0.9)"/></svg>
+                <div class="gmg-gcard-glow"></div>
+              </div>
+              <div class="gmg-gcard-action">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
+                Scroll down
+              </div>
+              <h4>Closed Fist</h4>
+              <p>Keep hand compact. Centered knuckles and a steady wrist work best.</p>
+            </article>
+            <article class="gmg-gcard">
+              <div class="gmg-gcard-vis">
+                <svg viewBox="0 0 120 120"><path d="M38 90c-2-15 1-28 5-40 2-7 11-8 14-1l3 9V29c0-8 12-8 12 0v28l2 4V22c0-8 12-8 12 0v40l10 13c5 7 1 17-7 19-15 5-34 4-51-4z" fill="rgba(196,191,177,0.9)"/></svg>
+                <div class="gmg-gcard-glow"></div>
+              </div>
+              <div class="gmg-gcard-action">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                Screenshot
+              </div>
+              <h4>Peace Sign</h4>
+              <p>Raise index and middle fingers cleanly with a clear V shape.</p>
+            </article>
+            <article class="gmg-gcard">
+              <div class="gmg-gcard-vis">
+                <svg viewBox="0 0 120 120"><path d="M37 91c-2-16-1-29 4-40 2-6 11-7 14 0l4 9 1-30c0-8 12-8 12 0v40l2 3-2-21c0-8 12-8 12 0v22l9-18c3-6 12-5 14 1 4 13 0 26-9 35-14 13-31 14-51 9z" fill="rgba(196,191,177,0.9)"/></svg>
+                <div class="gmg-gcard-glow"></div>
+              </div>
+              <div class="gmg-gcard-action">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Play / Pause
+              </div>
+              <h4>Thumbs Up</h4>
+              <p>Show a clear thumb silhouette with fingers fully closed.</p>
+            </article>
+            <article class="gmg-gcard">
+              <div class="gmg-gcard-vis">
+                <svg viewBox="0 0 120 120"><path d="M37 91c-2-17-1-30 5-41 3-5 11-5 14 1l3 10V25c0-8 12-8 12 0v37l1 4V18c0-8 12-8 12 0v48l1 3-1-23c0-8 12-8 12 0v25c0 12-5 22-14 29-13 10-28 12-45 11z" fill="rgba(196,191,177,0.9)"/></svg>
+                <div class="gmg-gcard-glow"></div>
+              </div>
+              <div class="gmg-gcard-action">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Move cursor
+              </div>
+              <h4>Pointing</h4>
+              <p>Extend only the index finger. Visible tip position drives cursor stability.</p>
+            </article>
+            <article class="gmg-gcard">
+              <div class="gmg-gcard-vis">
+                <svg viewBox="0 0 120 120">
+                  <path d="M37 91c-2-15 0-29 4-41 2-6 10-7 14-1l4 9V27c0-8 12-8 12 0v36l3 4V22c0-8 12-8 12 0v42l8 12c4 6 2 14-4 18-15 9-34 8-53-3z" fill="rgba(196,191,177,0.9)"/>
+                  <circle cx="82" cy="54" r="8" fill="#CFA09D"/>
+                </svg>
+                <div class="gmg-gcard-glow"></div>
+              </div>
+              <div class="gmg-gcard-action">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                Left click
+              </div>
+              <h4>Pinch</h4>
+              <p>Bring thumb and index together deliberately. Short clean pinches only.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- ── WORKSPACE SHOWCASE IMAGE ── -->
+        <section class="gmg-workspace-section">
+          <div class="gmg-workspace-inner">
+            <div class="gmg-workspace-img-col">
+              <div class="gmg-ws-img-frame">
+                <img src="/workspace_preview.png" alt="Gestra workspace" class="gmg-ws-img" />
+                <div class="gmg-ws-img-overlay"></div>
+                <div class="gmg-ws-scan-line"></div>
+                <div class="gmg-ws-badge">
+                  <span class="gmg-live-dot"></span>
+                  Workspace Preview
+                </div>
+              </div>
+            </div>
+            <div class="gmg-workspace-copy-col">
+              <p class="gmg-eyebrow">Workspace Map</p>
+              <h2 class="gmg-section-title">Every panel has a clear purpose</h2>
+              <p class="gmg-workspace-lead">The runtime shows exactly what it sees, what it did, and how certain it was. No guessing — just clear, layered feedback.</p>
+              <div class="gmg-ws-features">
+                <div class="gmg-ws-feat">
+                  <div class="gmg-ws-feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M1 12h3m14 0h3M12 1v3m0 14v3"/></svg>
+                  </div>
+                  <div>
+                    <strong>Runtime status</strong>
+                    <p>FPS, stability, gesture lock, cooldown, context — all at a glance.</p>
+                  </div>
+                </div>
+                <div class="gmg-ws-feat">
+                  <div class="gmg-ws-feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+                  </div>
+                  <div>
+                    <strong>Camera preview</strong>
+                    <p>Live feed with overlays, confidence bars, and phase indicators.</p>
+                  </div>
+                </div>
+                <div class="gmg-ws-feat">
+                  <div class="gmg-ws-feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div>
+                    <strong>Action feed</strong>
+                    <p>Live log of dispatched actions, locks, and cooldown timing.</p>
+                  </div>
+                </div>
+                <div class="gmg-ws-feat">
+                  <div class="gmg-ws-feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div>
+                    <strong>Workflow packs</strong>
+                    <p>Context-aware presets for browsers, editors, and creator tools.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── TIPS + SPECS BOTTOM ROW ── -->
+        <div class="gmg-bottom-row">
+          <section class="gmg-section gmg-tips-section">
+            <p class="gmg-eyebrow">Best Results</p>
+            <h2 class="gmg-section-title">How to use Gestra well</h2>
+            <div class="gmg-tips-grid">
+              <div class="gmg-tip-card">
+                <div class="gmg-tip-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </div>
+                <h4>Lighting</h4>
+                <p>Front lighting keeps fingers readable. Backlighting destroys detection accuracy.</p>
+              </div>
+              <div class="gmg-tip-card">
+                <div class="gmg-tip-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18" opacity=".4"/></svg>
+                </div>
+                <h4>Framing</h4>
+                <p>Stay inside the preview zone. Edge drift breaks hold stability immediately.</p>
+              </div>
+              <div class="gmg-tip-card">
+                <div class="gmg-tip-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22V12M12 12L7 7M12 12l5-5"/><circle cx="12" cy="12" r="10"/></svg>
+                </div>
+                <h4>Stability</h4>
+                <p>Pause and hold before expecting action. Gestra rewards deliberate intent.</p>
+              </div>
+              <div class="gmg-tip-card">
+                <div class="gmg-tip-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                </div>
+                <h4>Tuning</h4>
+                <p>Adjust confidence, hold timing, smoothing, and deadzone until it feels natural.</p>
+              </div>
+            </div>
+          </section>
+          <section class="gmg-section gmg-specs-section">
+            <p class="gmg-eyebrow">Project Overview</p>
+            <h2 class="gmg-section-title">What makes this different</h2>
+            <div class="gmg-spec-list">
+              <div class="gmg-spec-item">
+                <div class="gmg-spec-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                  <h4>Local-first control</h4>
+                  <p>No cloud. All gesture inference happens on-device for zero-latency and full privacy.</p>
+                </div>
+              </div>
+              <div class="gmg-spec-item">
+                <div class="gmg-spec-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <div>
+                  <h4>Two runtime paths</h4>
+                  <p>Local camera processing or Python-powered collective vision depending on availability.</p>
+                </div>
+              </div>
+              <div class="gmg-spec-item">
+                <div class="gmg-spec-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div>
+                  <h4>Visible confidence</h4>
+                  <p>Overlay feedback, confidence bars, and cooldown indicators on every action.</p>
+                </div>
+              </div>
+              <div class="gmg-spec-item">
+                <div class="gmg-spec-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+                <div>
+                  <h4>Context-aware packs</h4>
+                  <p>Packs adapt gestures for browsers, editors, and creator tools automatically.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </section>
+
     <section
       id="login-screen"
       class="absolute inset-0 z-[55] hidden items-center justify-center px-6"
     >
       <div class="w-full max-w-5xl">
         <div class="grid overflow-hidden rounded-[36px] border border-white/10 bg-black/30 shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-2xl lg:grid-cols-[0.95fr_1.05fr]">
+
+          <!-- Left decorative pane -->
           <div class="relative hidden min-h-[680px] overflow-hidden border-r border-white/10 lg:block">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_35%),linear-gradient(180deg,#07111f_0%,#050A14_100%)]"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(162,123,92,0.24),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(232,188,185,0.14),transparent_40%),linear-gradient(180deg,#2C3930_0%,#334238_100%)]"></div>
+
+            <!-- Decorative orbit rings -->
+            <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div class="h-[420px] w-[420px] rounded-full border border-white/[0.04]"></div>
+              <div class="absolute h-[280px] w-[280px] rounded-full border border-[#A27B5C]/[0.12]"></div>
+              <div class="absolute h-[140px] w-[140px] rounded-full border border-[#A27B5C]/[0.16] bg-[#E8BCB9]/[0.05]"></div>
+            </div>
+
             <div class="relative z-10 flex h-full flex-col justify-between p-10">
               <div>
                 <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-300">
-                  Spatial Access
+                  Setup Flow
                 </div>
                 <h2 class="mt-8 text-4xl font-extrabold leading-tight text-white">
-                  Sign in to unlock the full desktop gesture layer
+                  Prepare the camera and control model before entering the workspace
                 </h2>
-                <p class="mt-5 max-w-md text-sm leading-8 text-slate-300">
-                  Use a polished, system-level interface with local AI control, gesture commands,
-                  and assistant workflows that feel like a real shipped product.
+                <p class="mt-5 max-w-md text-sm leading-8 text-slate-400">
+                  This replaces the fake sign-in flow with a short setup that tells the user exactly what the app needs and how it behaves.
                 </p>
               </div>
 
-              <div class="space-y-4">
-                <div class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
-                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Secure shell</p>
-                  <p class="mt-2 text-sm text-slate-200">Desktop-grade permission flow and app session entry.</p>
+              <div class="space-y-3">
+                <div class="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Camera quality</p>
+                  </div>
+                  <p class="mt-2 text-sm text-slate-200">Front lighting, visible hand, and room for stable holds.</p>
                 </div>
-                <div class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
-                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Live runtime</p>
-                  <p class="mt-2 text-sm text-slate-200">Vision, gestures, HUD, control routing, and assistant access.</p>
+                <div class="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#A27B5C]"></span>
+                    <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Action model</p>
+                  </div>
+                  <p class="mt-2 text-sm text-slate-200">Point to move, pinch to click, hold palm or fist to scroll.</p>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- Right form pane -->
           <div class="p-8 sm:p-10 lg:p-12">
             <div class="mx-auto w-full max-w-md">
               <div class="mb-8">
-                <p class="text-xs font-black uppercase tracking-[0.24em] text-slate-500">Account Login</p>
-                <h3 class="mt-3 text-3xl font-bold text-white">Welcome back</h3>
+                <p class="text-[10px] font-black uppercase tracking-[0.26em] text-slate-500">Workspace Setup</p>
+                <h3 class="mt-3 text-3xl font-bold text-white">Before you enter Gestra</h3>
                 <p class="mt-2 text-sm leading-7 text-slate-400">
-                  Sign in to continue into the RunAnywhere AI desktop experience.
+                  Confirm how the runtime should behave. This matches the real product flow far better than a mock login.
                 </p>
               </div>
 
-              <form id="login-form" class="space-y-5">
-                <div class="space-y-2">
-                  <label class="text-sm font-semibold text-slate-300">Email</label>
-                  <input
-                    id="login-email"
-                    type="email"
-                    placeholder="you@company.com"
-                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
-                  />
-                </div>
+              <form id="login-form" class="space-y-4">
+                <!-- Checkbox items -->
+                <label class="flex cursor-pointer items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4.5 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07]">
+                  <input id="login-email" type="checkbox" checked class="mt-0.5 h-4 w-4 rounded border-white/10 bg-white/5 accent-[#A27B5C]" />
+                  <span>
+                    <strong class="block font-bold text-white">Camera ready</strong>
+                    <span class="mt-1 block text-xs leading-6 text-slate-400">Webcam is connected and my hand will stay visible in frame.</span>
+                  </span>
+                </label>
 
-                <div class="space-y-2">
-                  <label class="text-sm font-semibold text-slate-300">Password</label>
-                  <input
-                    id="login-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    class="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/50"
-                  />
-                </div>
+                <label class="flex cursor-pointer items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4.5 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07]">
+                  <input id="login-password" type="checkbox" checked class="mt-0.5 h-4 w-4 rounded border-white/10 bg-white/5 accent-[#A27B5C]" />
+                  <span>
+                    <strong class="block font-bold text-white">Lighting checked</strong>
+                    <span class="mt-1 block text-xs leading-6 text-slate-400">I have enough light for stable gesture detection.</span>
+                  </span>
+                </label>
 
-                <div class="flex items-center justify-between text-sm">
-                  <label class="flex items-center gap-2 text-slate-400">
-                    <input type="checkbox" class="rounded border-white/10 bg-white/5" />
-                    Keep me signed in
-                  </label>
-                  <button type="button" class="font-semibold text-cyan-300">
-                    Forgot password?
-                  </button>
+                <!-- Info cards row -->
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div class="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-4">
+                    <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Runtime states</p>
+                    <p class="mt-2 text-xs leading-6 text-slate-400">Camera ready, hand visible, gesture locked, action sent, cooldown active.</p>
+                  </div>
+                  <div class="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-4">
+                    <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Action guidance</p>
+                    <p class="mt-2 text-xs leading-6 text-slate-400">Clear hints for pointer mode, click mode, and hold-based scrolling.</p>
+                  </div>
                 </div>
 
                 <button
                   id="login-submit-btn"
                   type="submit"
-                  class="w-full rounded-2xl bg-white px-6 py-4 text-sm font-bold text-[#041019] shadow-[0_20px_40px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5"
+                  class="group relative w-full overflow-hidden rounded-2xl px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5"
                 >
-                  Continue
+                  <span class="absolute inset-0 bg-gradient-to-br from-[#A27B5C] to-[#3F4F44]"></span>
+                  <span class="absolute inset-0 bg-white/0 transition group-hover:bg-white/10"></span>
+                  <span class="relative text-white">Continue to Permissions</span>
                 </button>
-
-                <div class="relative py-2 text-center">
-                  <span class="relative z-10 bg-transparent px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-600">or</span>
-                </div>
-
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]">
-                    Sign in with Google
-                  </button>
-                  <button type="button" class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]">
-                    Enterprise SSO
-                  </button>
-                </div>
               </form>
             </div>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ================= LICENSE SCREEN ================= -->
+    <!-- ═══════════════════════════════════════
+         LICENSE / PERMISSIONS SCREEN
+    ═══════════════════════════════════════ -->
     <section
       id="license-screen"
       class="absolute inset-0 z-[52] hidden items-center justify-center px-6"
     >
       <div class="w-full max-w-3xl rounded-[36px] border border-white/10 bg-black/35 p-8 shadow-[0_40px_100px_rgba(0,0,0,0.55)] backdrop-blur-2xl sm:p-10">
+
+        <!-- Header row -->
         <div class="mb-8 flex items-start justify-between gap-4">
           <div>
-            <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Runtime Consent</p>
-            <h3 class="mt-3 text-3xl font-bold text-white">Desktop Interaction License</h3>
+            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Permissions</p>
+            <h3 class="mt-3 text-3xl font-bold text-white">Desktop interaction consent</h3>
             <p class="mt-3 max-w-2xl text-sm leading-8 text-slate-400">
-              This application requests permission to stay visible on your screen, read gesture input,
-              and control desktop actions during the active session.
+              Gestra needs camera access to detect hand posture and may send desktop-level actions while the session is active.
             </p>
           </div>
-          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300">
-            Verified Runtime
+          <div class="shrink-0 rounded-xl border border-[#A27B5C]/30 bg-[#A27B5C]/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#DCD7C9]">
+            Session scoped
           </div>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Screen presence</p>
-            <p class="mt-3 text-sm leading-7 text-slate-300">
-              Allows the app shell to remain visible while gestures are being interpreted.
-            </p>
+        <!-- Permission cards grid -->
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition hover:border-white/[0.14]">
+            <div class="mb-2 flex items-center gap-2">
+              <div class="h-7 w-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2.5"><circle cx="12" cy="12" r="4"/><path d="M1 12h3m14 0h3M12 1v3m0 14v3"/></svg>
+              </div>
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Camera input</p>
+            </div>
+            <p class="text-sm leading-7 text-slate-300">Reads hand position from your webcam feed for local gesture interpretation.</p>
           </div>
-          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Input routing</p>
-            <p class="mt-3 text-sm leading-7 text-slate-300">
-              Enables OS-level commands such as scroll, click, media control, and cursor movement.
-            </p>
+          <div class="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition hover:border-white/[0.14]">
+            <div class="mb-2 flex items-center gap-2">
+              <div class="h-7 w-7 rounded-lg bg-[#A27B5C]/15 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A27B5C" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Action routing</p>
+            </div>
+            <p class="text-sm leading-7 text-slate-300">Enables OS-level commands such as scroll, click, media control, and cursor movement.</p>
           </div>
-          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Vision processing</p>
-            <p class="mt-3 text-sm leading-7 text-slate-300">
-              Uses camera input for hand gesture analysis and action mapping.
-            </p>
+          <div class="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition hover:border-white/[0.14]">
+            <div class="mb-2 flex items-center gap-2">
+              <div class="h-7 w-7 rounded-lg bg-purple-500/15 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+              </div>
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Window control</p>
+            </div>
+            <p class="text-sm leading-7 text-slate-300">Can pin, hide, or foreground the desktop shell while you work.</p>
           </div>
-          <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Session scope</p>
-            <p class="mt-3 text-sm leading-7 text-slate-300">
-              Permissions apply only while the application is active and initialized.
-            </p>
+          <div class="group rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition hover:border-white/[0.14]">
+            <div class="mb-2 flex items-center gap-2">
+              <div class="h-7 w-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              </div>
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">Assistant access</p>
+            </div>
+            <p class="text-sm leading-7 text-slate-300">Voice and AI features are optional and only used when you open them.</p>
           </div>
         </div>
 
-        <div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-          <label class="flex items-start gap-3 text-sm leading-7 text-slate-300">
-            <input id="license-check" type="checkbox" class="mt-1 rounded border-white/10 bg-white/5" />
-            I understand that this application can remain on screen and simulate desktop interaction while the session is active.
+        <!-- Consent checkbox -->
+        <div class="mt-6 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
+          <label class="flex cursor-pointer items-start gap-3.5 text-sm leading-7 text-slate-300">
+            <input id="license-check" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-white/10 bg-white/5 accent-[#A27B5C]" />
+            I understand that Gestra can stay visible, access the camera, and dispatch desktop actions while this session is running.
           </label>
         </div>
 
+        <!-- Action buttons -->
         <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
           <button
             id="back-to-login-btn"
             type="button"
-            class="rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.08]"
+            class="rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.08]"
           >
-            Back
+            ← Back to Setup
           </button>
 
           <button
             id="accept-license-btn"
             type="button"
-            class="rounded-2xl bg-white px-7 py-4 text-sm font-bold text-[#041019] transition hover:-translate-y-0.5"
+            class="group relative overflow-hidden rounded-2xl px-7 py-4 text-sm font-bold transition hover:-translate-y-0.5"
           >
-            Accept & Enter Home
+            <span class="absolute inset-0 bg-gradient-to-br from-[#A27B5C] to-[#3F4F44]"></span>
+            <span class="absolute inset-0 bg-white/0 transition group-hover:bg-white/10"></span>
+            <span class="relative text-white">Enter Workspace →</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- ================= HOME APP ================= -->
-    <div id="app-container" class="hidden h-screen w-screen bg-[#050A14]">
+    <!-- ═══════════════════════════════════════
+         MAIN APP CONTAINER
+    ═══════════════════════════════════════ -->
+    <div id="app-container" class="hidden h-screen min-w-full">
       <div class="flex h-full w-full flex-col">
 
-        <!-- NAVBAR -->
-        <header class="border-b border-white/10 bg-black/30 px-6 py-4 backdrop-blur-2xl">
+        <!-- ── NAVBAR ── -->
+        <header class="shrink-0 border-b border-white/[0.08] bg-black/40 px-6 py-3.5 backdrop-blur-2xl">
           <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400 text-[#041019] text-lg font-black">
-                R
+
+            <!-- Logo -->
+            <div class="flex items-center gap-3.5">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#A27B5C] to-[#3F4F44] text-base font-black text-white shadow-[0_8px_18px_rgba(44,57,48,0.32)]">
+                G
               </div>
               <div>
-                <h1 class="text-lg font-bold text-white">RunAnywhere AI OS</h1>
-                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Spatial Runtime Dashboard
+                <h1 class="text-base font-bold leading-none text-white">Gestra</h1>
+                <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                  Gesture workspace
                 </p>
               </div>
             </div>
 
-            <nav class="hidden items-center gap-2 lg:flex">
-              <button class="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-300">
-                Home
+            <!-- Nav links -->
+            <nav class="hidden items-center gap-1.5 lg:flex">
+              <button class="rounded-xl border border-[#A27B5C]/30 bg-[#A27B5C]/12 px-4 py-2 text-xs font-semibold text-[#DCD7C9] transition">
+                Workspace
               </button>
-              <button class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300">
+              <button id="open-guide-from-workspace-btn" class="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-xs font-semibold text-slate-400 transition hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-slate-200">
+                Guide
+              </button>
+              <button class="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-xs font-semibold text-slate-400 transition hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-slate-200">
                 Gestures
               </button>
-              <button class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300">
+              <button class="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-xs font-semibold text-slate-400 transition hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-slate-200">
                 Assistant
               </button>
-              <button class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300">
+              <button class="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2 text-xs font-semibold text-slate-400 transition hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-slate-200">
                 Runtime
               </button>
             </nav>
 
-            <div class="flex items-center gap-3">
+            <!-- Window controls -->
+            <div class="flex items-center gap-2">
               <button id="pin-window-btn" class="shell-btn" type="button">Pin</button>
               <button id="hide-window-btn" class="shell-btn" type="button">Hide</button>
               <button id="quit-app-btn" class="shell-btn shell-btn-danger" type="button">Quit</button>
@@ -339,91 +976,84 @@
           </div>
         </header>
 
-        <!-- CONTENT -->
-        <div class="flex min-h-0 flex-1 overflow-hidden">
+        <!-- ── CONTENT ── -->
+        <div id="workspace-scroll" class="custom-scrollbar flex min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
 
-          <!-- LEFT PANEL -->
-          <aside class="hidden min-h-0 w-[300px] shrink-0 overflow-hidden border-r border-white/10 bg-black/20 p-5 backdrop-blur-2xl lg:flex lg:flex-col xl:w-[340px]">
-            <div class="mb-6">
-              <p class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Gesture Library</p>
-              <h2 class="mt-2 text-2xl font-bold text-white">Control Map</h2>
-              <p class="mt-2 text-sm leading-7 text-slate-400">
-                Cleaner gesture guidance so users understand actions instantly.
+          <!-- ── LEFT PANEL: GESTURE LIBRARY ── -->
+          <aside id="workspace-left-sidebar" class="custom-scrollbar hidden min-h-0 w-[300px] shrink-0 overflow-y-auto border-r border-white/[0.08] bg-black/20 p-5 backdrop-blur-2xl lg:flex lg:flex-col xl:w-[340px]">
+
+            <!-- Panel header -->
+            <div class="mb-5">
+              <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Gesture Library</p>
+              <h2 class="mt-1.5 text-xl font-bold text-white">Control Map</h2>
+              <p class="mt-2 text-xs leading-6 text-slate-500">
+                Gestures the runtime can reliably interpret.
               </p>
             </div>
 
-            <div class="min-h-0 flex-1 space-y-4 overflow-y-scroll pr-2 custom-scrollbar">
+            <!-- Gesture cards -->
+            <div class="space-y-2.5 pr-1.5">
+
               <div id="gesture-palm" class="gesture-card group">
-                <div class="gesture-icon-box">
-                  <span class="text-lg">🖐️</span>
+                <div class="gesture-icon-box">Palm</div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-slate-200">Open Palm</h3>
+                  <p class="text-xs text-slate-500">Hold to scroll upward</p>
                 </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-slate-200">Open Palm</h3>
-                  <p class="text-xs text-slate-500">Scroll up through content</p>
-                </div>
-                <div class="status-indicator"></div>
+                <div class="status-indicator shrink-0"></div>
               </div>
 
               <div id="gesture-fist" class="gesture-card group">
-                <div class="gesture-icon-box">
-                  <span class="text-lg">✊</span>
+                <div class="gesture-icon-box">Fist</div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-slate-200">Closed Fist</h3>
+                  <p class="text-xs text-slate-500">Hold to scroll downward</p>
                 </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-slate-200">Closed Fist</h3>
-                  <p class="text-xs text-slate-500">Scroll down through content</p>
-                </div>
-                <div class="status-indicator"></div>
+                <div class="status-indicator shrink-0"></div>
               </div>
 
               <div id="gesture-peace" class="gesture-card group">
-                <div class="gesture-icon-box">
-                  <span class="text-lg">✌️</span>
-                </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-slate-200">Peace Sign</h3>
+                <div class="gesture-icon-box">V</div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-slate-200">Peace Sign</h3>
                   <p class="text-xs text-slate-500">Capture a screenshot</p>
                 </div>
-                <div class="status-indicator"></div>
+                <div class="status-indicator shrink-0"></div>
               </div>
 
               <div id="gesture-thumb" class="gesture-card group">
-                <div class="gesture-icon-box">
-                  <span class="text-lg">👍</span>
-                </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-slate-200">Thumbs Up</h3>
+                <div class="gesture-icon-box">Thumb</div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-slate-200">Thumbs Up</h3>
                   <p class="text-xs text-slate-500">Play or pause media</p>
                 </div>
-                <div class="status-indicator"></div>
+                <div class="status-indicator shrink-0"></div>
               </div>
 
               <div id="gesture-index" class="gesture-card group">
-                <div class="gesture-icon-box">
-                  <span class="text-lg">☝️</span>
+                <div class="gesture-icon-box">Point</div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-slate-200">Pointing</h3>
+                  <p class="text-xs text-slate-500">Move the pointer</p>
                 </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-slate-200">Pointing</h3>
-                  <p class="text-xs text-slate-500">Move cursor on screen</p>
-                </div>
-                <div class="status-indicator"></div>
+                <div class="status-indicator shrink-0"></div>
               </div>
 
               <div id="gesture-pinch" class="gesture-card group">
-                <div class="gesture-icon-box">
-                  <span class="text-lg">🤏</span>
-                </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-slate-200">Pinch</h3>
+                <div class="gesture-icon-box">Pinch</div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-slate-200">Pinch</h3>
                   <p class="text-xs text-slate-500">Trigger left click</p>
                 </div>
-                <div class="status-indicator"></div>
+                <div class="status-indicator shrink-0"></div>
               </div>
             </div>
 
-            <div class="mt-6 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+            <!-- Confidence slider -->
+            <div class="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Confidence</span>
-                <span id="threshold-value" class="text-sm font-mono text-cyan-300">0.70</span>
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Confidence Threshold</span>
+                <span id="threshold-value" class="rounded-lg bg-[#A27B5C]/15 px-2 py-0.5 text-xs font-bold text-[#DCD7C9]">0.70</span>
               </div>
               <input
                 type="range"
@@ -432,138 +1062,250 @@
                 max="0.95"
                 step="0.05"
                 value="0.7"
-                class="mt-4 w-full cursor-pointer accent-cyan-400"
+                class="mt-3 w-full cursor-pointer accent-[#A27B5C]"
               />
+              <div class="mt-1.5 flex justify-between text-[9px] font-semibold uppercase tracking-widest text-slate-600">
+                <span>Lenient</span>
+                <span>Strict</span>
+              </div>
             </div>
+
+            <div id="workflow-control-panel" class="mt-4"></div>
           </aside>
 
-          <!-- CENTER -->
-          <main class="flex min-h-0 flex-1 flex-col overflow-hidden p-6 lg:p-8">
-            <!-- top stats -->
-            <div class="mb-6 grid gap-4 md:grid-cols-3">
-              <div class="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
-                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">System Status</p>
-                <h3 id="system-status-text" class="mt-3 text-2xl font-bold text-white">System Ready</h3>
-                <div class="mt-4 flex items-center gap-2 text-sm text-slate-400">
+          <!-- ── CENTER: CAMERA + STATS ── -->
+          <main class="flex min-h-0 flex-1 flex-col overflow-hidden p-5 lg:p-6">
+
+            <!-- Stats row -->
+            <div class="mb-4 grid gap-3 md:grid-cols-4">
+
+              <!-- Runtime Status card -->
+              <div class="rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-4 backdrop-blur-sm">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Runtime Status</p>
+                    <h3 id="system-status-text" class="mt-1.5 text-xl font-bold text-white">Waiting to start</h3>
+                  </div>
+                  <div id="runtime-mode-chip" class="shrink-0 mode-chip">Idle</div>
+                </div>
+                <p id="runtime-subtext" class="mt-2 text-xs leading-5 text-slate-500">
+                  Use Start Runtime to connect the camera feed and begin gesture tracking.
+                </p>
+                <div class="mt-2.5 flex items-center gap-2">
                   <div id="system-status-dot" class="h-2 w-2 rounded-full bg-slate-700"></div>
-                  Native Bridge
+                  <span class="text-xs text-slate-500">Local runtime</span>
+                </div>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                  <button id="start-btn" type="button" class="runtime-control-btn runtime-control-btn-primary">
+                    Start Runtime
+                  </button>
+                  <button id="stop-btn" type="button" class="runtime-control-btn" disabled>
+                    Stop
+                  </button>
+                  <span id="runtime-control-note" class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                    Manual control
+                  </span>
                 </div>
               </div>
 
-              <div class="hud-stat rounded-[28px] !items-start !p-5">
+              <!-- FPS -->
+              <div class="hud-stat rounded-[24px] !p-4">
                 <span class="hud-stat-label">FPS</span>
-                <span id="fps-counter" class="hud-stat-val text-2xl">0</span>
+                <span id="fps-counter" class="hud-stat-val mt-1.5">0</span>
+                <span class="mt-0.5 text-[10px] font-semibold text-slate-600">frames/sec</span>
               </div>
 
-              <div class="hud-stat rounded-[28px] !items-start !p-5">
+              <!-- Stability -->
+              <div class="hud-stat rounded-[24px] !p-4">
                 <span class="hud-stat-label">Stability</span>
-                <span id="stability-counter" class="hud-stat-val text-2xl">0%</span>
+                <span id="stability-counter" class="hud-stat-val mt-1.5">0%</span>
+                <span class="mt-0.5 text-[10px] font-semibold text-slate-600">gesture lock</span>
+              </div>
+
+              <!-- Context -->
+              <div class="hud-stat rounded-[24px] !p-4">
+                <span class="hud-stat-label">Context</span>
+                <span id="active-pack-chip" class="hud-stat-val mt-1.5 text-lg">Desktop</span>
+                <span id="active-app-chip" class="mt-1.5 text-xs font-medium text-slate-500">No app detected</span>
+                <span id="automation-chip" class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-600">Auto routing on</span>
               </div>
             </div>
 
-            <!-- camera -->
+            <!-- Camera container -->
             <div
               id="camera-container"
-              class="relative flex min-h-0 flex-1 overflow-hidden rounded-[36px] border border-white/10 bg-black/40 shadow-[0_40px_100px_rgba(0,0,0,0.45)]"
+              class="relative min-h-0 flex-1 overflow-hidden rounded-[28px] border border-white/[0.08] shadow-[0_40px_100px_rgba(0,0,0,0.45)]"
             >
               <video id="webcam-feed" class="h-full w-full object-cover scale-x-[-1]" autoplay playsinline muted></video>
               <img id="python-vision-feed" class="hidden absolute inset-0 h-full w-full object-cover scale-x-[-1]" alt="" />
 
-              <div id="loading-overlay" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#050A14]/80 backdrop-blur-xl transition-opacity duration-700">
-                <div class="relative mb-6 h-24 w-24">
-                  <div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
-                  <div class="absolute inset-0 animate-spin rounded-full border-4 border-cyan-400 border-t-transparent"></div>
+              <!-- Loading overlay -->
+              <div id="loading-overlay" class="absolute inset-0 z-40 flex flex-col items-center justify-center transition-opacity duration-700">
+                <div class="relative mb-6 h-20 w-20">
+                  <div class="absolute inset-0 rounded-full border-2 border-white/[0.08]"></div>
+                  <div class="absolute inset-0 animate-spin rounded-full border-2 border-t-transparent" style="border-color: rgba(162,123,92,0.72); border-top-color: transparent;"></div>
+                  <!-- Inner ring -->
+                  <div class="absolute inset-3 animate-[spin_1.4s_linear_infinite_reverse] rounded-full border-2 border-t-transparent" style="border-color: rgba(232,188,185,0.34); border-top-color: transparent;"></div>
                 </div>
-                <p id="loading-text" class="text-xl font-semibold text-white">Neural Engine Offline</p>
-                <div class="mt-5 h-1.5 w-56 overflow-hidden rounded-full bg-white/10">
-                  <div id="loading-bar" class="h-full w-0 bg-cyan-400 transition-all duration-300"></div>
+                <p id="loading-text" class="text-lg font-semibold text-white">Runtime offline</p>
+                <p class="mt-1 text-xs text-slate-500">Start the runtime to begin</p>
+                <div class="mt-5 h-1 w-48 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div id="loading-bar" class="h-full w-0 transition-all duration-300" style="background: linear-gradient(90deg, #A27B5C, #E8BCB9);"></div>
                 </div>
               </div>
 
-              <div class="pointer-events-none absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-4">
+              <!-- Top-left status pills -->
+              <div class="pointer-events-none absolute left-4 top-4 z-20 flex flex-col gap-2">
+                <div class="status-mini-card">
+                  <span class="status-mini-label">Hand</span>
+                  <span id="hand-presence" class="status-mini-value">Not visible</span>
+                </div>
+                <div class="status-mini-card">
+                  <span class="status-mini-label">Gesture</span>
+                  <span id="gesture-phase" class="status-mini-value">Waiting</span>
+                </div>
+                <div class="status-mini-card">
+                  <span class="status-mini-label">Feedback</span>
+                  <span id="feedback-chip" class="status-mini-value">No action</span>
+                </div>
+              </div>
+
+              <!-- Bottom center: detected gesture -->
+              <div class="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3">
                 <div id="detected-gesture-label" class="gesture-live-pill opacity-0">
-                  Show Gesture
+                  Show a gesture
                 </div>
-                <div class="h-2 w-56 overflow-hidden rounded-full bg-black/40 backdrop-blur-md">
-                  <div id="confidence-bar" class="h-full w-0 bg-cyan-400 transition-all duration-300"></div>
+                <div class="h-1.5 w-52 overflow-hidden rounded-full bg-black/40 backdrop-blur-md">
+                  <div id="confidence-bar" class="h-full w-0 transition-all duration-300" style="background: linear-gradient(90deg, #A27B5C, #E8BCB9);"></div>
                 </div>
               </div>
 
-              <div class="absolute left-6 top-6 z-20 rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-xl">
-                <div class="flex items-center gap-4">
-                  <span class="text-xs font-bold text-slate-300">Overlay Mode</span>
+              <!-- Top-right overlay toggle -->
+              <div class="absolute right-4 top-4 z-20 rounded-2xl border border-white/[0.08] bg-black/50 p-4 backdrop-blur-xl">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-semibold text-slate-300">Overlay mode</span>
                   <label class="relative inline-flex cursor-pointer items-center">
                     <input id="overlay-mode-toggle" type="checkbox" class="peer sr-only" />
-                    <div class="h-6 w-11 rounded-full bg-slate-800 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-cyan-400 peer-checked:after:translate-x-full"></div>
+                    <div class="h-5 w-9 rounded-full bg-slate-800 transition-colors duration-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#A27B5C] peer-checked:after:translate-x-full"></div>
                   </label>
                 </div>
-                <p id="overlay-mode-hint" class="mt-2 text-[10px] font-medium text-slate-500">
-                  Disabled for stability
+                <p id="overlay-mode-hint" class="mt-1.5 text-[9px] font-semibold text-slate-500">
+                  Disabled until overlay path is stable
                 </p>
               </div>
             </div>
           </main>
 
-          <!-- RIGHT PANEL -->
-          <aside class="hidden min-h-0 w-[300px] shrink-0 overflow-hidden border-l border-white/10 bg-black/20 p-5 backdrop-blur-2xl xl:flex xl:flex-col 2xl:w-[340px]">
+          <!-- ── RIGHT PANEL: ACTION FEED ── -->
+          <aside id="workspace-right-sidebar" class="custom-scrollbar hidden min-h-0 w-[300px] shrink-0 overflow-y-auto border-l border-white/[0.08] bg-black/20 p-5 backdrop-blur-2xl xl:flex xl:flex-col 2xl:w-[340px]">
+
+            <!-- Panel header -->
             <div class="mb-5 flex items-center justify-between">
               <div>
-                <p class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Action Feed</p>
-                <h3 class="mt-2 text-xl font-bold text-white">Live Activity</h3>
+                <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Action Feed</p>
+                <h3 class="mt-1.5 text-xl font-bold text-white">Live Activity</h3>
               </div>
-              <button id="clear-log-btn" class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 transition hover:text-cyan-300">
+              <button id="clear-log-btn" class="rounded-lg border border-white/[0.07] bg-white/[0.03] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 transition hover:border-white/[0.14] hover:text-slate-300">
                 Clear
               </button>
             </div>
 
-            <div id="action-log" class="min-h-0 flex-1 space-y-3 overflow-y-scroll custom-scrollbar pr-2">
-              <!-- log -->
+            <div id="action-log" class="activity-scrollbar min-h-0 space-y-2.5 overflow-y-auto pr-1.5">
+              <!-- Log entries inserted here -->
             </div>
 
-            <div class="mt-6 rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
-              <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Quick Notes</p>
-              <ul class="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-                <li>• Use smooth open-palm holds for consistent scrolling.</li>
-                <li>• Pinch should feel like a click, not a hold.</li>
-                <li>• Cursor control works best in clear lighting.</li>
+            <!-- Feedback Loop card -->
+            <div class="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Feedback Loop</p>
+                  <h4 id="interaction-hint-title" class="mt-2 text-sm font-bold text-white">No active gesture</h4>
+                </div>
+                <div id="feedback-status-dot" class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-slate-700"></div>
+              </div>
+              <p id="feedback-detail" class="mt-3 text-xs leading-6 text-slate-500">
+                Start the runtime to see detection confidence, action results, and timing feedback.
+              </p>
+              <p id="interaction-hint-body" class="mt-2 text-xs leading-6 text-slate-500">
+                Keep your hand inside frame. Gestra will surface a hint when pointer or click mode becomes active.
+              </p>
+
+              <!-- Cooldown bar -->
+              <div class="mt-4">
+                <div class="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
+                  <span>Action cooldown</span>
+                  <span id="action-cooldown-label">Idle</span>
+                </div>
+                <div class="h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div id="action-cooldown-fill" class="h-full w-0 transition-all duration-200" style="background: linear-gradient(90deg, #A27B5C, #E8BCB9);"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick notes card -->
+            <div class="mt-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
+              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Quick Notes</p>
+              <ul class="mt-3 space-y-2.5">
+                <li class="flex items-start gap-2.5 text-xs leading-6 text-slate-400">
+                  <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#A27B5C]/60"></span>
+                  Use smooth open-palm holds for consistent scrolling.
+                </li>
+                <li class="flex items-start gap-2.5 text-xs leading-6 text-slate-400">
+                  <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#A27B5C]/60"></span>
+                  Pinch should feel like a click, not a hold.
+                </li>
+                <li class="flex items-start gap-2.5 text-xs leading-6 text-slate-400">
+                  <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#A27B5C]/60"></span>
+                  Cursor control works best in clear lighting.
+                </li>
               </ul>
             </div>
+
+            <div id="context-control-panel" class="mt-3"></div>
+            <div id="calibration-control-panel" class="mt-3"></div>
+            <div id="remap-control-panel" class="mt-3"></div>
           </aside>
-        </div>
+
+        </div><!-- end content row -->
       </div>
-    </div>
+    </div><!-- end app-container -->
 
-    <!-- TOAST -->
-    <div id="toast-container" class="fixed left-1/2 top-8 z-[200] flex -translate-x-1/2 flex-col gap-2"></div>
+    <!-- ── TOAST ── -->
+    <div id="toast-container" class="fixed left-1/2 top-6 z-[200] flex -translate-x-1/2 flex-col items-center gap-2"></div>
 
-    <!-- ASSISTANT -->
+    <!-- ── ASSISTANT ── -->
     <section id="assistant-root" class="assistant-root">
       <button
         id="assistant-toggle"
-        class="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-black shadow-2xl transition hover:scale-105"
+        class="flex items-center gap-2.5 rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-2xl transition hover:scale-105 active:scale-[0.98]"
+        style="background: linear-gradient(135deg, #A27B5C 0%, #3F4F44 100%); box-shadow: 0 12px 28px rgba(44,57,48,0.32);"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
         </svg>
-        Assistant Engine
+        Gestra Assistant
       </button>
 
+      <!-- Assistant panel -->
       <div id="assistant-panel" class="assistant-pro-panel" aria-hidden="true">
-        <header class="flex items-center justify-between border-b border-white/10 p-5">
-          <div>
-            <h3 class="text-sm font-bold tracking-tight">RunAnywhere AI</h3>
-            <p id="assistant-status" class="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-500">Ready</p>
+        <header id="assistant-panel-header" class="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+          <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#A27B5C] to-[#3F4F44] text-xs font-black text-white">G</div>
+            <div>
+              <h3 class="text-sm font-bold text-white">Gestra Assistant</h3>
+              <p id="assistant-status" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Ready</p>
+            </div>
           </div>
-          <div class="flex gap-2">
-            <button id="assistant-mic-toggle" class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition hover:bg-white/10">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <div class="flex gap-1.5">
+            <button id="assistant-mic-toggle" class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-slate-400 transition hover:bg-white/[0.08] hover:text-slate-200">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                 <line x1="12" x2="12" y1="19" y2="22"/>
               </svg>
             </button>
-            <button id="assistant-close" class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition hover:bg-white/10">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button id="assistant-close" class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-slate-400 transition hover:bg-white/[0.08] hover:text-slate-200">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M18 6 6 18"/>
                 <path d="m6 6 12 12"/>
               </svg>
@@ -571,6 +1313,7 @@
           </div>
         </header>
 
+        <!-- Voice orb shell -->
         <div class="assistant-voice-shell">
           <div id="assistant-voice-orb" class="assistant-voice-orb" aria-hidden="true">
             <span class="assistant-voice-core"></span>
@@ -580,19 +1323,25 @@
           <p id="assistant-voice-caption" class="assistant-voice-caption">Voice standby</p>
         </div>
 
-        <div id="assistant-messages" class="custom-scrollbar flex-1 overflow-y-auto p-5 space-y-4"></div>
+        <!-- Messages -->
+        <div id="assistant-messages" class="custom-scrollbar flex-1 overflow-y-auto space-y-3 p-4"></div>
 
-        <form id="assistant-form" class="border-t border-white/10 bg-white/5 p-4">
+        <!-- Input form -->
+        <form id="assistant-form" class="border-t border-white/[0.08] p-4">
           <div class="relative flex items-center gap-2">
             <input
               id="assistant-input"
               type="text"
-              placeholder="Ask RunAnywhere AI..."
+              placeholder="Ask Gestra Assistant..."
               autocomplete="off"
-              class="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400"
+              class="flex-1 rounded-xl border border-white/[0.08] bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600"
             />
-            <button type="submit" class="rounded-xl bg-white p-3 text-black transition hover:bg-cyan-300">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button
+              type="submit"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white transition hover:opacity-90 active:scale-95"
+              style="background: linear-gradient(135deg, #A27B5C 0%, #3F4F44 100%);"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M5 12h14"/>
                 <path d="m12 5 7 7-7 7"/>
               </svg>
@@ -600,56 +1349,87 @@
           </div>
         </form>
       </div>
-    </section>
-  </div>
+    </section><!-- end assistant -->
 
+  </div><!-- end shell -->
+
+  <!-- ── INLINE LOGIC ── -->
   <script>
     (() => {
-      const introScreen = document.getElementById('intro-screen');
-      const loginScreen = document.getElementById('login-screen');
+      const introScreen   = document.getElementById('intro-screen');
+      const guideScreen   = document.getElementById('guide-screen');
+      const loginScreen   = document.getElementById('login-screen');
       const licenseScreen = document.getElementById('license-screen');
-      const appContainer = document.getElementById('app-container');
+      const appContainer  = document.getElementById('app-container');
+      const introDepthNodes = introScreen ? Array.from(introScreen.querySelectorAll('[data-intro-depth]')) : [];
 
-      const goToLoginBtn = document.getElementById('go-to-login-btn');
-      const skipIntroBtn = document.getElementById('skip-intro-btn');
-      const loginForm = document.getElementById('login-form');
-      const backToLoginBtn = document.getElementById('back-to-login-btn');
-      const acceptLicenseBtn = document.getElementById('accept-license-btn');
-      const licenseCheck = document.getElementById('license-check');
+      const openMasterGuideBtn = document.getElementById('open-master-guide-btn');
+      const goToLoginBtn    = document.getElementById('go-to-login-btn');
+      const skipIntroBtn    = document.getElementById('skip-intro-btn');
+      const guideStartSetupBtn = document.getElementById('guide-start-setup-btn');
+      const guideEnterWorkspaceBtn = document.getElementById('guide-enter-workspace-btn');
+      const guideBackHomeBtn = document.getElementById('guide-back-home-btn');
+      const openGuideFromWorkspaceBtn = document.getElementById('open-guide-from-workspace-btn');
+      const loginForm       = document.getElementById('login-form');
+      const backToLoginBtn  = document.getElementById('back-to-login-btn');
+      const acceptLicenseBtn= document.getElementById('accept-license-btn');
+      const licenseCheck    = document.getElementById('license-check');
 
       const showScreen = (screen) => {
-        [introScreen, loginScreen, licenseScreen].forEach((el) => {
+        [introScreen, guideScreen, loginScreen, licenseScreen].forEach((el) => {
           if (!el) return;
           el.classList.add('hidden');
           el.classList.remove('flex');
         });
-
         if (screen) {
           screen.classList.remove('hidden');
           screen.classList.add('flex');
         }
       };
 
-      goToLoginBtn?.addEventListener('click', () => showScreen(loginScreen));
-      skipIntroBtn?.addEventListener('click', () => showScreen(loginScreen));
-
-      loginForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        showScreen(licenseScreen);
-      });
-
-      backToLoginBtn?.addEventListener('click', () => showScreen(loginScreen));
-
-      acceptLicenseBtn?.addEventListener('click', () => {
-        if (!licenseCheck?.checked) return;
-        introScreen?.classList.add('hidden');
-        loginScreen?.classList.add('hidden');
-        licenseScreen?.classList.add('hidden');
+      const enterWorkspace = () => {
+        [introScreen, guideScreen, loginScreen, licenseScreen].forEach((el) => {
+          el?.classList.add('hidden');
+          el?.classList.remove('flex');
+        });
         appContainer?.classList.remove('hidden');
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('gestra:start-requested'));
-        }, 60);
-      });
+      };
+
+      if (introScreen) {
+        const resetIntroParallax = () => {
+          introScreen.style.setProperty('--intro-mx', '0px');
+          introScreen.style.setProperty('--intro-my', '0px');
+          introDepthNodes.forEach((node) => {
+            node.style.transform = '';
+          });
+        };
+
+        introScreen.addEventListener('pointermove', (event) => {
+          const rect = introScreen.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+          const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+          introScreen.style.setProperty('--intro-mx', `${x * 12}px`);
+          introScreen.style.setProperty('--intro-my', `${y * 12}px`);
+
+          introDepthNodes.forEach((node) => {
+            const depth = Number(node.dataset.introDepth || 16);
+            node.style.transform = `translate3d(${x * depth}px, ${y * depth}px, 0)`;
+          });
+        });
+
+        introScreen.addEventListener('pointerleave', resetIntroParallax);
+      }
+
+      openMasterGuideBtn?.addEventListener('click', () => showScreen(guideScreen));
+      goToLoginBtn?.addEventListener('click', () => showScreen(loginScreen));
+      skipIntroBtn?.addEventListener('click', () => enterWorkspace());
+      guideStartSetupBtn?.addEventListener('click', () => showScreen(loginScreen));
+      guideEnterWorkspaceBtn?.addEventListener('click', () => enterWorkspace());
+      guideBackHomeBtn?.addEventListener('click', () => showScreen(introScreen));
+      openGuideFromWorkspaceBtn?.addEventListener('click', () => showScreen(guideScreen));
+      loginForm?.addEventListener('submit', (e) => { e.preventDefault(); showScreen(licenseScreen); });
+      backToLoginBtn?.addEventListener('click', () => showScreen(loginScreen));
+      acceptLicenseBtn?.addEventListener('click', () => { if (licenseCheck?.checked) enterWorkspace(); });
     })();
   </script>
 
@@ -657,3 +1437,5 @@
   <script type="module" src="/src/assistant.js"></script>
 </body>
 </html>
+
+
