@@ -5,4 +5,7 @@ dist/
 *.tsbuildinfo
 .playwright-mcp/
 *.png
+!public/gesture_hero.png
+!public/gesture_palm.png
+!public/workspace_preview.png
 .env
