@@ -1,243 +1,221 @@
-# RunAnywhere AI (Gestra2)
+# RunAnywhere AI Gestra
 
-RunAnywhere AI is a desktop shell for gesture-driven control, system manipulation, and AI assistance. It enables hands-free interaction across your screen using real-time hand tracking with MediaPipe, supporting both browser-based and Python backend modes.
+RunAnywhere AI Gestra is an offline-first desktop interaction system that combines hand-gesture control, voice-triggered assistance, and system automation in a single Electron application. It is designed to feel natural on a laptop or workstation: raise a hand, trigger a gesture, speak a command, and control the desktop without breaking focus.
+
+This project is documented as a RunAnywhere AI experience. The intended AI stack is centered on RunAnywhere's on-device runtime, local model loading, and desktop-side execution rather than third-party hosted assistants.
+
+## Overview
+
+RunAnywhere AI Gestra brings together three core layers:
+
+- Real-time gesture recognition for desktop control
+- Voice-driven assistant workflows inside the app shell
+- Offline-first local execution for system actions and runtime feedback
+
+The result is a desktop tool that can monitor hand landmarks, translate stable gestures into actions, and provide a more immersive, touch-free control flow for browsing, productivity, demos, and accessibility-oriented interaction.
+
+## Key Highlights
+
+- Offline-first desktop experience for gesture control and runtime interaction
+- RunAnywhere AI focused positioning and model workflow
+- Real-time camera-based hand tracking
+- Native desktop actions such as cursor movement, scroll, click, screenshot, and media control
+- Embedded assistant panel with voice-ready interaction states
+- Electron-based desktop shell with Python-assisted vision runtime support
+- Polished visual interface with live feedback and onboarding cues
+
+## Screenshots
+
+### Main Workspace
+
+![RunAnywhere AI Gestra workspace](./public/workspace_preview.png)
+
+### Gesture UI Preview
+
+![RunAnywhere AI Gestra hero screen](./public/gesture_hero.png)
+
+### Palm Gesture Detection
+
+![RunAnywhere AI Gestra palm gesture](./public/gesture_palm.png)
+
+## RunAnywhere AI Positioning
+
+This project is intended to be presented as a RunAnywhere AI application. The README, product framing, and feature explanation are centered on RunAnywhere's local AI workflow:
+
+- On-device runtime behavior
+- Local model loading
+- Desktop-native interaction
+- Offline-first control flows
+- Voice, language, and vision experiences tied to a local runtime model stack
+
+## Model Stack
+
+The RunAnywhere AI flow in this project is organized around the following model categories:
+
+- `LLM` for assistant responses and text reasoning
+- `VLM` for vision-capable flows in RunAnywhere-enabled experiences
+- `VAD` for voice activity detection
+- `STT` for speech-to-text
+- `TTS` for text-to-speech
+
+The codebase and test artifacts reference a RunAnywhere-compatible LLM load flow using:
+
+- `lfm2-350m-q4_k_m`
+
+In the broader RunAnywhere workflow, the application is structured to support a local, on-device model pipeline instead of a cloud-first dependency chain.
+
+## Offline-First Experience
+
+RunAnywhere AI Gestra is built and documented as an offline-first desktop app.
+
+- Gesture recognition runs locally on the device
+- Desktop actions are executed locally
+- Voice interaction states are managed inside the desktop shell
+- The user experience is designed around local runtime behavior, not a browser-only SaaS workflow
+
+This makes the project a strong fit for private demos, local experimentation, accessibility workflows, and environments where low-latency interaction matters.
 
 ## Features
 
-- **Real-time gesture recognition**: 6 gestures mapped to OS actions (scroll, click, screenshot, media control, cursor movement, pinch)
-- **AI Assistant**: Multi-provider LLM support (Google Gemini, xAI Grok, OpenRouter) with voice input/output
-- **Dual operating modes**: Collective (Python-controlled camera) or Local (browser-based detection)
-- **Voice activation**: Wake-word detection + command parsing with direct app launching
-- **System tray integration**: Window pinning, minimize, quit controls
-- **Hybrid action execution**: Primary Python bridge with Electron native fallback
+### Gesture Control
 
-## Technology Stack
-
-### Frontend
-- Vite 6.0 - Modern build tool
-- Electron 41 - Desktop application shell
-- TailwindCSS 3.4 - UI styling (dark theme)
-- MediaPipe.js - Browser-based hand landmark detection
-- Web Speech API - Native browser voice recognition
-- html2canvas - Screenshot capture
-
-### Backend (Python)
-- OpenCV 4.8+ - Video capture & frame processing
-- MediaPipe 0.10.9+ - Hand landmark detection
-- PyAutoGUI 0.9.54+ - OS-level mouse/keyboard automation
-- Built-in HTTP server - Serves MJPEG streams and JSON state
-
-## Prerequisites
-
-- **Node.js** (version 18 or higher)
-- **Python** (version 3.8 or higher)
-- **Windows OS** (required for native speech recognition and system integration)
-- **Webcam** (for gesture detection)
-
-## Installation
-
-1. **Clone or download the project**:
-   ```bash
-   cd "Your Path"
-   ```
-
-2. **Install Node.js dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Set up Python environment**:
-   ```bash
-   cd python-core
-   pip install -r requirements.txt
-   cd ..
-   ```
-
-## Configuration
-
-### API Keys (Optional)
-Create a `.env` file in the root directory for AI features:
-
-```env
-VITE_GEMINI_API_KEY=your_gemini_api_key
-VITE_XAI_API_KEY=your_xai_api_key
-VITE_OPENROUTER_API_KEY=your_openrouter_api_key
-```
-
-### Environment Variables
-The following are automatically configured but can be overridden:
-
-- `VITE_PYTHON_BRIDGE_URL=http://127.0.0.1:8765` (Renderer)
-- `GESTRA_PYTHON_URL=http://127.0.0.1:8765` (Electron)
-- `GESTRA_PYTHON_ENTRY=path/to/python-core/main.py` (Electron)
-
-## Running the Project
-
-### Development Mode
-
-1. **Start the Python backend** (optional, for Collective mode):
-   ```bash
-   cd python-core
-   python main.py --api
-   ```
-   This starts the HTTP server on port 8765.
-
-2. **Start the Electron app**:
-   ```bash
-   npm run dev
-   ```
-   This launches the application in development mode.
-
-### Production Mode
-
-1. **Build the application**:
-   ```bash
-   npm run build
-   ```
-
-2. **Start the Python backend** (if using Collective mode):
-   ```bash
-   cd python-core
-   python main.py --api
-   ```
-
-3. **Run the built application**:
-   ```bash
-   npm run preview
-   ```
-
-## Usage
-
-### Gesture Actions
+Gestra detects a stable hand pose and maps it to a desktop action.
 
 | Gesture | Action |
-|---------|--------|
+| --- | --- |
 | Open palm | Scroll up continuously while held |
 | Closed fist | Scroll down continuously while held |
-| Peace sign | Take screenshot |
-| Thumbs up | Media play/pause |
+| Peace | Capture screenshot |
+| Thumbs up | Play or pause media |
 | Index point | Move cursor |
 | Pinch | Left click |
 
-### Operating Modes
+### Assistant Experience
 
-#### Collective Mode (Recommended)
-- Python backend owns the camera
-- Provides MJPEG stream at `GET /camera.mjpg`
-- Serves HUD state at `GET /api/v1/state`
-- More stable for continuous gesture detection
+- Embedded assistant panel inside the desktop UI
+- Voice orb and runtime state feedback
+- Command-style interaction flow
+- Local desktop command handling for common actions
 
-#### Local Camera Mode
-- Browser uses `getUserMedia` API
-- Falls back to Electron native actions when Python unavailable
-- Lighter resource usage but may have camera conflicts
+### Desktop Automation
 
-### Voice Commands
+- Cursor movement
+- Click and scroll actions
+- Screenshot trigger
+- Media playback control
+- Window and app-level interaction support
 
-- **Wake word**: "Hey Gestra" or "Okay Gestra"
-- **Direct commands**: App launching, OS actions, AI queries
-- **Fallback**: Windows native speech recognition via PowerShell
+## How It Works
 
-### AI Assistant
+The application supports a desktop-oriented runtime architecture:
 
-- Supports multiple LLM providers
-- Voice input/output integration
-- Context-aware responses
-- Direct command execution
+### 1. Electron Shell
 
-## Project Architecture
+The Electron layer manages the window, preload bridge, desktop integrations, assistant IPC, and runtime orchestration.
 
+### 2. Vision Layer
+
+Hand landmarks are processed through MediaPipe-based gesture recognition. Depending on the mode, the app can use a browser-side camera flow or a Python-powered vision bridge.
+
+### 3. Action Layer
+
+Recognized gestures are stabilized, translated into action intents, and then executed as desktop operations.
+
+### 4. Assistant Layer
+
+The assistant UI handles typed and voice-assisted interaction while maintaining status feedback and conversational state.
+
+## Runtime Modes
+
+### Collective Vision Mode
+
+In collective mode, the Python runtime owns the camera feed and exposes synchronized state for the Electron UI. This mode is useful when the app needs a dedicated vision pipeline and desktop action bridge.
+
+### Local Camera Mode
+
+In local camera mode, the Electron app uses `getUserMedia` and local gesture processing in the renderer. When available, it can still forward gesture events through the desktop bridge.
+
+## Project Structure
+
+| Path | Responsibility |
+| --- | --- |
+| `electron/main.cjs` | Electron main process, assistant bridge, desktop runtime orchestration |
+| `electron/preload.cjs` | Secure renderer bridge for desktop APIs |
+| `src/main.js` | Main application startup flow and UI coordination |
+| `src/assistant.js` | Assistant panel, voice state, and interaction logic |
+| `src/gesture-mediapipe.js` | Browser-side hand landmark detection |
+| `src/actions.js` | Gesture-to-action routing |
+| `src/ui.js` | Runtime UI updates and gesture feedback |
+| `src/tts.js` | Speech synthesis helpers |
+| `python-core/main.py` | Python runtime, bridge endpoints, and vision coordination |
+| `python-core/gesture.py` | Gesture classification and hand landmark pipeline |
+| `python-core/actions.py` | Desktop action execution and motion smoothing |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm
+- Python 3.x
+- Windows desktop environment for native action behavior
+
+### Install
+
+```bash
+npm install
 ```
-┌─ Electron Main ─────────────────────────────────┐
-│  IPC routing, window mgmt, Python launcher      │
-└────────────────────────────────┬────────────────┘
-                                 │ IPC/HTTP
-           ┌─────────────────────┴──────────────────┐
-           │  Vite Renderer (Web UI)                 │
-           │  Gesture detection, action routing      │
-           │  AI assistant, voice control            │
-           └─────────────────────┬──────────────────┘
-                                 │ HTTP
-           ┌─────────────────────┴──────────────────┐
-           │  Python Backend (Optional)              │
-           │  Camera → MediaPipe → Actions           │
-           └─────────────────────────────────────────┘
+
+### Start Development
+
+```bash
+npm run dev
 ```
 
-## Key Components
+### Build Production Bundle
 
-### Frontend (`src/`)
-- `main.js` - App orchestration and startup flow
-- `gesture-mediapipe.js` - Browser hand detection and classification
-- `actions.js` - Gesture-to-action mapping and execution
-- `voice.js` - Voice recognition and wake-word detection
-- `assistant.js` - AI assistant interface
-- `ai.js` - LLM provider abstraction
-- `tts.js` - Text-to-speech for feedback
-- `ui.js` - HUD updates and interface management
+```bash
+npm run build
+```
 
-### Electron (`electron/`)
-- `main.cjs` - Window management and IPC handlers
-- `preload.cjs` - Context bridge for secure API exposure
-- `windows-voice-once.ps1` - PowerShell speech recognition fallback
+### Create Desktop Distribution
 
-### Python (`python-core/`)
-- `main.py` - HTTP server and camera processing loop
-- `gesture.py` - MediaPipe landmark classification
-- `actions.py` - PyAutoGUI action execution with smoothing
+```bash
+npm run dist
+```
 
-## Building for Distribution
+## Scripts
 
-1. **Build the web assets**:
-   ```bash
-   npm run build
-   ```
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite development environment |
+| `npm run build` | Build the production frontend bundle |
+| `npm run preview` | Preview the built frontend |
+| `npm run dist` | Build and package the Electron app |
 
-2. **Create Windows installer**:
-   ```bash
-   npm run dist
-   ```
-   This generates an NSIS installer in the `dist/` directory.
+## Use Cases
 
-## Performance Tuning
+- Touch-free desktop navigation
+- Presentation control
+- Accessibility-inspired interaction
+- Gesture-based demos and experiments
+- Local AI desktop showcase projects
+- Human-computer interaction prototypes
 
-- **Gesture confidence threshold**: 0.7 (configurable via UI slider)
-- **Stability requirement**: 6 consecutive frames of same gesture
-- **Action cooldowns**: 700-1400ms per action type
-- **Mouse smoothing**: Exponential moving average (alpha 0.38)
-- **Scroll repeat**: 120ms intervals, 6 clicks per tick
+## Why This Project Stands Out
 
-## Troubleshooting
+RunAnywhere AI Gestra is more than a gesture demo. It blends interface design, desktop automation, local runtime orchestration, and AI-ready interaction patterns into a single product direction. The combination of gesture feedback, voice signaling, and on-device workflow design makes it suitable for modern desktop AI experiences that need to feel responsive and tangible.
 
-### Python Backend Issues
-- Ensure Python 3.8+ is installed
-- Check that `requirements.txt` packages are installed
-- Verify camera permissions
-- Check port 8765 availability
+## Future Direction
 
-### Camera Access
-- Grant browser camera permissions when prompted
-- Close other applications using the camera
-- Try switching between Collective and Local modes
+Planned or natural next-step improvements include:
 
-### Voice Recognition
-- Ensure microphone permissions
-- Test with different wake words
-- Check Windows speech recognition settings
-
-### Build Issues
-- Clear `node_modules` and reinstall: `rm -rf node_modules && npm install`
-- Update Node.js to latest LTS version
-- Check for conflicting global packages
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly in both modes
-5. Submit a pull request
+- Deeper RunAnywhere model integration across assistant flows
+- Expanded offline voice pipeline coverage
+- More configurable gesture packs
+- Better model selection and local runtime controls
+- Stronger packaging for production-ready desktop release flows
 
 ## License
 
-This project is proprietary software. See LICENSE file for details.
+This project is currently provided without an explicit production license declaration in the application setup. Add a final license before public distribution if needed.
