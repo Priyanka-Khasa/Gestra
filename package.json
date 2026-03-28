@@ -1,5 +1,5 @@
 {
-  "name": "gestureos",
+  "name": "gestra",
   "private": true,
   "version": "0.2.0",
   "type": "module",
@@ -32,8 +32,8 @@
     "vite-plugin-electron-renderer": "^0.14.6"
   },
   "build": {
-    "appId": "com.gestureos.desktop",
-    "productName": "RunAnywhere AI",
+    "appId": "com.gestra.desktop",
+    "productName": "Gestra",
     "files": [
       "dist/**",
       "dist-electron/**",
@@ -47,7 +47,7 @@
       "target": "nsis"
     }
   },
-  "description": "Desktop Electron app for real-time vision control, system actions, and a RunAnywhere AI assistant with voice activation.",
+  "description": "Desktop Electron app for real-time gesture control, system actions, and the Gestra assistant with optional voice activation.",
   "directories": {
     "test": "tests"
   },

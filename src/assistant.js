@@ -1,6 +1,7 @@
 import { createAIClient } from './ai.js';
 import { initVoiceActivation } from './voice.js';
 import { initTTS, speakFeedback } from './tts.js';
+import { resolveLocalAssistantCommand } from './control-state.js';
 
 function formatTime(date = new Date()) {
   return date.toLocaleTimeString([], {
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let voiceState = 'idle';
   let nativeVoiceLoopAbort = false;
 
-  const providerLabel = 'RunAnywhere';
+  const providerLabel = 'Gestra';
   const canUseNativeVoice =
     Boolean(window.electronAPI?.recognizeNativeSpeech) &&
     typeof navigator !== 'undefined' &&
@@ -134,10 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
     { pattern: /\b(volume\s+up)\b/, payload: { type: 'os-action', target: 'volume-up' } },
     { pattern: /\b(volume\s+down)\b/, payload: { type: 'os-action', target: 'volume-down' } },
     { pattern: /\b(alt\s+tab|switch\s+window)\b/, payload: { type: 'os-action', target: 'alt-tab' } },
-    { pattern: /\b(show|open)\s+(runanywhere|assistant|app)\b/, payload: { type: 'window-action', target: 'show' } },
-    { pattern: /\b(hide|minimize)\s+(runanywhere|assistant|app)\b/, payload: { type: 'window-action', target: 'hide' } },
-    { pattern: /\b(pin)\s+(runanywhere|assistant|app)\b/, payload: { type: 'window-action', target: 'pin' } },
-    { pattern: /\b(unpin)\s+(runanywhere|assistant|app)\b/, payload: { type: 'window-action', target: 'unpin' } },
+    { pattern: /\b(show|open)\s+(gestra|assistant|app)\b/, payload: { type: 'window-action', target: 'show' } },
+    { pattern: /\b(hide|minimize)\s+(gestra|assistant|app)\b/, payload: { type: 'window-action', target: 'hide' } },
+    { pattern: /\b(pin)\s+(gestra|assistant|app)\b/, payload: { type: 'window-action', target: 'pin' } },
+    { pattern: /\b(unpin)\s+(gestra|assistant|app)\b/, payload: { type: 'window-action', target: 'unpin' } },
+    { pattern: /\b(switch to|use)\s+(browser|desktop|presentation|creator|coding)\s+(mode|pack)?\b/, payload: { type: 'gestra-local', target: 'pack' } },
+    { pattern: /\b(use|apply)\s+(balanced|accessibility|presentation|creator)\s+profile\b/, payload: { type: 'gestra-local', target: 'profile' } },
+    { pattern: /\b(enable|turn on)\s+automation\b/, payload: { type: 'gestra-local', target: 'automation-on' } },
+    { pattern: /\b(disable|turn off)\s+automation\b/, payload: { type: 'gestra-local', target: 'automation-off' } },
   ];
 
   const resolveDirectVoiceCommand = (transcript) => {
@@ -152,6 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const executeDirectVoiceCommand = async (transcript) => {
     const voiceCommand = resolveDirectVoiceCommand(transcript);
+    if (voiceCommand?.type === 'gestra-local') {
+      appendMessage('user', transcript);
+      const message = resolveLocalAssistantCommand(transcript) || 'That local Gestra command did not match a workflow setting.';
+      appendAssistantSystemMessage(message);
+      speakFeedback(message);
+      setStatus('Voice Ready');
+      setVoiceVisualState('ready', 'Voice standby');
+      return true;
+    }
+
     if (!voiceCommand || !window.electronAPI?.executeVoiceCommand) {
       return false;
     }
@@ -256,6 +271,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
+      const localReply = resolveLocalAssistantCommand(trimmed);
+      if (localReply) {
+        history.push({ role: 'user', content: trimmed });
+        history.push({ role: 'assistant', content: localReply });
+        trimHistory();
+        appendMessage('assistant', localReply);
+        setStatus(voiceEnabled ? 'Voice Ready' : 'Ready');
+        if (fromVoice) {
+          speakFeedback(localReply);
+          setVoiceVisualState(voiceEnabled ? 'ready' : 'idle', voiceEnabled ? 'Voice standby' : 'Voice offline');
+        }
+        return true;
+      }
+
       const assistantText = await client.askAssistant({
         message: trimmed,
         history,
@@ -286,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const voiceController = initVoiceActivation({
-    wakeWord: 'hey runanywhere',
+    wakeWord: 'hey gestra',
     onWakeWord: () => {
       setOpen(true);
       setStatus('Listening...');
@@ -354,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     appendAssistantSystemMessage(
       client.hasApiKey
-        ? `Neural link established. ${providerLabel} AI is online. Say "Hey RunAnywhere" to start voice control.`
+        ? `Gestra Assistant is online. Say "Hey Gestra" to start voice control.`
         : `Assistant UI initialized. Add your ${providerLabel} AI key to enable cloud reasoning.`
     );
   }, 600);

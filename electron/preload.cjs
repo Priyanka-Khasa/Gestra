@@ -8,11 +8,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   pythonBridge: (payload) => ipcRenderer.invoke('python-bridge', payload),
 
   performAction: (action, options) => {
-    console.log('[GestureOS/Preload] performAction → IPC', action, options ?? '');
+    console.log('[Gestra/Preload] performAction → IPC', action, options ?? '');
     return ipcRenderer.invoke('perform-action', { action, options: options ?? null });
   },
 
   toggleOverlayMode: (enabled) => ipcRenderer.invoke('set-overlay-mode', enabled),
+  yieldFocusToDesktop: (payload) => ipcRenderer.invoke('yield-focus-to-desktop', payload ?? {}),
 
   hideWindow: () => ipcRenderer.invoke('hide-window'),
 
@@ -23,6 +24,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getPythonBackendStatus: () => ipcRenderer.invoke('get-python-backend-status'),
 
   ensurePythonBackend: () => ipcRenderer.invoke('ensure-python-backend'),
+  getActiveAppContext: () => ipcRenderer.invoke('get-active-app-context'),
 
   assistantRequest: (payload) => ipcRenderer.invoke('assistant-request', payload),
 
@@ -30,3 +32,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   recognizeNativeSpeech: (payload) => ipcRenderer.invoke('recognize-native-speech', payload),
 });
+

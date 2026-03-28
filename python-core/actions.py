@@ -1,5 +1,5 @@
 """
-PyAutoGUI: gesture → OS actions with discrete cooldowns and repeating scroll.
+PyAutoGUI: gesture to OS actions with discrete cooldowns and repeating scroll.
 """
 
 from __future__ import annotations
@@ -18,9 +18,10 @@ pyautogui.PAUSE = 0
 
 # 1s between click, PrintScreen, and media play/pause (per user spec).
 DISCRETE_COOLDOWN_S = 1.0
-# Continuous scroll while palm/fist stable (aligned with renderer repeat interval).
-SCROLL_REPEAT_INTERVAL_S = 0.12
-SCROLL_CLICKS_PER_TICK = 6
+# Continuous scroll while palm/fist stays stable.
+# The previous cadence was fast enough to flood actions and feel jumpy.
+SCROLL_REPEAT_INTERVAL_S = 0.28
+SCROLL_CLICKS_PER_TICK = 2
 
 _IS_WINDOWS = __import__("sys").platform.startswith("win")
 _WHEEL_DELTA = 120
@@ -109,7 +110,7 @@ class ActionController:
         if now - self._last_move_log >= 0.4:
             self._last_move_log = now
             ix, iy = int(round(self._sx)), int(round(self._sy))
-            logger.info("Cursor moving → (%d, %d)", ix, iy)
+            logger.info("Cursor moving -> (%d, %d)", ix, iy)
 
         ix, iy = int(round(self._sx)), int(round(self._sy))
         pyautogui.moveTo(ix, iy, duration=0)

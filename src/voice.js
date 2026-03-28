@@ -10,7 +10,7 @@ function normalize(text) {
 }
 
 export function initVoiceActivation({
-  wakeWord = 'hey runanywhere',
+  wakeWord = 'hey gestra',
   commandWindowMs = 5000,
   onWakeWord = () => {},
   onCommand = () => {},
