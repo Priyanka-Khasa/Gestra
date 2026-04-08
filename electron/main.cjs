@@ -13,7 +13,6 @@ const {
 const path = require('path');
 const { spawn } = require('child_process');
 const { keyboard, Key, mouse, screen } = require('@nut-tree-fork/nut-js');
-
 mouse.config.mouseSpeed = 2000;
 
 /** Python OS bridge (python-core `python main.py --api`). Override with GESTRA_PYTHON_URL. */
