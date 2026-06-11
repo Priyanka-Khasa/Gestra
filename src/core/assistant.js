@@ -1,5 +1,5 @@
 import { createAIClient } from './ai.js';
-import { initVoiceActivation } from './voice.js';
+import { initVoiceActivation } from '../voice.js';
 import { initTTS, speakFeedback } from './tts.js';
 import { resolveLocalAssistantCommand } from './control-state.js';
 
