@@ -1,10 +1,25 @@
 import './style.css';
+
+import { initIntroScreen } from './screens/intro.screen.js';
+import { initSetupScreen } from './screens/setup.screen.js';
+import { initPermissionScreen } from './screens/permission.screen.js';
+import { initGuideScreen } from './screens/guide.screen.js';
+import { initWorkspaceScreen } from './screens/workspace.screen.js';
+
+import { initAssistantPanel } from './components/assistant-panel.component.js';
+import { initNavbar } from './components/navbar.component.js';
+import { initStatusCard } from './components/status-card.component.js';
+import {
+  renderGestureCards,
+} from './components/gesture-card.component.js';
+
 import {
   initGestureEngine,
   setGestureMinConfidence,
   startGestureEngine,
   stopGestureEngine,
 } from './core/gesture-mediapipe.js';
+
 import {
   DEFAULT_PYTHON_BRIDGE_URL,
   fireAction,
@@ -15,6 +30,7 @@ import {
   fetchPythonHudState,
   mapPythonStateToOverlay,
 } from './core/actions.js';
+
 import {
   getCalibration,
   getGestureActionLabel,
@@ -23,9 +39,17 @@ import {
   setCalibrationValue,
   subscribeControlState,
 } from './core/control-state.js';
+
 import { initControlUi } from './core/control-ui.js';
 import { initTTS, speakFeedback } from './core/tts.js';
-import { showToast, updateOverlay, updateSystemStatus, logAction, resetRuntimeUi } from './core/ui.js';
+
+import {
+  showToast,
+  updateOverlay,
+  updateSystemStatus,
+  logAction,
+  resetRuntimeUi,
+} from './core/ui.js';
 
 function waitForVideoReady(video, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {

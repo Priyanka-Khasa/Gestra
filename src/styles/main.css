@@ -1,40 +1,21 @@
-/* =========================================================
-   GESTRA MAIN STYLESHEET
-========================================================= */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* =========================================================
-   CORE
-========================================================= */
-
 @import "./tokens.css";
 @import "./base.css";
 @import "./animations.css";
 @import "./layout.css";
 
-/* =========================================================
-   COMMON COMPONENTS
-========================================================= */
-
-@import "./buttons.css";
 @import "./utilities.css";
-
-/* =========================================================
-   SCREENS
-========================================================= */
-
 @import "./intro.css";
 @import "./guide.css";
 @import "./setup.css";
 @import "./permission.css";
 @import "./workspace.css";
 @import "./assistant.css";
+@import "./responsive.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* =========================================================
-   RESPONSIVE OVERRIDES
+   GESTRA MAIN STYLESHEET
 ========================================================= */
-
-@import "./responsive.css";
