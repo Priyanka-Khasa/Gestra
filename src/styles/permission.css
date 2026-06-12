@@ -1,0 +1,333 @@
+/* =========================================================
+   PERMISSION SCREEN
+========================================================= */
+
+#permission-screen,
+#license-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2rem;
+
+  overflow-y: auto;
+
+  animation: fadeIn 0.5s var(--ease-out) both;
+}
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.permission-container,
+.permission-shell {
+  width: 100%;
+  max-width: 920px;
+
+  position: relative;
+
+  border-radius: var(--r-2xl);
+
+  border: 1px solid var(--border-base);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.04),
+      rgba(255,255,255,0.02)
+    );
+
+  backdrop-filter: blur(24px);
+
+  box-shadow: var(--shadow-lg);
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.permission-header {
+  padding: 2rem 2rem 1.5rem;
+
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.permission-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  margin-bottom: 1rem;
+
+  padding: 0.5rem 0.9rem;
+
+  border-radius: 999px;
+
+  background: rgba(162,123,92,0.12);
+
+  border: 1px solid rgba(162,123,92,0.2);
+
+  color: var(--text-mid);
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.permission-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  color: var(--text-hi);
+}
+
+.permission-subtitle {
+  margin-top: 1rem;
+
+  color: var(--text-lo);
+
+  line-height: 1.8;
+
+  max-width: 680px;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.permission-content {
+  padding: 2rem;
+
+  display: grid;
+  gap: 1.25rem;
+}
+
+.permission-card {
+  position: relative;
+
+  padding: 1.25rem;
+
+  border-radius: var(--r-lg);
+
+  border: 1px solid var(--border-dim);
+
+  background: rgba(255,255,255,0.03);
+
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    background .25s ease;
+}
+
+.permission-card:hover {
+  transform: translateY(-2px);
+
+  border-color: var(--border-base);
+
+  background: rgba(255,255,255,0.05);
+}
+
+.permission-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  font-weight: 700;
+  color: var(--text-hi);
+
+  margin-bottom: 0.5rem;
+}
+
+.permission-card-text {
+  color: var(--text-lo);
+  line-height: 1.7;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.permission-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 1rem;
+
+  border-radius: var(--r-md);
+
+  background: rgba(162,123,92,0.08);
+
+  border: 1px solid rgba(162,123,92,0.15);
+}
+
+.permission-status-dot {
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #34d399;
+
+  box-shadow:
+    0 0 10px rgba(52,211,153,0.7);
+
+  animation: badgeStatusPing 2s infinite;
+}
+
+.permission-status-text {
+  font-size: 14px;
+  color: var(--text-mid);
+}
+
+/* =========================================================
+   CHECKLIST
+========================================================= */
+
+.permission-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.permission-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.permission-item-icon {
+  flex-shrink: 0;
+
+  width: 20px;
+  height: 20px;
+
+  margin-top: 2px;
+
+  color: var(--accent);
+}
+
+.permission-item-text {
+  color: var(--text-lo);
+  line-height: 1.7;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.permission-footer {
+  padding: 1.5rem 2rem;
+
+  border-top: 1px solid var(--border-dim);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.permission-note {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.permission-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.permission-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 150px;
+
+  padding: 0.9rem 1.4rem;
+
+  border-radius: var(--r-md);
+
+  font-weight: 700;
+
+  transition: all .25s ease;
+}
+
+.permission-btn-primary {
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent-deep)
+    );
+}
+
+.permission-btn-primary:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 28px rgba(140,103,72,0.28);
+}
+
+.permission-btn-secondary {
+  color: var(--text-mid);
+
+  border: 1px solid var(--border-base);
+
+  background: rgba(255,255,255,0.03);
+}
+
+.permission-btn-secondary:hover {
+  background: rgba(255,255,255,0.06);
+
+  border-color: var(--border-strong);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  #permission-screen,
+  #license-screen {
+    padding: 1rem;
+  }
+
+  .permission-header,
+  .permission-content,
+  .permission-footer {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .permission-title {
+    font-size: 2rem;
+  }
+
+  .permission-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .permission-actions {
+    width: 100%;
+  }
+
+  .permission-btn {
+    width: 100%;
+  }
+}

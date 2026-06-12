@@ -1,0 +1,681 @@
+/* =========================================================
+   WORKSPACE ROOT
+========================================================= */
+
+#app-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent;
+}
+
+#app-container > div {
+  min-width: 1680px;
+}
+
+/* =========================================================
+   WORKSPACE NAVBAR / SHELL BUTTONS
+========================================================= */
+
+.shell-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 56px;
+  height: 34px;
+
+  padding: 0 0.9rem;
+
+  border-radius: 12px;
+  border: 1px solid var(--border-dim);
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: var(--text-mid);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition:
+    transform 0.2s var(--ease-out),
+    background 0.25s var(--ease-in-out),
+    border-color 0.25s var(--ease-in-out),
+    color 0.25s var(--ease-in-out);
+}
+
+.shell-btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-base);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-hi);
+}
+
+.shell-btn:active {
+  transform: scale(0.96);
+}
+
+.shell-btn-danger {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.shell-btn-danger:hover {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.14);
+}
+
+/* =========================================================
+   WORKSPACE SCROLL AREA
+========================================================= */
+
+#workspace-scroll {
+  display: flex;
+  align-items: stretch;
+
+  min-height: 0;
+  flex: 1;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding-bottom: 10px;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(162, 123, 92, 0.78)
+    rgba(220, 215, 201, 0.05);
+}
+
+#workspace-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+#workspace-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+#workspace-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(162, 123, 92, 0.88),
+      rgba(63, 79, 68, 0.72)
+    );
+
+  border: 2px solid var(--bg-base);
+}
+
+/* =========================================================
+   SIDE PANELS
+========================================================= */
+
+#workspace-left-sidebar,
+#workspace-right-sidebar {
+  height: 100%;
+
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.015)
+    ),
+    rgba(0, 0, 0, 0.2);
+
+  backdrop-filter: blur(24px);
+}
+
+#workspace-left-sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#workspace-right-sidebar {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* =========================================================
+   CUSTOM SCROLLBAR
+========================================================= */
+
+.custom-scrollbar,
+.activity-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(162, 123, 92, 0.88)
+    rgba(220, 215, 201, 0.06);
+}
+
+.custom-scrollbar::-webkit-scrollbar,
+.activity-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track,
+.activity-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.activity-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(162, 123, 92, 0.95),
+      rgba(63, 79, 68, 0.82)
+    );
+
+  border: 1px solid rgba(44, 57, 48, 0.82);
+}
+
+/* =========================================================
+   GESTURE LIBRARY CARDS
+========================================================= */
+
+.gesture-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+
+  padding: 0.875rem 1rem;
+
+  border-radius: var(--r-md);
+
+  background: var(--surface-0);
+
+  border: 1px solid var(--border-dim);
+
+  cursor: pointer;
+
+  will-change: transform;
+
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-in-out),
+    border-color var(--dur-base) var(--ease-in-out),
+    box-shadow var(--dur-base) var(--ease-in-out);
+}
+
+.gesture-card:hover {
+  transform: translateY(-2px);
+
+  background: rgba(196, 191, 177, 0.07);
+
+  border-color: var(--accent-ring);
+
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(140, 103, 72, 0.08);
+}
+
+.gesture-card.is-active,
+.gesture-card.active {
+  border-color: var(--accent-ring);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(140, 103, 72, 0.18),
+      rgba(46, 60, 51, 0.16)
+    );
+
+  box-shadow:
+    0 0 0 1px rgba(140, 103, 72, 0.16),
+    0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.gesture-icon-box {
+  width: 44px;
+  height: 44px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(140, 103, 72, 0.18),
+      rgba(207, 160, 157, 0.08)
+    );
+
+  border: 1px solid rgba(140, 103, 72, 0.18);
+
+  color: var(--paper);
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-indicator {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 999px;
+
+  background: rgba(148, 163, 184, 0.35);
+
+  box-shadow:
+    0 0 0 3px rgba(148, 163, 184, 0.06);
+}
+
+.gesture-card.is-active .status-indicator,
+.gesture-card.active .status-indicator {
+  background: #34d399;
+
+  box-shadow:
+    0 0 0 4px rgba(52, 211, 153, 0.12),
+    0 0 14px rgba(52, 211, 153, 0.65);
+}
+
+/* =========================================================
+   CAMERA / VISION AREA
+========================================================= */
+
+#camera-container {
+  position: relative;
+
+  min-height: 0;
+  flex: 1;
+
+  overflow: hidden;
+
+  border-radius: 28px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(140, 103, 72, 0.14),
+      transparent 45%
+    ),
+    rgba(0, 0, 0, 0.28);
+
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.45);
+}
+
+#camera-container::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.32),
+      transparent 25%,
+      transparent 65%,
+      rgba(0, 0, 0, 0.35)
+    );
+}
+
+#webcam-feed,
+#python-vision-feed {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transform: scaleX(-1);
+}
+
+#python-vision-feed {
+  position: absolute;
+  inset: 0;
+}
+
+/* =========================================================
+   LOADING OVERLAY
+========================================================= */
+
+#loading-overlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 40;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(30, 41, 32, 0.72),
+      rgba(0, 0, 0, 0.82)
+    );
+
+  backdrop-filter: blur(18px);
+
+  transition:
+    opacity 0.7s var(--ease-out),
+    visibility 0.7s var(--ease-out);
+}
+
+#loading-overlay.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#loading-text {
+  color: var(--text-hi);
+}
+
+#loading-bar,
+#confidence-bar {
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent),
+      var(--accent-blush)
+    );
+}
+
+/* =========================================================
+   STATUS MINI CARDS
+========================================================= */
+
+.status-mini-card {
+  min-width: 128px;
+
+  padding: 0.7rem 0.85rem;
+
+  border-radius: 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  background: rgba(0, 0, 0, 0.5);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.status-mini-label {
+  display: block;
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.status-mini-value {
+  display: block;
+
+  margin-top: 0.2rem;
+
+  color: var(--text-hi);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   DETECTED GESTURE PILL
+========================================================= */
+
+.gesture-live-pill {
+  min-width: 160px;
+
+  padding: 0.7rem 1.1rem;
+
+  border-radius: 999px;
+
+  text-align: center;
+
+  color: var(--text-hi);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(140, 103, 72, 0.28),
+      rgba(207, 160, 157, 0.12)
+    ),
+    rgba(0, 0, 0, 0.48);
+
+  border: 1px solid rgba(140, 103, 72, 0.28);
+
+  backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.35),
+    0 0 24px rgba(140, 103, 72, 0.18);
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.gesture-live-pill:not(.opacity-0) {
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   OVERLAY MODE BOX
+========================================================= */
+
+#overlay-mode-hint {
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   ACTION LOG / RIGHT PANEL
+========================================================= */
+
+#action-log {
+  min-height: 12rem;
+  max-height: min(40vh, 24rem);
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.action-log-item,
+.log-item {
+  padding: 0.85rem 0.95rem;
+
+  border-radius: 14px;
+
+  border: 1px solid var(--border-dim);
+
+  background: rgba(255, 255, 255, 0.035);
+
+  color: var(--text-mid);
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  animation: fadeUp 0.25s var(--ease-out) both;
+}
+
+.action-log-item + .action-log-item,
+.log-item + .log-item {
+  margin-top: 0.6rem;
+}
+
+.action-log-item strong,
+.log-item strong {
+  color: var(--text-hi);
+}
+
+/* =========================================================
+   RUNTIME / STATUS CARDS
+========================================================= */
+
+.runtime-card,
+.status-card,
+.workspace-card {
+  border-radius: var(--r-lg);
+
+  border: 1px solid var(--border-dim);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(196, 191, 177, 0.05),
+      rgba(196, 191, 177, 0.02)
+    );
+
+  box-shadow: var(--shadow-sm);
+
+  backdrop-filter: blur(20px);
+}
+
+.runtime-card:hover,
+.status-card:hover,
+.workspace-card:hover {
+  border-color: var(--border-base);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(196, 191, 177, 0.075),
+      rgba(196, 191, 177, 0.03)
+    );
+}
+
+/* =========================================================
+   CHIPS
+========================================================= */
+
+#active-app-chip,
+#automation-chip {
+  display: inline-block;
+}
+
+.workspace-chip,
+.runtime-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.45rem 0.7rem;
+
+  border-radius: 999px;
+
+  border: 1px solid var(--border-dim);
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: var(--text-mid);
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   CAMERA CANVAS / OVERLAYS
+========================================================= */
+
+#gesture-canvas,
+#overlay-canvas,
+#landmark-canvas {
+  position: absolute;
+  inset: 0;
+
+  z-index: 12;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+}
+
+#confidence-bar {
+  transition:
+    width 0.3s var(--ease-out),
+    opacity 0.3s var(--ease-out);
+}
+
+/* =========================================================
+   RESPONSIVE WORKSPACE
+========================================================= */
+
+@media (max-width: 1536px) {
+  #app-container > div {
+    min-width: 1500px;
+  }
+
+  #workspace-left-sidebar,
+  #workspace-right-sidebar {
+    width: 300px;
+  }
+}
+
+@media (max-width: 1280px) {
+  #app-container > div {
+    min-width: 1360px;
+  }
+
+  #workspace-left-sidebar,
+  #workspace-right-sidebar {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+  #app-container > div {
+    min-width: 1180px;
+  }
+
+  #workspace-left-sidebar {
+    display: none;
+  }
+
+  #workspace-right-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  #app-container > div {
+    min-width: 980px;
+  }
+
+  .status-mini-card {
+    min-width: 112px;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .gesture-live-pill {
+    min-width: 140px;
+    font-size: 12px;
+  }
+}

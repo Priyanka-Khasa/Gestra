@@ -1,0 +1,441 @@
+/* =========================================================
+   SETUP SCREEN
+========================================================= */
+
+#setup-screen,
+#login-screen {
+  position: absolute;
+  inset: 0;
+
+  z-index: 55;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2rem;
+
+  overflow-y: auto;
+
+  animation: fadeIn 0.5s var(--ease-out) both;
+}
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.setup-container,
+.setup-shell {
+  width: 100%;
+  max-width: 1100px;
+
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  gap: 2rem;
+
+  align-items: center;
+}
+
+/* =========================================================
+   LEFT CONTENT
+========================================================= */
+
+.setup-copy {
+  max-width: 600px;
+}
+
+.setup-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  padding: 0.55rem 1rem;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(162, 123, 92, 0.2);
+
+  background: rgba(162, 123, 92, 0.1);
+
+  color: var(--text-mid);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+
+  margin-bottom: 1.5rem;
+}
+
+.setup-title {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+
+  line-height: 1.05;
+
+  color: var(--text-hi);
+
+  margin-bottom: 1rem;
+}
+
+.setup-title-accent {
+  display: block;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent),
+      var(--text-hi),
+      var(--accent-blush)
+    );
+
+  background-size: 200% 100%;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: heroTitleAccentShift 6s ease infinite;
+}
+
+.setup-lead {
+  color: var(--text-lo);
+
+  line-height: 1.9;
+
+  max-width: 540px;
+}
+
+/* =========================================================
+   FEATURES
+========================================================= */
+
+.setup-features {
+  margin-top: 2rem;
+
+  display: grid;
+  gap: 1rem;
+}
+
+.setup-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  padding: 1rem;
+
+  border-radius: var(--r-lg);
+
+  background: rgba(255,255,255,0.03);
+
+  border: 1px solid var(--border-dim);
+
+  transition: all .25s ease;
+}
+
+.setup-feature:hover {
+  transform: translateY(-2px);
+
+  background: rgba(255,255,255,0.05);
+
+  border-color: var(--border-base);
+}
+
+.setup-feature-icon {
+  flex-shrink: 0;
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: rgba(162,123,92,0.15);
+
+  color: var(--accent);
+}
+
+.setup-feature-content h4 {
+  margin-bottom: 0.35rem;
+}
+
+.setup-feature-content p {
+  color: var(--text-lo);
+  line-height: 1.6;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.setup-card {
+  position: relative;
+
+  border-radius: var(--r-xl);
+
+  border: 1px solid var(--border-base);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.05),
+      rgba(255,255,255,0.02)
+    );
+
+  backdrop-filter: blur(24px);
+
+  box-shadow: var(--shadow-lg);
+
+  overflow: hidden;
+}
+
+.setup-card::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(162,123,92,0.18),
+      transparent 40%
+    );
+}
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.setup-card-header {
+  padding: 1.5rem;
+
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.setup-card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.setup-card-subtitle {
+  margin-top: 0.5rem;
+
+  color: var(--text-lo);
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.setup-form {
+  padding: 1.5rem;
+
+  display: grid;
+  gap: 1rem;
+}
+
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setup-label {
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--text-mid);
+}
+
+.setup-input {
+  width: 100%;
+  height: 52px;
+
+  border-radius: 14px;
+
+  border: 1px solid var(--border-dim);
+
+  background: rgba(255,255,255,0.04);
+
+  color: var(--text-hi);
+
+  padding: 0 1rem;
+
+  transition: all .25s ease;
+}
+
+.setup-input:focus {
+  border-color: rgba(162,123,92,0.5);
+
+  box-shadow:
+    0 0 0 4px rgba(162,123,92,0.12);
+}
+
+.setup-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+
+.setup-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+
+  color: var(--text-lo);
+
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.setup-check input {
+  margin-top: 3px;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.setup-actions {
+  display: flex;
+  gap: 0.75rem;
+
+  margin-top: 0.5rem;
+}
+
+.setup-btn {
+  flex: 1;
+
+  height: 52px;
+
+  border-radius: 14px;
+
+  font-weight: 700;
+
+  transition: all .25s ease;
+}
+
+.setup-btn-primary {
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent-deep)
+    );
+}
+
+.setup-btn-primary:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 14px 32px rgba(140,103,72,0.25);
+}
+
+.setup-btn-secondary {
+  border: 1px solid var(--border-base);
+
+  background: rgba(255,255,255,0.03);
+
+  color: var(--text-mid);
+}
+
+.setup-btn-secondary:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.setup-status {
+  margin-top: 1rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.9rem 1rem;
+
+  border-radius: var(--r-md);
+
+  background: rgba(162,123,92,0.08);
+
+  border: 1px solid rgba(162,123,92,0.15);
+}
+
+.setup-status-dot {
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #34d399;
+
+  box-shadow:
+    0 0 10px rgba(52,211,153,0.8);
+
+  animation: badgeStatusPing 2s infinite;
+}
+
+.setup-status-text {
+  color: var(--text-mid);
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1024px) {
+
+  .setup-container,
+  .setup-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-copy {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+
+  #setup-screen,
+  #login-screen {
+    padding: 1rem;
+  }
+
+  .setup-title {
+    font-size: 2.5rem;
+  }
+
+  .setup-actions {
+    flex-direction: column;
+  }
+
+  .setup-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .setup-title {
+    font-size: 2rem;
+  }
+
+  .setup-card-header,
+  .setup-form {
+    padding: 1.25rem;
+  }
+}

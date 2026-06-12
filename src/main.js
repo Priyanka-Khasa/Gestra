@@ -4,7 +4,7 @@ import {
   setGestureMinConfidence,
   startGestureEngine,
   stopGestureEngine,
-} from './gesture-mediapipe.js';
+} from './core/gesture-mediapipe.js';
 import {
   DEFAULT_PYTHON_BRIDGE_URL,
   fireAction,
@@ -14,7 +14,7 @@ import {
   setPythonVisionCollective,
   fetchPythonHudState,
   mapPythonStateToOverlay,
-} from './actions.js';
+} from './core/actions.js';
 import {
   getCalibration,
   getGestureActionLabel,
@@ -22,10 +22,10 @@ import {
   setActiveContext,
   setCalibrationValue,
   subscribeControlState,
-} from './control-state.js';
-import { initControlUi } from './control-ui.js';
-import { initTTS, speakFeedback } from './tts.js';
-import { showToast, updateOverlay, updateSystemStatus, logAction, resetRuntimeUi } from './ui.js';
+} from './core/control-state.js';
+import { initControlUi } from './core/control-ui.js';
+import { initTTS, speakFeedback } from './core/tts.js';
+import { showToast, updateOverlay, updateSystemStatus, logAction, resetRuntimeUi } from './core/ui.js';
 
 function waitForVideoReady(video, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {

@@ -1,0 +1,399 @@
+/* =========================================================
+   DISPLAY
+========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.flex {
+  display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+/* =========================================================
+   FLEX HELPERS
+========================================================= */
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-grow {
+  flex: 1;
+}
+
+/* =========================================================
+   POSITION
+========================================================= */
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.sticky {
+  position: sticky;
+}
+
+/* =========================================================
+   WIDTH
+========================================================= */
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.max-w-sm {
+  max-width: 640px;
+}
+
+.max-w-md {
+  max-width: 768px;
+}
+
+.max-w-lg {
+  max-width: 1024px;
+}
+
+.max-w-xl {
+  max-width: 1280px;
+}
+
+/* =========================================================
+   SPACING
+========================================================= */
+
+.m-auto {
+  margin: auto;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.mb-auto {
+  margin-bottom: auto;
+}
+
+.mx-auto {
+  margin-inline: auto;
+}
+
+.p-0 { padding: 0; }
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.p-8 { padding: 2rem; }
+
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.gap-8 { gap: 2rem; }
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-upper {
+  text-transform: uppercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* =========================================================
+   COLORS
+========================================================= */
+
+.text-primary {
+  color: var(--accent);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-hi {
+  color: var(--text-hi);
+}
+
+.text-lo {
+  color: var(--text-lo);
+}
+
+/* =========================================================
+   BORDERS
+========================================================= */
+
+.border {
+  border: 1px solid var(--border-base);
+}
+
+.border-dim {
+  border: 1px solid var(--border-dim);
+}
+
+.rounded-sm {
+  border-radius: var(--r-sm);
+}
+
+.rounded-md {
+  border-radius: var(--r-md);
+}
+
+.rounded-lg {
+  border-radius: var(--r-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--r-xl);
+}
+
+.rounded-full {
+  border-radius: 999px;
+}
+
+/* =========================================================
+   GLASS EFFECT
+========================================================= */
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.glass-strong {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(30px);
+}
+
+/* =========================================================
+   SHADOWS
+========================================================= */
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.glow-primary {
+  box-shadow: var(--glow-primary);
+}
+
+.glow-accent {
+  box-shadow: var(--glow-accent);
+}
+
+/* =========================================================
+   OVERFLOW
+========================================================= */
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+/* =========================================================
+   CURSOR
+========================================================= */
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.pointer-none {
+  pointer-events: none;
+}
+
+.pointer-auto {
+  pointer-events: auto;
+}
+
+/* =========================================================
+   TRANSITIONS
+========================================================= */
+
+.transition {
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.transition-fast {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.transition-slow {
+  transition: all var(--duration-slow) var(--ease-out);
+}
+
+/* =========================================================
+   HOVER HELPERS
+========================================================= */
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--glow-primary);
+}
+
+/* =========================================================
+   ANIMATION HELPERS
+========================================================= */
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease forwards;
+}
+
+.animate-pulse {
+  animation: pulseSoft 2.5s ease infinite;
+}
+
+.animate-spin {
+  animation: spin 2s linear infinite;
+}
+
+/* =========================================================
+   Z INDEX
+========================================================= */
+
+.z-content {
+  z-index: var(--z-content);
+}
+
+.z-header {
+  z-index: var(--z-header);
+}
+
+.z-modal {
+  z-index: var(--z-modal);
+}
+
+.z-assistant {
+  z-index: var(--z-assistant);
+}

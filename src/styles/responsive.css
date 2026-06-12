@@ -1,0 +1,264 @@
+/* =========================================================
+   DESKTOP LARGE
+========================================================= */
+
+@media (max-width: 1440px) {
+
+  .workspace-layout {
+    min-width: 1450px;
+  }
+
+  .workspace-sidebar {
+    width: 300px;
+  }
+
+  .intro-title {
+    font-size: 4.5rem;
+  }
+}
+
+/* =========================================================
+   LAPTOP
+========================================================= */
+
+@media (max-width: 1280px) {
+
+  .workspace-layout {
+    min-width: 1300px;
+  }
+
+  .workspace-sidebar {
+    width: 280px;
+  }
+
+  .intro-title {
+    font-size: 4rem;
+  }
+
+  .intro-showcase {
+    max-width: 100%;
+  }
+
+  .gmg-shell {
+    padding-inline: 2rem;
+  }
+}
+
+/* =========================================================
+   TABLET LANDSCAPE
+========================================================= */
+
+@media (max-width: 1024px) {
+
+  #intro-screen {
+    overflow-y: auto;
+    align-items: flex-start;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .intro-title {
+    font-size: 3.5rem;
+  }
+
+  .intro-gesture-cluster-left,
+  .intro-gesture-cluster-right {
+    opacity: 0.15;
+  }
+
+  .workspace-layout {
+    min-width: 1200px;
+  }
+
+  .workspace-sidebar {
+    width: 260px;
+  }
+
+  .gmg-hero {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .gmg-hero-right {
+    order: -1;
+  }
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .card-grid-2,
+  .card-grid-3,
+  .card-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .intro-title {
+    font-size: 3rem;
+    max-width: 100%;
+  }
+
+  .intro-copy {
+    text-align: left;
+  }
+
+  .intro-showcase {
+    border-radius: 24px;
+  }
+
+  .intro-float-pill {
+    font-size: 8px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .workspace-layout {
+    min-width: 1000px;
+  }
+
+  #assistant-panel {
+    width: calc(100vw - 24px);
+    height: 75vh;
+  }
+
+  .gmg-shell {
+    padding-inline: 1.25rem;
+  }
+
+  .gmg-timeline {
+    padding-left: 0;
+  }
+
+  .gmg-timeline-spine {
+    display: none;
+  }
+
+  .gmg-tstep {
+    padding-left: 0;
+  }
+}
+
+/* =========================================================
+   MOBILE LARGE
+========================================================= */
+
+@media (max-width: 640px) {
+
+  #intro-screen {
+    padding-inline: 1rem;
+  }
+
+  .intro-title {
+    font-size: 2.5rem;
+    line-height: 1.1;
+  }
+
+  .intro-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .intro-actions button {
+    width: 100%;
+  }
+
+  .intro-showcase {
+    padding: 1rem;
+  }
+
+  .intro-gesture-cluster-left,
+  .intro-gesture-cluster-right,
+  .intro-trace-line,
+  .intro-orbit-ring {
+    display: none;
+  }
+
+  .gmg-hero-title {
+    font-size: 2.5rem;
+  }
+
+  .gmg-hero-actions {
+    flex-direction: column;
+  }
+
+  .gmg-hero-actions button {
+    width: 100%;
+  }
+
+  .permission-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .permission-btn {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   MOBILE SMALL
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .intro-title {
+    font-size: 2rem;
+  }
+
+  .intro-lead {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .gmg-hero-title {
+    font-size: 2rem;
+  }
+
+  .gmg-section-title {
+    font-size: 1.5rem;
+  }
+
+  .gmg-featured-gesture {
+    grid-template-columns: 1fr;
+  }
+
+  #assistant-root {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  #assistant-toggle {
+    width: 58px;
+    height: 58px;
+  }
+
+  #assistant-panel {
+    width: calc(100vw - 20px);
+    height: 80vh;
+  }
+}
+
+/* =========================================================
+   MOBILE EXTRA SMALL
+========================================================= */
+
+@media (max-width: 360px) {
+
+  .intro-title {
+    font-size: 1.75rem;
+  }
+
+  .gmg-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .permission-title {
+    font-size: 1.8rem;
+  }
+
+  #assistant-panel {
+    height: 85vh;
+  }
+}

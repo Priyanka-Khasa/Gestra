@@ -1,0 +1,421 @@
+/* =========================================================
+   GESTRA ANIMATIONS
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   HERO ORBS
+--------------------------------------------------------- */
+
+@keyframes heroOrbFloat {
+  0% {
+    transform: translate(-50%, 0px) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -40px) scale(1.08);
+  }
+
+  100% {
+    transform: translate(-50%, 0px) scale(1);
+  }
+}
+
+@keyframes heroOrbDrift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-60px, -40px) scale(1.12);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes heroOrbPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+/* ---------------------------------------------------------
+   INTRO BADGE
+--------------------------------------------------------- */
+
+@keyframes badgePing {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+
+  80% {
+    transform: scale(2);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   FLOATING ELEMENTS
+--------------------------------------------------------- */
+
+@keyframes floatUpDown {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes floatHorizontal {
+  0%,
+  100% {
+    transform: translateX(0px);
+  }
+
+  50% {
+    transform: translateX(15px);
+  }
+}
+
+/* ---------------------------------------------------------
+   SHIMMER EFFECT
+--------------------------------------------------------- */
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* ---------------------------------------------------------
+   FADE
+--------------------------------------------------------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   SLIDE
+--------------------------------------------------------- */
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------------------------------------------------------
+   SCALE
+--------------------------------------------------------- */
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ---------------------------------------------------------
+   ROTATION
+--------------------------------------------------------- */
+
+@keyframes rotateSlow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateReverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* ---------------------------------------------------------
+   GESTURE TRAIL
+--------------------------------------------------------- */
+
+@keyframes fingerTrailLoop {
+  0% {
+    stroke-dashoffset: 400;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   SCAN LINE
+--------------------------------------------------------- */
+
+@keyframes scanLine {
+  0% {
+    transform: translateY(-120%);
+  }
+
+  100% {
+    transform: translateY(120%);
+  }
+}
+
+/* ---------------------------------------------------------
+   DATA STREAM
+--------------------------------------------------------- */
+
+@keyframes dataStream {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(120vh);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   COMET
+--------------------------------------------------------- */
+
+@keyframes cometMove {
+  0% {
+    transform: translateX(-300px) translateY(0);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(120vw) translateY(150px);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   GLOW
+--------------------------------------------------------- */
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    filter: blur(8px);
+  }
+
+  50% {
+    opacity: 1;
+    filter: blur(12px);
+  }
+}
+
+/* ---------------------------------------------------------
+   STATUS DOT
+--------------------------------------------------------- */
+
+@keyframes statusBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ---------------------------------------------------------
+   LOADER
+--------------------------------------------------------- */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------------------
+   ASSISTANT ORB
+--------------------------------------------------------- */
+
+@keyframes voiceOrb {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------
+   TIMELINE STEPS
+--------------------------------------------------------- */
+
+@keyframes timelineReveal {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------------------------------------------------
+   UTILITIES
+--------------------------------------------------------- */
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulseSoft 3s ease-in-out infinite;
+}
+
+.animate-rotate {
+  animation: rotateSlow 20s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}

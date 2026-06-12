@@ -1,0 +1,267 @@
+/* =========================================================
+   RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   HTML
+========================================================= */
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   TYPOGRAPHY
+========================================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-white);
+}
+
+p {
+  line-height: 1.7;
+}
+
+small {
+  font-size: 0.875rem;
+}
+
+strong {
+  font-weight: 700;
+}
+
+/* =========================================================
+   LINKS
+========================================================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* =========================================================
+   LISTS
+========================================================= */
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* =========================================================
+   IMAGES
+========================================================= */
+
+img,
+picture,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  user-select: none;
+}
+
+/* =========================================================
+   FORMS
+========================================================= */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* =========================================================
+   INPUT STATES
+========================================================= */
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted);
+}
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+  background: rgba(162, 123, 92, 0.25);
+  color: var(--color-white);
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(162, 123, 92, 0.35);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(162, 123, 92, 0.5);
+}
+
+/* Firefox */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(162, 123, 92, 0.4)
+    transparent;
+}
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: block !important;
+}
+
+.pointer-none {
+  pointer-events: none;
+}
+
+.pointer-auto {
+  pointer-events: auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* =========================================================
+   APP ROOT
+========================================================= */
+
+#app {
+  min-height: 100vh;
+}
+
+#shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* =========================================================
+   FOCUS ACCESSIBILITY
+========================================================= */
+
+:focus-visible {
+  outline: 2px solid rgba(162, 123, 92, 0.7);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   TRANSITIONS
+========================================================= */
+
+button,
+a,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}

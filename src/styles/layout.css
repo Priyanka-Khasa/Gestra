@@ -1,0 +1,311 @@
+/* =========================================================
+   SHELL
+========================================================= */
+
+#shell {
+  position: relative;
+  min-height: 100vh;
+  min-width: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+#app-container {
+  min-width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* =========================================================
+   SCREEN WRAPPER
+========================================================= */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.screen-hidden {
+  display: none;
+}
+
+.screen-visible {
+  display: block;
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.main-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   WORKSPACE
+========================================================= */
+
+#workspace-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  display: flex;
+  align-items: stretch;
+
+  height: 100%;
+
+  padding-bottom: 10px;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(162, 123, 92, 0.78)
+    rgba(220, 215, 201, 0.05);
+}
+
+#workspace-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+#workspace-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+#workspace-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(162, 123, 92, 0.88),
+      rgba(63, 79, 68, 0.72)
+    );
+
+  border: 2px solid var(--bg-base);
+}
+
+.workspace-layout {
+  display: flex;
+  gap: 20px;
+  min-width: 1680px;
+  width: max-content;
+}
+
+/* =========================================================
+   SIDEBARS
+========================================================= */
+
+#workspace-left-sidebar,
+#workspace-right-sidebar {
+  height: 100%;
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+
+  scrollbar-gutter: stable both-edges;
+}
+
+.workspace-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.workspace-main {
+  flex: 1;
+  min-width: 700px;
+}
+
+/* =========================================================
+   PANELS
+========================================================= */
+
+.panel {
+  border-radius: var(--r-lg);
+
+  background: var(--surface-1);
+
+  border: 1px solid var(--border-base);
+
+  backdrop-filter: blur(20px);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 1rem 1.25rem;
+
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.panel-body {
+  padding: 1.25rem;
+}
+
+.panel-footer {
+  padding: 1rem 1.25rem;
+
+  border-top: 1px solid var(--border-dim);
+}
+
+/* =========================================================
+   CARD LAYOUT
+========================================================= */
+
+.card-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.card-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* =========================================================
+   ACTION LOG
+========================================================= */
+
+#action-log {
+  min-height: 12rem;
+  max-height: min(40vh, 24rem);
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+
+  scrollbar-gutter: stable;
+}
+
+.activity-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(162, 123, 92, 0.88)
+    rgba(220, 215, 201, 0.06);
+}
+
+.activity-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.activity-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.activity-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(162, 123, 92, 0.95),
+      rgba(63, 79, 68, 0.82)
+    );
+
+  border: 1px solid rgba(44, 57, 48, 0.82);
+}
+
+/* =========================================================
+   FLEX HELPERS
+========================================================= */
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-grow {
+  flex: 1;
+}
+
+/* =========================================================
+   SECTION SPACING
+========================================================= */
+
+.section {
+  padding: 1.5rem;
+}
+
+.section-lg {
+  padding: 2rem;
+}
+
+.section-xl {
+  padding: 3rem;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1280px) {
+
+  .workspace-layout {
+    min-width: 1400px;
+  }
+
+  .workspace-sidebar {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+
+  .workspace-layout {
+    min-width: 1200px;
+  }
+
+  .workspace-sidebar {
+    width: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .card-grid-2,
+  .card-grid-3,
+  .card-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-layout {
+    min-width: 1000px;
+  }
+}
